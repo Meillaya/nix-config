@@ -31,6 +31,7 @@ let
     for dir in "''${candidates[@]}"; do
       cli="$dir/dist/cli/omx.js"
       if [ -x "$cli" ]; then
+        export SHELL="${zsh}/bin/zsh"
         export OMX_ENTRY_PATH="$cli"
         export OMX_STARTUP_CWD="$PWD"
         exec ${nodejs_24}/bin/node "$cli" "$@"

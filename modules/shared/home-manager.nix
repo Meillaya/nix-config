@@ -1,9 +1,10 @@
-{ config, pkgs, lib, secrets, ... }:
+{ config, pkgs, lib, ... }:
 
-let personal = import "${secrets}/profiles/mei.nix";
-    name = personal.name;
+let
     user = "mei";
-    email = personal.email; in
+    gitName = "Meillaya";
+    gitEmail = "nathanagbomed@proton.me";
+in
 {
   # Shared shell configuration
   zsh = {
@@ -81,8 +82,8 @@ let personal = import "${secrets}/profiles/mei.nix";
     signing.format = "openpgp";
     settings = {
       user = {
-        name = name;
-        email = email;
+        name = gitName;
+        email = gitEmail;
       };
       init.defaultBranch = "main";
       core = {
