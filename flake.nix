@@ -148,6 +148,63 @@ EOF
             search_ref "stable" "$stable_ref"
           '')}/bin/search-pkgs";
         };
+      mkStandaloneLinuxHome = system: home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.${system};
+        extraSpecialArgs = { inherit secrets; };
+        modules = [
+          ./modules/standalone-linux/home-manager.nix
+        ];
+      };
+      mkHomeSwitchApp = system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          defaultTarget =
+            if system == "x86_64-linux"
+            then "${user}@arch-niri"
+            else "${user}@linux-aarch64";
+        in {
+          type = "app";
+          program = "${(pkgs.writeShellScriptBin "home-switch" ''
+            set -euo pipefail
+
+            target="${defaultTarget}"
+            hm_args=()
+
+            while [ "$#" -gt 0 ]; do
+              case "$1" in
+                --target)
+                  target="$2"
+                  shift 2
+                  ;;
+                --help|-h)
+                  cat <<'EOF'
+Usage: nix run .#home-switch -- [--target HOME] [home-manager args...]
+
+Defaults:
+  x86_64-linux -> mei@arch-niri
+  aarch64-linux -> mei@linux-aarch64
+
+Examples:
+  nix run .#home-switch
+  nix run .#home-switch -- --dry-run
+  nix run .#home-switch -- --target mei@arch-niri --dry-run
+EOF
+                  exit 0
+                  ;;
+                *)
+                  hm_args+=("$1")
+                  shift
+                  ;;
+              esac
+            done
+
+            exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
+              --extra-experimental-features "nix-command flakes" \
+              switch \
+              --flake ${self}#$target \
+              ''${hm_args[@]}
+          '')}/bin/home-switch";
+        };
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
@@ -157,6 +214,7 @@ EOF
         "check-keys" = mkApp "check-keys" system;
         "install" = mkApp "install" system;
         "install-with-secrets" = mkApp "install-with-secrets" system;
+        "home-switch" = mkHomeSwitchApp system;
         "search-pkgs" = mkSearchPkgsApp system;
       };
       mkDarwinApps = system: {
@@ -174,6 +232,10 @@ EOF
     {
       devShells = forAllSystems devShell;
       apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
+      homeConfigurations = {
+        "${user}@arch-niri" = mkStandaloneLinuxHome "x86_64-linux";
+        "${user}@linux-aarch64" = mkStandaloneLinuxHome "aarch64-linux";
+      };
 
       darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
         darwin.lib.darwinSystem {
