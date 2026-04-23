@@ -1,0 +1,6 @@
+result
+result-*
+.DS_Store
+*.bak
+*.tmp
+temp_insert.txt
