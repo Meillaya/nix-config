@@ -7,6 +7,96 @@ let
 in
 {
   # Shared shell configuration
+  readline = {
+    enable = true;
+    variables = {
+      completion-ignore-case = true;
+      show-all-if-ambiguous = true;
+      colored-stats = true;
+      mark-symlinked-directories = true;
+      menu-complete-display-prefix = true;
+    };
+    bindings = {
+      "\\e[A" = "history-search-backward";
+      "\\e[B" = "history-search-forward";
+      "\\eOA" = "history-search-backward";
+      "\\eOB" = "history-search-forward";
+    };
+  };
+
+  bash = {
+    enable = true;
+    enableCompletion = true;
+    historyControl = [ "ignoreboth" "erasedups" ];
+    historyIgnore = [ "pwd" "ls" "cd" ];
+    shellAliases = {
+      pn = "pnpm";
+      px = "pnpx";
+      diff = "difft";
+      ls = "ls --color=auto";
+      search = "rg -p --glob '!node_modules/*'";
+    };
+    initExtra = ''
+      if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+        . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+      fi
+
+      export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
+      export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
+      export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
+      export PATH=$HOME/.local/share/bin:$PATH
+
+      export ALTERNATE_EDITOR=""
+      export EDITOR="emacsclient -t"
+      export VISUAL="emacsclient -c -a emacs"
+
+      e() {
+          emacsclient -t "$@"
+      }
+
+      shell() {
+          nix-shell '<nixpkgs>' -A "$1"
+      }
+    '';
+  };
+
+  fish = {
+    enable = true;
+    generateCompletions = true;
+    shellAliases = {
+      pn = "pnpm";
+      px = "pnpx";
+      diff = "difft";
+      ls = "ls --color=auto";
+      search = "rg -p --glob '!node_modules/*'";
+    };
+    functions = {
+      e.body = ''
+        emacsclient -t $argv
+      '';
+      shell.body = ''
+        nix-shell '<nixpkgs>' -A $argv[1]
+      '';
+    };
+    shellInit = ''
+      if test -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+        source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
+      else if test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+        source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
+      end
+
+      fish_add_path --prepend /opt/homebrew/bin /opt/homebrew/sbin
+      fish_add_path --prepend $HOME/.pnpm-packages/bin $HOME/.pnpm-packages
+      fish_add_path --prepend $HOME/.npm-packages/bin $HOME/bin
+      fish_add_path --prepend $HOME/.local/share/bin
+
+      set -gx ALTERNATE_EDITOR ""
+      set -gx EDITOR "emacsclient -t"
+      set -gx VISUAL "emacsclient -c -a emacs"
+    '';
+  };
+
   zsh = {
     enable = true;
     enableCompletion = true;
