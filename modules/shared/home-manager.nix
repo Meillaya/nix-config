@@ -29,9 +29,16 @@ let personal = import "${secrets}/profiles/mei.nix";
       fi
 
       # Define variables for directories
+      export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
+
+      # OMX/tmux launches source ~/.zshrc from non-interactive shells to recover
+      # PATH. Stop here before interactive-only plugin/history/setopt setup.
+      if [[ ! -o interactive ]]; then
+        return
+      fi
 
       # Remove history data we don't want to see
       export HISTIGNORE="pwd:ls:cd"
