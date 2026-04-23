@@ -9,8 +9,42 @@ in
   # Shared shell configuration
   zsh = {
     enable = true;
+    enableCompletion = true;
     autocd = false;
     cdpath = [ "~/Projects" ];
+    autosuggestion = {
+      enable = true;
+      strategy = [ "history" "completion" ];
+      highlight = "fg=8";
+    };
+    historySubstringSearch = {
+      enable = true;
+      searchUpKey = [ "$terminfo[kcuu1]" "^[[A" ];
+      searchDownKey = [ "$terminfo[kcud1]" "^[[B" ];
+    };
+    oh-my-zsh = {
+      enable = true;
+      theme = "";
+      plugins = [
+        "git"
+        "sudo"
+        "aws"
+        "direnv"
+        "docker"
+        "docker-compose"
+        "gh"
+        "kubectl"
+        "terraform"
+        "tmux"
+      ];
+      extraConfig = ''
+        DISABLE_AUTO_UPDATE="true"
+        DISABLE_UPDATE_PROMPT="true"
+        CASE_SENSITIVE="false"
+        HYPHEN_INSENSITIVE="true"
+        ZSH_COMPDUMP="$HOME/.cache/zsh/.zcompdump-$ZSH_VERSION"
+      '';
+    };
     plugins = [
       {
           name = "powerlevel10k";
@@ -23,54 +57,71 @@ in
           file = "p10k.zsh";
       }
     ];
-    initContent = lib.mkBefore ''
-      if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
-        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-        . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
-      fi
+    initContent = lib.mkMerge [
+      (lib.mkBefore ''
+        if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+          . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+        fi
 
-      # Define variables for directories
-      export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
-      export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
-      export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
-      export PATH=$HOME/.local/share/bin:$PATH
+        # Define variables for directories
+        export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
+        export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
+        export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
+        export PATH=$HOME/.local/share/bin:$PATH
 
-      # OMX/tmux launches source ~/.zshrc from non-interactive shells to recover
-      # PATH. Stop here before interactive-only plugin/history/setopt setup.
-      if [[ ! -o interactive ]]; then
-        return
-      fi
+        # OMX/tmux launches source ~/.zshrc from non-interactive shells to recover
+        # PATH. Stop here before interactive-only plugin/history/setopt setup.
+        if [[ ! -o interactive ]]; then
+          return
+        fi
 
-      # Remove history data we don't want to see
-      export HISTIGNORE="pwd:ls:cd"
+        # Remove history data we don't want to see
+        export HISTIGNORE="pwd:ls:cd"
 
-      # Ripgrep alias
-      alias search=rg -p --glob '!node_modules/*'  $@
+        # Ripgrep alias
+        alias search=rg -p --glob '!node_modules/*'  $@
 
-      # Emacs is my editor
-      export ALTERNATE_EDITOR=""
-      export EDITOR="emacsclient -t"
-      export VISUAL="emacsclient -c -a emacs"
+        # Emacs is my editor
+        export ALTERNATE_EDITOR=""
+        export EDITOR="emacsclient -t"
+        export VISUAL="emacsclient -c -a emacs"
 
-      e() {
-          emacsclient -t "$@"
-      }
+        e() {
+            emacsclient -t "$@"
+        }
 
-      # nix shortcuts
-      shell() {
-          nix-shell '<nixpkgs>' -A "$1"
-      }
+        # nix shortcuts
+        shell() {
+            nix-shell '<nixpkgs>' -A "$1"
+        }
 
-      # pnpm is a javascript package manager
-      alias pn=pnpm
-      alias px=pnpx
+        # pnpm is a javascript package manager
+        alias pn=pnpm
+        alias px=pnpx
 
-      # Use difftastic, syntax-aware diffing
-      alias diff=difft
+        # Use difftastic, syntax-aware diffing
+        alias diff=difft
 
-      # Always color ls and group directories
-      alias ls='ls --color=auto'
-    '';
+        # Always color ls and group directories
+        alias ls='ls --color=auto'
+      '')
+
+      (lib.mkOrder 850 ''
+        mkdir -p "$HOME/.cache/zsh"
+        zmodload zsh/complist
+
+        zstyle ':completion:*' menu select
+        zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+        zstyle ':completion:*' list-colors "''${(s.:.)LS_COLORS}"
+        zstyle ':completion:*' special-dirs true
+        zstyle ':completion:*' squeeze-slashes true
+        zstyle ':completion:*' use-cache on
+        zstyle ':completion:*' cache-path "$HOME/.cache/zsh"
+        zstyle ':completion:*:descriptions' format '[%d]'
+        zstyle ':completion:*:warnings' format 'no matches for: %d'
+      '')
+    ];
   };
 
   git = {
