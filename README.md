@@ -68,12 +68,18 @@ Then switch the standalone home config:
 nix run .#home-switch
 ```
 
-That defaults to the `mei@arch-niri` Home Manager configuration on `x86_64-linux`.
+That defaults to the generic `standalone-linux` Home Manager configuration on `x86_64-linux`, using your current `USER` and `HOME`.
 
 After the first switch, normal updates are:
 
 ```bash
-home-manager switch --flake .#mei@arch-niri
+home-manager switch --flake .#standalone-linux --impure
+```
+
+If you need to override the detected user or home directory on a machine:
+
+```bash
+NIXOS_CONFIG_USER=mei NIXOS_CONFIG_HOME=/home/mei nix run .#home-switch
 ```
 
 ## Secrets

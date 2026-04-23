@@ -1,7 +1,14 @@
 { config, pkgs, lib, ... }:
 
 let
-  user = "mei";
+  user =
+    let configured = builtins.getEnv "NIXOS_CONFIG_USER";
+        ambient = builtins.getEnv "USER";
+    in if configured != "" then configured else if ambient != "" then ambient else "mei";
+  homeDirectory =
+    let configured = builtins.getEnv "NIXOS_CONFIG_HOME";
+        ambient = builtins.getEnv "HOME";
+    in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
 in
@@ -9,7 +16,7 @@ in
   home = {
     enableNixpkgsReleaseCheck = false;
     username = user;
-    homeDirectory = "/home/${user}";
+    homeDirectory = homeDirectory;
     packages = pkgs.callPackage ./packages.nix {};
     file = shared-files;
     stateVersion = "25.11";

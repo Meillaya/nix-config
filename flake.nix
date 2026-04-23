@@ -160,8 +160,8 @@ EOF
           pkgs = nixpkgs.legacyPackages.${system};
           defaultTarget =
             if system == "x86_64-linux"
-            then "${user}@arch-niri"
-            else "${user}@linux-aarch64";
+            then "standalone-linux"
+            else "standalone-linux-aarch64";
         in {
           type = "app";
           program = "${(pkgs.writeShellScriptBin "home-switch" ''
@@ -181,13 +181,13 @@ EOF
 Usage: nix run .#home-switch -- [--target HOME] [home-manager args...]
 
 Defaults:
-  x86_64-linux -> mei@arch-niri
-  aarch64-linux -> mei@linux-aarch64
+  x86_64-linux -> standalone-linux
+  aarch64-linux -> standalone-linux-aarch64
 
 Examples:
   nix run .#home-switch
   nix run .#home-switch -- --dry-run
-  nix run .#home-switch -- --target mei@arch-niri --dry-run
+  nix run .#home-switch -- --target standalone-linux --dry-run
 EOF
                   exit 0
                   ;;
@@ -200,6 +200,7 @@ EOF
 
             exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
               --extra-experimental-features "nix-command flakes" \
+              --impure \
               switch \
               --flake ${self}#$target \
               ''${hm_args[@]}
@@ -233,8 +234,8 @@ EOF
       devShells = forAllSystems devShell;
       apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
       homeConfigurations = {
-        "${user}@arch-niri" = mkStandaloneLinuxHome "x86_64-linux";
-        "${user}@linux-aarch64" = mkStandaloneLinuxHome "aarch64-linux";
+        "standalone-linux" = mkStandaloneLinuxHome "x86_64-linux";
+        "standalone-linux-aarch64" = mkStandaloneLinuxHome "aarch64-linux";
       };
 
       darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
