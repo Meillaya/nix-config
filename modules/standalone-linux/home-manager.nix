@@ -11,7 +11,7 @@ let
     in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
-  standalone-files = import ./files.nix;
+  standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
   secret-files = lib.optionalAttrs (builtins.pathExists (secrets + "/kavita/appsettings.json")) {
     "Documents/Kavita/config/appsettings.json".source = secrets + "/kavita/appsettings.json";
   };

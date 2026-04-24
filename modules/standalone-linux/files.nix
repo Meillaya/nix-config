@@ -1,3 +1,16 @@
+{ pkgs, homeDirectory }:
+let
+  codexHooks =
+    builtins.replaceStrings
+      [ "/home/mei/.local/lib/node_modules/oh-my-codex" ]
+      [ "${pkgs.oh-my-codex-sidecar}/lib/node_modules/oh-my-codex" ]
+      (builtins.readFile ./config/codex/hooks.json);
+  codexConfig =
+    builtins.replaceStrings
+      [ "/home/mei/.local/lib/node_modules/oh-my-codex" ]
+      [ "${pkgs.oh-my-codex-sidecar}/lib/node_modules/oh-my-codex" ]
+      (builtins.readFile ./config/codex/config.toml);
+in
 {
   ".config/niri/config.kdl".source = ./config/niri/config.kdl;
 
@@ -28,8 +41,8 @@
   ".config/mako/config".source = ./config/mako/config;
 
   ".codex/AGENTS.md".source = ./config/codex/AGENTS.md;
-  ".codex/config.toml".source = ./config/codex/config.toml;
-  ".codex/hooks.json".source = ./config/codex/hooks.json;
+  ".codex/config.toml".text = codexConfig;
+  ".codex/hooks.json".text = codexHooks;
 
   ".omx/hud-config.json".source = ./config/omx/hud-config.json;
 

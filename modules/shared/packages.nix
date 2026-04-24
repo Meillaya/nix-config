@@ -5,6 +5,14 @@ let
   omxLauncher = writeShellScriptBin "omx" ''
     set -euo pipefail
 
+    cli="${oh-my-codex-sidecar}/lib/node_modules/oh-my-codex/dist/cli/omx.js"
+    if [ -f "$cli" ]; then
+      export SHELL="${zsh}/bin/zsh"
+      export OMX_ENTRY_PATH="$cli"
+      export OMX_STARTUP_CWD="$PWD"
+      exec ${nodejs_24}/bin/node "$cli" "$@"
+    fi
+
     candidates=()
     npm_root="$(${nodejs_24}/bin/npm root -g 2>/dev/null || true)"
 
@@ -13,8 +21,10 @@ let
     fi
 
     for dir in \
+      "$HOME/.nix-profile/lib/node_modules/oh-my-codex" \
       /opt/homebrew/lib/node_modules/oh-my-codex \
       "$HOME/.npm-packages/lib/node_modules/oh-my-codex" \
+      "$HOME/.local/lib/node_modules/oh-my-codex" \
       "$HOME/.local/share/pnpm/global/5/node_modules/oh-my-codex"
     do
       if [ -d "$dir" ]; then
@@ -45,6 +55,11 @@ let
   omcLauncher = writeShellScriptBin "omc" ''
     set -euo pipefail
 
+    cli="${oh-my-claude-sisyphus-sidecar}/lib/node_modules/oh-my-claude-sisyphus/bridge/cli.cjs"
+    if [ -f "$cli" ]; then
+      exec ${nodejs_24}/bin/node "$cli" "$@"
+    fi
+
     candidates=()
     npm_root="$(${nodejs_24}/bin/npm root -g 2>/dev/null || true)"
 
@@ -53,6 +68,7 @@ let
     fi
 
     for dir in \
+      "$HOME/.nix-profile/lib/node_modules/oh-my-claude-sisyphus" \
       "$HOME/.local/lib/node_modules/oh-my-claude-sisyphus" \
       "$HOME/.npm-packages/lib/node_modules/oh-my-claude-sisyphus" \
       "$HOME/.local/share/pnpm/global/5/node_modules/oh-my-claude-sisyphus"
