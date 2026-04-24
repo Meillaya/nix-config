@@ -31,10 +31,18 @@ managed wrappers and config keep working without hand-managed global installs.
 - `~/.claude/.omc-config.json`
 - `~/.claude/settings.json`
 - `~/.claude/CLAUDE.md`
-- `~/.codex/config.toml`
-- `~/.codex/hooks.json`
-- `~/.codex/AGENTS.md`
+- `~/.codex/config.toml` baseline, installed as a writable file
+- `~/.codex/hooks.json` baseline, installed as a writable file
+- `~/.codex/AGENTS.md` baseline, installed as a writable file
 - `~/.omx/hud-config.json`
+
+`~/.codex/config.toml` is seeded by Home Manager when missing or replacing an
+old store symlink, but is not linked directly into `/nix/store`. Codex persists
+runtime preferences, such as the default model, by rewriting this file.
+`~/.codex/AGENTS.md` follows the same writable-baseline pattern because
+`omx setup` regenerates it.
+`~/.codex/hooks.json` is also writable because OMX refreshes native hook
+coverage during setup.
 
 ## Intentionally not tracked
 

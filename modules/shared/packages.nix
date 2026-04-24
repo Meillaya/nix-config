@@ -5,9 +5,25 @@ let
   omxLauncher = writeShellScriptBin "omx" ''
     set -euo pipefail
 
+    select_omx_shell() {
+      for shell in \
+        /bin/zsh \
+        /usr/bin/zsh \
+        /usr/local/bin/zsh \
+        /opt/homebrew/bin/zsh \
+        /bin/bash \
+        /usr/bin/bash
+      do
+        if [ -x "$shell" ]; then
+          export SHELL="$shell"
+          return
+        fi
+      done
+    }
+
     cli="${oh-my-codex-sidecar}/lib/node_modules/oh-my-codex/dist/cli/omx.js"
     if [ -f "$cli" ]; then
-      export SHELL="${zsh}/bin/zsh"
+      select_omx_shell
       export OMX_ENTRY_PATH="$cli"
       export OMX_STARTUP_CWD="$PWD"
       exec ${nodejs_24}/bin/node "$cli" "$@"
@@ -41,7 +57,7 @@ let
     for dir in "''${candidates[@]}"; do
       cli="$dir/dist/cli/omx.js"
       if [ -x "$cli" ]; then
-        export SHELL="${zsh}/bin/zsh"
+        select_omx_shell
         export OMX_ENTRY_PATH="$cli"
         export OMX_STARTUP_CWD="$PWD"
         exec ${nodejs_24}/bin/node "$cli" "$@"
