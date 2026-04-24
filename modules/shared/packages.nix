@@ -42,6 +42,45 @@ let
     echo "Expected oh-my-codex under npm global packages, /opt/homebrew, or /opt/zerobrew." >&2
     exit 127
   '';
+  omcLauncher = writeShellScriptBin "omc" ''
+    set -euo pipefail
+
+    candidates=()
+    npm_root="$(${nodejs_24}/bin/npm root -g 2>/dev/null || true)"
+
+    if [ -n "$npm_root" ]; then
+      candidates+=("$npm_root/oh-my-claude-sisyphus")
+    fi
+
+    for dir in \
+      "$HOME/.local/lib/node_modules/oh-my-claude-sisyphus" \
+      "$HOME/.npm-packages/lib/node_modules/oh-my-claude-sisyphus" \
+      "$HOME/.local/share/pnpm/global/5/node_modules/oh-my-claude-sisyphus"
+    do
+      if [ -d "$dir" ]; then
+        candidates+=("$dir")
+      fi
+    done
+
+    for dir in "''${candidates[@]}"; do
+      cli="$dir/bridge/cli.cjs"
+      if [ -f "$cli" ]; then
+        exec ${nodejs_24}/bin/node "$cli" "$@"
+      fi
+    done
+
+    echo "omc is not installed in a known global node location." >&2
+    echo "Expected oh-my-claude-sisyphus under npm global packages or ~/.local/lib/node_modules." >&2
+    exit 127
+  '';
+  syncAiSidecars = writeShellScriptBin "sync-ai-sidecars" ''
+    set -euo pipefail
+
+    prefix="''${AI_SIDECAR_PREFIX:-$HOME/.local}"
+    ${nodejs_24}/bin/npm install --global --prefix "$prefix" \
+      oh-my-codex@0.14.4 \
+      oh-my-claude-sisyphus@4.13.3
+  '';
   nixpkgsSearch = writeShellScriptBin "nixpkgs-search" ''
     set -euo pipefail
 
@@ -236,6 +275,8 @@ in [
   python3
   virtualenv
   zig
+  omcLauncher
   omxLauncher
+  syncAiSidecars
   nixpkgsSearch
 ]

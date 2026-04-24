@@ -3,6 +3,9 @@
 
   ".config/calibre/gui.json".source = ./config/calibre/gui.json;
   ".config/calibre/tweaks.json".source = ./config/calibre/tweaks.json;
+  ".claude/.omc-config.json".source = ./config/claude/omc-config.json;
+  ".claude/settings.json".source = ./config/claude/settings.json;
+  ".claude/CLAUDE.md".source = ./config/claude/CLAUDE.md;
   ".config/opencode/opencode.json".source = ./config/opencode/opencode.json;
   ".config/zed/settings.json".source = ./config/zed/settings.json;
 

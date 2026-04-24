@@ -1,0 +1,17 @@
+{
+  "defaultExecutionMode": "ultrawork",
+  "configuredAt": "2026-04-08T22:28:59Z",
+  "taskTool": "builtin",
+  "taskToolConfig": {
+    "injectInstructions": true,
+    "useMcp": false
+  },
+  "team": {
+    "maxAgents": 3,
+    "defaultAgentType": "executor",
+    "monitorIntervalMs": 30000,
+    "shutdownTimeoutMs": 15000
+  },
+  "setupCompleted": "2026-04-08T18:48:17-04:00",
+  "setupVersion": "4.11.2"
+}
