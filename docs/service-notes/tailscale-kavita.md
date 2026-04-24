@@ -40,7 +40,13 @@ Suggested bootstrap flow:
 
 1. Copy `modules/standalone-linux/templates/kavita-appsettings.example.json`
 2. Fill in `TokenKey` and any other secret values locally
-3. Use that local file when provisioning the Kavita service on the target host
+3. Sync it into this repo's ignored `./secrets` tree (for example with `nix run .#sync-secrets`)
+4. Run `nix run .#home-switch`
+
+When `secrets/kavita/appsettings.json` exists locally, standalone Home Manager
+will now manage the live file at:
+
+- `~/Documents/Kavita/config/appsettings.json`
 
 ## Why this is a boundary
 

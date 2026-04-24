@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, secrets, ... }:
 
 let
   user =
@@ -12,6 +12,9 @@ let
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
   standalone-files = import ./files.nix;
+  secret-files = lib.optionalAttrs (builtins.pathExists (secrets + "/kavita/appsettings.json")) {
+    "Documents/Kavita/config/appsettings.json".source = secrets + "/kavita/appsettings.json";
+  };
 in
 {
   home = {
@@ -19,7 +22,7 @@ in
     username = user;
     homeDirectory = homeDirectory;
     packages = import ./packages.nix { inherit pkgs inputs; };
-    file = shared-files // standalone-files;
+    file = shared-files // standalone-files // secret-files;
     sessionVariables = {
       BROWSER = "firefox";
       TERM = "alacritty";
