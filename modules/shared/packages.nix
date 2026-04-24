@@ -139,9 +139,16 @@ in [
   bash-completion
   bat
   btop
+  bun
+  ccache
   coreutils
+  duf
+  fastfetch
+  gdb
   killall
   openssh
+  pipx
+  resvg
   sqlite
   wget
   zip
@@ -206,6 +213,7 @@ in [
   # Python packages
   python3
   virtualenv
+  zig
   omxLauncher
   nixpkgsSearch
 ]

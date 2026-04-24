@@ -7,12 +7,15 @@ shared-packages ++ [
   cliphist
   fontconfig
   fuzzel
+  gimp
   ghostty
   keepassxc
   libnotify
   mako
+  obsidian
   pavucontrol
   playerctl
+  qbittorrent
   swaybg
   waybar
   wl-clipboard
