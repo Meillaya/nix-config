@@ -1,0 +1,357 @@
+// Niri configuration
+// Docs: https://niri-wm.github.io/niri/
+
+// ────────────── Input ──────────────
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+        numlock
+    }
+
+    touchpad {
+        tap
+        natural-scroll
+    }
+
+    focus-follows-mouse
+    workspace-auto-back-and-forth
+}
+
+// ────────────── Outputs ──────────────
+// Use `niri msg outputs` if these names ever change.
+output "DP-1" {
+    mode "3440x1440@143.975"
+    scale 1
+    position x=0 y=0
+}
+
+output "DP-2" {
+    mode "1920x1080@144.001"
+    scale 1
+    position x=760 y=-1080
+}
+
+// ────────────── Workspaces ──────────────
+// Using dynamic numeric workspaces only, so empty named workspaces do not clutter the bar.
+
+// ────────────── Key Bindings ──────────────
+binds {
+    MOD+SHIFT+ESCAPE { show-hotkey-overlay; }
+
+    // ─── Launchers ───
+    MOD+RETURN hotkey-overlay-title="Open Terminal: Alacritty" { spawn-sh "alacritty"; }
+    MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "qs -c noctalia-shell ipc call launcher toggle"; }
+    MOD+B hotkey-overlay-title="Open Browser: Zen" { spawn-sh "zen"; }
+    MOD+E hotkey-overlay-title="Open Files: Nautilus" { spawn-sh "nautilus"; }
+    MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
+
+    // ─── Media / Audio ───
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
+    XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
+    XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
+
+    // ─── Window Focus ───
+    MOD+Q hotkey-overlay-title=null { close-window; }
+    MOD+SHIFT+TAB hotkey-overlay-title="Previous Window" { focus-window-previous; }
+
+    MOD+LEFT  { focus-column-left; }
+    MOD+H     { focus-column-left; }
+    MOD+RIGHT { focus-column-right; }
+    MOD+L     { focus-column-right; }
+    MOD+UP    { focus-window-up; }
+    MOD+K     { focus-window-up; }
+    MOD+DOWN  { focus-window-down; }
+    MOD+J     { focus-window-down; }
+
+    MOD+CTRL+LEFT  { move-column-left; }
+    MOD+CTRL+H     { move-column-left; }
+    MOD+CTRL+RIGHT { move-column-right; }
+    MOD+CTRL+L     { move-column-right; }
+    MOD+CTRL+UP    { move-window-up; }
+    MOD+CTRL+K     { move-window-up; }
+    MOD+CTRL+DOWN  { move-window-down; }
+    MOD+CTRL+J     { move-window-down; }
+
+    MOD+HOME      { focus-column-first; }
+    MOD+END       { focus-column-last; }
+    MOD+CTRL+HOME { move-column-to-first; }
+    MOD+CTRL+END  { move-column-to-last; }
+
+    MOD+SHIFT+LEFT  { focus-monitor-left; }
+    MOD+SHIFT+RIGHT { focus-monitor-right; }
+    MOD+SHIFT+UP    { focus-monitor-up; }
+    MOD+SHIFT+DOWN  { focus-monitor-down; }
+
+    MOD+SHIFT+CTRL+LEFT  { move-column-to-monitor-left; }
+    MOD+SHIFT+CTRL+RIGHT { move-column-to-monitor-right; }
+    MOD+SHIFT+CTRL+UP    { move-column-to-monitor-up; }
+    MOD+SHIFT+CTRL+DOWN  { move-column-to-monitor-down; }
+
+    // ─── Workspace Navigation ───
+    MOD+WHEELSCROLLDOWN cooldown-ms=150 { focus-workspace-down; }
+    MOD+WHEELSCROLLUP cooldown-ms=150 { focus-workspace-up; }
+    MOD+CTRL+WHEELSCROLLDOWN cooldown-ms=150 { move-column-to-workspace-down; }
+    MOD+CTRL+WHEELSCROLLUP cooldown-ms=150 { move-column-to-workspace-up; }
+
+    MOD+WHEELSCROLLRIGHT { focus-column-right; }
+    MOD+WHEELSCROLLLEFT { focus-column-left; }
+    MOD+CTRL+WHEELSCROLLRIGHT { move-column-right; }
+    MOD+CTRL+WHEELSCROLLLEFT { move-column-left; }
+
+    MOD+SHIFT+WHEELSCROLLDOWN { focus-column-right; }
+    MOD+SHIFT+WHEELSCROLLUP { focus-column-left; }
+    MOD+CTRL+SHIFT+WHEELSCROLLDOWN { move-column-right; }
+    MOD+CTRL+SHIFT+WHEELSCROLLUP { move-column-left; }
+
+    MOD+1 { focus-workspace 1; }
+    MOD+2 { focus-workspace 2; }
+    MOD+3 { focus-workspace 3; }
+    MOD+4 { focus-workspace 4; }
+    MOD+5 { focus-workspace 5; }
+    MOD+6 { focus-workspace 6; }
+    MOD+7 { focus-workspace 7; }
+    MOD+8 { focus-workspace 8; }
+    MOD+9 { focus-workspace 9; }
+
+    MOD+CTRL+1 { move-column-to-workspace 1; }
+    MOD+CTRL+2 { move-column-to-workspace 2; }
+    MOD+CTRL+3 { move-column-to-workspace 3; }
+    MOD+CTRL+4 { move-column-to-workspace 4; }
+    MOD+CTRL+5 { move-column-to-workspace 5; }
+    MOD+CTRL+6 { move-column-to-workspace 6; }
+    MOD+CTRL+7 { move-column-to-workspace 7; }
+    MOD+CTRL+8 { move-column-to-workspace 8; }
+    MOD+CTRL+9 { move-column-to-workspace 9; }
+
+    MOD+TAB { focus-workspace-previous; }
+
+    // ─── Layout / Tiling Controls ───
+    MOD+CTRL+F hotkey-overlay-title="Expand Column" { expand-column-to-available-width; }
+    MOD+C hotkey-overlay-title="Center Column" { center-column; }
+    MOD+CTRL+C hotkey-overlay-title="Center Visible Columns" { center-visible-columns; }
+
+    MOD+MINUS { set-column-width "-10%"; }
+    MOD+EQUAL { set-column-width "+10%"; }
+    MOD+SHIFT+MINUS { set-window-height "-10%"; }
+    MOD+SHIFT+EQUAL { set-window-height "+10%"; }
+    MOD+CTRL+SHIFT+EQUAL hotkey-overlay-title="Reset Window Height" { reset-window-height; }
+
+    // Fast horizontal / vertical layout cycling.
+    MOD+COMMA hotkey-overlay-title="Previous Column Width Preset" { switch-preset-column-width-back; }
+    MOD+PERIOD hotkey-overlay-title="Next Column Width Preset" { switch-preset-column-width; }
+    MOD+SHIFT+COMMA hotkey-overlay-title="Previous Window Height Preset" { switch-preset-window-height-back; }
+    MOD+SHIFT+PERIOD hotkey-overlay-title="Next Window Height Preset" { switch-preset-window-height; }
+
+    MOD+ALT+LEFT { consume-or-expel-window-left; }
+    MOD+ALT+RIGHT { consume-or-expel-window-right; }
+    MOD+M hotkey-overlay-title="Maximize Column" { maximize-column; }
+    MOD+SHIFT+M hotkey-overlay-title="Maximize Window To Edges" { maximize-window-to-edges; }
+
+    // ─── Window Modes ───
+    MOD+T hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
+    MOD+SHIFT+T hotkey-overlay-title="Switch Floating / Tiling Focus" { switch-focus-between-floating-and-tiling; }
+    MOD+F hotkey-overlay-title="Fullscreen" { fullscreen-window; }
+    MOD+SHIFT+F hotkey-overlay-title="Windowed Fullscreen" { toggle-windowed-fullscreen; }
+    MOD+W hotkey-overlay-title="Toggle Tabbed Column" { toggle-column-tabbed-display; }
+    MOD+G hotkey-overlay-title="Center Window" { center-window; }
+
+    // ─── Screenshots ───
+    CTRL+SHIFT+1 { screenshot; }
+    CTRL+SHIFT+2 { screenshot-screen; }
+    CTRL+SHIFT+3 { screenshot-window; }
+
+    // ─── Recovery / Overview / Power ───
+    MOD+ESCAPE allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+    MOD+O hotkey-overlay-title="Toggle Overview" repeat=false { toggle-overview; }
+    MOD+SHIFT+P hotkey-overlay-title="Power Off Monitors" { power-off-monitors; }
+    CTRL+ALT+DELETE { quit; }
+}
+
+// ────────────── Startup / Misc ──────────────
+spawn-sh-at-startup "/usr/lib/polkit-kde-authentication-agent-1 &"
+spawn-sh-at-startup "swww-daemon"
+spawn-at-startup "qs" "-c" "noctalia-shell"
+
+prefer-no-csd
+screenshot-path null
+
+cursor {
+    hide-when-typing
+    hide-after-inactive-ms 1500
+}
+
+overview {
+    zoom 0.28
+    backdrop-color "#120d16"
+
+    workspace-shadow {
+        softness 90
+        spread 24
+        offset x=0 y=28
+        color "#12081288"
+    }
+}
+
+// ────────────── Layout ──────────────
+layout {
+    gaps 18
+    center-focused-column "on-overflow"
+    always-center-single-column
+    background-color "#120d16"
+
+    preset-column-widths {
+        proportion 0.34
+        proportion 0.42
+        proportion 0.50
+        proportion 0.62
+        proportion 0.74
+    }
+
+    default-column-width { proportion 0.56; }
+
+    preset-window-heights {
+        proportion 0.25
+        proportion 0.33
+        proportion 0.50
+        proportion 0.66
+        proportion 0.75
+    }
+
+    focus-ring {
+        width 3
+        active-gradient from="#f3a6c7" to="#d98cff" angle=135 relative-to="workspace-view" in="oklch longer hue"
+        inactive-color "#4a3445"
+        urgent-color "#ff7aa2"
+    }
+
+    border {
+        width 1
+        active-color "#5a4051"
+        inactive-color "#251a24"
+        urgent-color "#ff7aa2"
+    }
+
+    shadow {
+        on
+        softness 72
+        spread 4
+        offset x=0 y=18
+        color "#160d1699"
+        inactive-color "#10080f66"
+    }
+
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        gap 6
+        width 4
+        length total-proportion=1.0
+        position "top"
+        gaps-between-tabs 6
+        corner-radius 999
+        active-gradient from="#f3a6c7" to="#cf89ff" angle=90 relative-to="workspace-view"
+        inactive-color "#4a3445"
+        urgent-color "#ff7aa2"
+    }
+
+    insert-hint {
+        gradient from="#f3a6c799" to="#cf89ff99" angle=90 relative-to="workspace-view"
+    }
+
+    struts {}
+}
+
+// ────────────── Animations ──────────────
+animations {
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=850 epsilon=0.0001
+    }
+
+    window-open {
+        duration-ms 240
+        curve "ease-out-expo"
+    }
+
+    window-close {
+        duration-ms 180
+        curve "ease-out-cubic"
+    }
+
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=760 epsilon=0.0001
+    }
+
+    window-movement {
+        spring damping-ratio=1.0 stiffness=760 epsilon=0.0001
+    }
+
+    window-resize {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.0001
+    }
+
+    config-notification-open-close {
+        spring damping-ratio=0.65 stiffness=1200 epsilon=0.001
+    }
+
+    screenshot-ui-open {
+        duration-ms 280
+        curve "ease-out-quad"
+    }
+
+    overview-open-close {
+        spring damping-ratio=0.95 stiffness=780 epsilon=0.0001
+    }
+}
+
+// ────────────── Window Rules ──────────────
+window-rule {
+    match app-id=r#"^(zen|firefox)$"# title="^Picture-in-Picture$"
+    open-floating true
+}
+
+window-rule {
+    match app-id=r#"^Alacritty$"#
+    default-column-width { proportion 0.50; }
+}
+
+window-rule {
+    match app-id=r#"^org\.gnome\.Nautilus$"#
+    default-column-width { proportion 0.58; }
+}
+
+window-rule {
+    match app-id=r#"^obsidian$"#
+    default-column-width { proportion 0.52; }
+}
+
+window-rule {
+    geometry-corner-radius 24
+    clip-to-geometry true
+}
+
+debug {
+    // Allows notification actions and window activation from Noctalia.
+    honor-xdg-activation-with-invalid-serial
+}
+
+// ────────────── Environment ──────────────
+environment {
+    DISPLAY ":1"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    QT_QPA_PLATFORM "wayland"
+    QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
+    XDG_SESSION_TYPE "wayland"
+    XDG_CURRENT_DESKTOP "niri"
+}
+
+hotkey-overlay {
+    skip-at-startup
+    hide-not-bound
+}

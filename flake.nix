@@ -31,14 +31,11 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    secrets = {
-      url = "git+ssh://git@github.com/Meillaya/nix-secrets.git";
-      flake = false;
-    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, secrets } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix } @inputs:
     let
       user = "mei";
+      secrets = ./secrets;
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
@@ -148,13 +145,26 @@ EOF
             search_ref "stable" "$stable_ref"
           '')}/bin/search-pkgs";
         };
-      mkStandaloneLinuxHome = system: home-manager.lib.homeManagerConfiguration {
-        pkgs = nixpkgs.legacyPackages.${system};
-        extraSpecialArgs = { inherit secrets; };
-        modules = [
-          ./modules/standalone-linux/home-manager.nix
-        ];
-      };
+      mkStandaloneLinuxHome =
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            config = {
+              allowUnfree = true;
+              allowBroken = true;
+              allowInsecure = false;
+              allowUnsupportedSystem = true;
+            };
+          };
+        in
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = { inherit secrets; };
+          modules = [
+            ./modules/standalone-linux/home-manager.nix
+          ];
+        };
       mkHomeSwitchApp = system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
@@ -168,6 +178,70 @@ EOF
             set -euo pipefail
 
             target="${defaultTarget}"
+            backup_ext="hm-backup"
+            hm_args=()
+
+            while [ "$#" -gt 0 ]; do
+              case "$1" in
+                --target)
+                  target="$2"
+                  shift 2
+                  ;;
+                -b|--backup-ext)
+                  backup_ext="$2"
+                  shift 2
+                  ;;
+                --help|-h)
+                  cat <<'EOF'
+Usage: nix run .#home-switch -- [--target HOME] [home-manager args...]
+
+Defaults:
+  x86_64-linux -> standalone-linux
+  aarch64-linux -> standalone-linux-aarch64
+  backup extension -> hm-backup
+
+Examples:
+  nix run .#home-switch
+  nix run .#home-switch -- --dry-run
+  nix run .#home-switch -- --target standalone-linux --dry-run
+  nix run .#home-switch -- --backup-ext my-backup --dry-run
+EOF
+                  exit 0
+                  ;;
+                *)
+                  hm_args+=("$1")
+                  shift
+                  ;;
+              esac
+            done
+
+            # Fresh multi-user Nix installs may not have the default profile
+            # directories initialized yet, which can trip up standalone
+            # Home Manager. Touch the profile state first.
+            ${pkgs.nix}/bin/nix profile list >/dev/null 2>&1 || true
+
+            exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
+              --extra-experimental-features "nix-command flakes" \
+              --impure \
+              switch \
+              -b "$backup_ext" \
+              --flake ${self}#$target \
+              ''${hm_args[@]}
+          '')}/bin/home-switch";
+        };
+      mkHomeNewsApp = system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          defaultTarget =
+            if system == "x86_64-linux"
+            then "standalone-linux"
+            else "standalone-linux-aarch64";
+        in {
+          type = "app";
+          program = "${(pkgs.writeShellScriptBin "home-news" ''
+            set -euo pipefail
+
+            target="${defaultTarget}"
             hm_args=()
 
             while [ "$#" -gt 0 ]; do
@@ -178,16 +252,15 @@ EOF
                   ;;
                 --help|-h)
                   cat <<'EOF'
-Usage: nix run .#home-switch -- [--target HOME] [home-manager args...]
+Usage: nix run .#home-news -- [--target HOME] [extra home-manager news args...]
 
 Defaults:
   x86_64-linux -> standalone-linux
   aarch64-linux -> standalone-linux-aarch64
 
 Examples:
-  nix run .#home-switch
-  nix run .#home-switch -- --dry-run
-  nix run .#home-switch -- --target standalone-linux --dry-run
+  nix run .#home-news
+  nix run .#home-news -- --show-trace
 EOF
                   exit 0
                   ;;
@@ -201,10 +274,10 @@ EOF
             exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
               --extra-experimental-features "nix-command flakes" \
               --impure \
-              switch \
               --flake ${self}#$target \
+              news \
               ''${hm_args[@]}
-          '')}/bin/home-switch";
+          '')}/bin/home-news";
         };
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
@@ -215,6 +288,7 @@ EOF
         "check-keys" = mkApp "check-keys" system;
         "install" = mkApp "install" system;
         "install-with-secrets" = mkApp "install-with-secrets" system;
+        "home-news" = mkHomeNewsApp system;
         "home-switch" = mkHomeSwitchApp system;
         "search-pkgs" = mkSearchPkgsApp system;
       };

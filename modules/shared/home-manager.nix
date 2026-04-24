@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-    user = "mei";
+    user = config.home.username or "mei";
     gitName = "Meillaya";
     gitEmail = "nathanagbomed@proton.me";
 in
@@ -33,6 +33,7 @@ in
       pn = "pnpm";
       px = "pnpx";
       diff = "difft";
+      grep = "grep --color=auto";
       ls = "ls --color=auto";
       search = "rg -p --glob '!node_modules/*'";
     };
@@ -42,14 +43,20 @@ in
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
+      ''}
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
+      export PATH=$HOME/.local/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
 
       export ALTERNATE_EDITOR=""
       export EDITOR="emacsclient -t"
       export VISUAL="emacsclient -c -a emacs"
+
+      [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+      [[ -f "$HOME/.ghcup/env" ]] && . "$HOME/.ghcup/env"
 
       e() {
           emacsclient -t "$@"
@@ -86,10 +93,21 @@ in
         source /nix/var/nix/profiles/default/etc/profile.d/nix.fish
       end
 
+      if test -f /usr/share/cachyos-fish-config/cachyos-config.fish
+        source /usr/share/cachyos-fish-config/cachyos-config.fish
+      end
+
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
       fish_add_path --prepend /opt/homebrew/bin /opt/homebrew/sbin
+      ''}
       fish_add_path --prepend $HOME/.pnpm-packages/bin $HOME/.pnpm-packages
       fish_add_path --prepend $HOME/.npm-packages/bin $HOME/bin
+      fish_add_path --prepend $HOME/.local/bin
       fish_add_path --prepend $HOME/.local/share/bin
+      fish_add_path --prepend $HOME/.cabal/bin $HOME/.ghcup/bin
+      fish_add_path --prepend $HOME/.spicetify
+
+      test -r "$HOME/.opam/opam-init/init.fish" && source "$HOME/.opam/opam-init/init.fish" > /dev/null 2> /dev/null; or true
 
       set -gx ALTERNATE_EDITOR ""
       set -gx EDITOR "emacsclient -t"
@@ -149,16 +167,27 @@ in
     ];
     initContent = lib.mkMerge [
       (lib.mkBefore ''
+        if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
+          source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
+        fi
+
         if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
           . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
           . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
         fi
 
         # Define variables for directories
+        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
         export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
+        ''}
         export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
         export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
+        export PATH=$HOME/.local/bin:$PATH
         export PATH=$HOME/.local/share/bin:$PATH
+
+        [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
+        [[ -f "$HOME/.ghcup/env" ]] && . "$HOME/.ghcup/env"
+        [[ -f /usr/share/cachyos-zsh-config/cachyos-config.zsh ]] && source /usr/share/cachyos-zsh-config/cachyos-config.zsh
 
         # OMX/tmux launches source ~/.zshrc from non-interactive shells to recover
         # PATH. Stop here before interactive-only plugin/history/setopt setup.
@@ -216,7 +245,7 @@ in
 
   git = {
     enable = true;
-    ignores = [ "*.swp" ];
+    ignores = [ "*.swp" "**/.claude/settings.local.json" ];
     lfs = {
       enable = true;
     };
@@ -351,12 +380,71 @@ in
   alacritty = {
     enable = true;
     settings = {
+      env = {
+        TERM = "xterm-256color";
+        WINIT_X11_SCALE_FACTOR = "1";
+      };
+
       cursor = {
-        style = "Block";
+        style = "Underline";
+        vi_mode_style = "None";
+        unfocused_hollow = true;
+        thickness = 0.15;
+      };
+
+      general = {
+        live_config_reload = true;
+        working_directory = "None";
+      };
+
+      keyboard.bindings = [
+        { key = "Paste"; action = "Paste"; }
+        { key = "Copy"; action = "Copy"; }
+        { key = "L"; mods = "Control"; action = "ClearLogNotice"; }
+        { key = "L"; mods = "Control"; mode = "~Vi"; chars = "\\f"; }
+        { key = "PageUp"; mods = "Shift"; mode = "~Alt"; action = "ScrollPageUp"; }
+        { key = "PageDown"; mods = "Shift"; mode = "~Alt"; action = "ScrollPageDown"; }
+        { key = "Home"; mods = "Shift"; mode = "~Alt"; action = "ScrollToTop"; }
+        { key = "End"; mods = "Shift"; mode = "~Alt"; action = "ScrollToBottom"; }
+        { key = "V"; mods = "Control|Shift"; action = "Paste"; }
+        { key = "C"; mods = "Control|Shift"; action = "Copy"; }
+        { key = "F"; mods = "Control|Shift"; action = "SearchForward"; }
+        { key = "B"; mods = "Control|Shift"; action = "SearchBackward"; }
+        { key = "C"; mods = "Control|Shift"; mode = "Vi"; action = "ClearSelection"; }
+        { key = "Key0"; mods = "Control"; action = "ResetFontSize"; }
+      ];
+
+      mouse = {
+        hide_when_typing = true;
+        bindings = [
+          { mouse = "Middle"; action = "PasteSelection"; }
+        ];
+      };
+
+      scrolling = {
+        history = 10000;
+        multiplier = 3;
+      };
+
+      selection = {
+        semantic_escape_chars = ",│`|:\\\"' ()[]{}<>\\t";
+        save_to_clipboard = true;
       };
 
       window = {
-        opacity = 1.0;
+        dynamic_padding = true;
+        decorations = "full";
+        title = "Alacritty@CachyOS";
+        opacity = 0.8;
+        decorations_theme_variant = "Dark";
+        dimensions = {
+          columns = 100;
+          lines = 30;
+        };
+        class = {
+          instance = "Alacritty";
+          general = "Alacritty";
+        };
         padding = {
           x = 24;
           y = 24;
@@ -372,42 +460,56 @@ in
 
       font = {
         normal = {
-          family = "MesloLGS NF";
+          family = "monospace";
           style = "Regular";
         };
+        bold = {
+          family = "monospace";
+          style = "Bold";
+        };
+        italic = {
+          family = "monospace";
+          style = "Italic";
+        };
+        bold_italic = {
+          family = "monospace";
+          style = "Bold Italic";
+        };
         size = lib.mkMerge [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 10)
+          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 12)
           (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
         ];
       };
 
 
       colors = {
+        draw_bold_text_with_bright_colors = true;
+
         primary = {
-          background = "0x1f2528";
-          foreground = "0xc0c5ce";
+          background = "0x2E3440";
+          foreground = "0xD8DEE9";
         };
 
         normal = {
-          black = "0x1f2528";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xc0c5ce";
+          black = "0x3B4252";
+          red = "0xBF616A";
+          green = "0xA3BE8C";
+          yellow = "0xEBCB8B";
+          blue = "0x81A1C1";
+          magenta = "0xB48EAD";
+          cyan = "0x88C0D0";
+          white = "0xE5E9F0";
         };
 
         bright = {
-          black = "0x65737e";
-          red = "0xec5f67";
-          green = "0x99c794";
-          yellow = "0xfac863";
-          blue = "0x6699cc";
-          magenta = "0xc594c5";
-          cyan = "0x5fb3b3";
-          white = "0xd8dee9";
+          black = "0x4C566A";
+          red = "0xBF616A";
+          green = "0xA3BE8C";
+          yellow = "0xEBCB8B";
+          blue = "0x81A1C1";
+          magenta = "0xB48EAD";
+          cyan = "0x8FBCBB";
+          white = "0xECEFF4";
         };
       };
     };
@@ -432,14 +534,14 @@ in
       };
       "github.com" = {
         identitiesOnly = true;
-        identityFile = [
-          (lib.mkIf pkgs.stdenv.hostPlatform.isLinux
+        identityFile =
+          if pkgs.stdenv.hostPlatform.isLinux then [
             "/home/${user}/.ssh/id_github"
-          )
-          (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
+            "/home/${user}/.ssh/id_ed25519"
+          ] else [
             "/Users/${user}/.ssh/id_github"
-          )
-        ];
+            "/Users/${user}/.ssh/id_ed25519"
+          ];
       };
     };
   };

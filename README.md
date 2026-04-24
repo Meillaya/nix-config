@@ -69,11 +69,19 @@ nix run .#home-switch
 ```
 
 That defaults to the generic `standalone-linux` Home Manager configuration on `x86_64-linux`, using your current `USER` and `HOME`.
+The wrapper also passes `-b hm-backup` by default so any pre-existing dotfiles
+that Home Manager needs to take over are backed up on first switch.
 
 After the first switch, normal updates are:
 
 ```bash
 home-manager switch --flake .#standalone-linux --impure
+```
+
+To read Home Manager news with this flake-based setup, use:
+
+```bash
+nix run .#home-news
 ```
 
 If you need to override the detected user or home directory on a machine:
@@ -84,4 +92,9 @@ NIXOS_CONFIG_USER=mei NIXOS_CONFIG_HOME=/home/mei nix run .#home-switch
 
 ## Secrets
 
-Private values live in the separate `nix-secrets` repo and are pulled in as a flake input.
+The repo ships with an ignored local `secrets/` directory so standalone Linux
+machines can bootstrap without GitHub SSH access on first switch.
+
+If you want to use `agenix`-managed private files, place them under `secrets/`
+locally (or sync your private secrets repo into that directory) before
+referencing them from the `modules/*/secrets.nix` files.

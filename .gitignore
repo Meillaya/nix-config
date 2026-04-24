@@ -4,3 +4,5 @@ result-*
 *.bak
 *.tmp
 temp_insert.txt
+secrets/*
+!secrets/README.md

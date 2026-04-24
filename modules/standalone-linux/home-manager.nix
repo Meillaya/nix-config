@@ -11,6 +11,7 @@ let
     in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
+  standalone-files = import ./files.nix;
 in
 {
   home = {
@@ -18,7 +19,19 @@ in
     username = user;
     homeDirectory = homeDirectory;
     packages = pkgs.callPackage ./packages.nix {};
-    file = shared-files;
+    file = shared-files // standalone-files;
+    sessionVariables = {
+      BROWSER = "firefox";
+      TERM = "alacritty";
+      QT_QPA_PLATFORMTHEME = "qt5ct";
+      GTK_THEME = "adw-gtk3-dark";
+    };
+    sessionPath = [
+      "${homeDirectory}/.local/bin"
+      "${homeDirectory}/.ghcup/bin"
+      "${homeDirectory}/.cabal/bin"
+      "${homeDirectory}/.spicetify"
+    ];
     stateVersion = "25.11";
   };
 
