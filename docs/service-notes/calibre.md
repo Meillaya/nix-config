@@ -49,3 +49,18 @@ create **sanitized templates** for:
 - `customize.py.json`
 
 with machine-specific paths, installation identifiers, and history removed.
+
+That step is now wired through the ignored local/private secrets tree:
+
+- `secrets/calibre/global.py.json`
+- `secrets/calibre/gui.py.json`
+- `secrets/calibre/customize.py.json`
+
+If those files exist locally, standalone Home Manager will manage the live
+Calibre files from them.
+
+Public sanitized examples live at:
+
+- `modules/standalone-linux/templates/calibre/global.py.example.json`
+- `modules/standalone-linux/templates/calibre/gui.py.example.json`
+- `modules/standalone-linux/templates/calibre/customize.py.example.json`

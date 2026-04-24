@@ -12,9 +12,19 @@ let
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
   shared-files = import ../shared/files.nix { inherit config pkgs; };
   standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
-  secret-files = lib.optionalAttrs (builtins.pathExists (secrets + "/kavita/appsettings.json")) {
-    "Documents/Kavita/config/appsettings.json".source = secrets + "/kavita/appsettings.json";
-  };
+  secret-files =
+    (lib.optionalAttrs (builtins.pathExists (secrets + "/kavita/appsettings.json")) {
+      "Documents/Kavita/config/appsettings.json".source = secrets + "/kavita/appsettings.json";
+    })
+    // (lib.optionalAttrs (builtins.pathExists (secrets + "/calibre/global.py.json")) {
+      ".config/calibre/global.py.json".source = secrets + "/calibre/global.py.json";
+    })
+    // (lib.optionalAttrs (builtins.pathExists (secrets + "/calibre/gui.py.json")) {
+      ".config/calibre/gui.py.json".source = secrets + "/calibre/gui.py.json";
+    })
+    // (lib.optionalAttrs (builtins.pathExists (secrets + "/calibre/customize.py.json")) {
+      ".config/calibre/customize.py.json".source = secrets + "/calibre/customize.py.json";
+    });
 in
 {
   home = {

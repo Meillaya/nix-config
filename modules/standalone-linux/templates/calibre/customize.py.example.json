@@ -1,0 +1,21 @@
+{
+  "disabled_plugins": {
+    "__class__": "set",
+    "__value__": [
+      "Open Library",
+      "Fantastic Fiction",
+      "FictionDB",
+      "Hardcover"
+    ]
+  },
+  "enabled_plugins": {
+    "__class__": "set",
+    "__value__": [
+      "Barnes & Noble",
+      "Google"
+    ]
+  },
+  "filetype_mapping": {},
+  "plugin_customization": {},
+  "plugins": {}
+}
