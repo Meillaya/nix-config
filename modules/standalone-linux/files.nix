@@ -19,6 +19,7 @@ in
   ".config/calibre/save_to_disk.py.json".source = ./config/calibre/save_to_disk.py.json;
   ".config/calibre/metadata_sources/global.json".source = ./config/calibre-metadata-sources-global.json;
   ".config/calibre/conversion/page_setup.py".source = ./config/calibre/conversion/page_setup.py;
+  ".config/noctalia/settings.json".source = ./config/noctalia/settings.json;
   ".claude/.omc-config.json".source = ./config/claude/omc-config.json;
   ".claude/settings.json".source = ./config/claude/settings.json;
   ".claude/CLAUDE.md".source = ./config/claude/CLAUDE.md;
