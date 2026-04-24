@@ -174,11 +174,17 @@ in [
   htop
   jetbrains-mono
   jq
+  glances
+  micro
   ripgrep
+  tectonic
+  tokei
   tree
   tmux
   unrar
   unzip
+  yazi
+  zoxide
   zsh-powerlevel10k
   
   # Development tools
