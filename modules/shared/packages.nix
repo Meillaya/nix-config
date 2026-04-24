@@ -138,6 +138,7 @@ in [
   alacritty
   bash-completion
   bat
+  bear
   btop
   bun
   ccache
@@ -205,10 +206,15 @@ in [
   direnv
   
   # Programming languages and runtimes
+  elixir
+  erlang
   go
+  iverilog
   rustc
   cargo
   openjdk
+  pandoc
+  valkey
 
   # Python packages
   python3
