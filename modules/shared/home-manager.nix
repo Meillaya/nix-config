@@ -38,6 +38,21 @@ in
       search = "rg -p --glob '!node_modules/*'";
     };
     initExtra = ''
+      if [[ "$(uname)" == Linux && -n "''${WAYLAND_DISPLAY-}" ]]; then
+        current_display="''${DISPLAY-}"
+        current_socket=""
+        if [[ -n "$current_display" && "$current_display" == :* ]]; then
+          display_num="''${current_display#:}"
+          display_num="''${display_num%%.*}"
+          current_socket="/tmp/.X11-unix/X$display_num"
+        fi
+        if [[ -z "$current_display" || ! -S "$current_socket" ]]; then
+          if [[ -S /tmp/.X11-unix/X0 ]]; then
+            export DISPLAY=:0
+          fi
+        fi
+      fi
+
       if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
@@ -87,6 +102,20 @@ in
       '';
     };
     shellInit = ''
+      if test (uname) = Linux; and test -n "$WAYLAND_DISPLAY"
+        set -l current_display "$DISPLAY"
+        set -l current_socket ""
+        if string match -rq '^:[0-9]+' -- "$current_display"
+          set -l display_num (string replace -r '^:([0-9]+).*' '$1' -- "$current_display")
+          set current_socket "/tmp/.X11-unix/X$display_num"
+        end
+        if test -z "$current_display"; or not test -S "$current_socket"
+          if test -S /tmp/.X11-unix/X0
+            set -gx DISPLAY :0
+          end
+        end
+      end
+
       if test -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
         source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.fish
       else if test -f /nix/var/nix/profiles/default/etc/profile.d/nix.fish
@@ -167,6 +196,21 @@ in
     ];
     initContent = lib.mkMerge [
       (lib.mkBefore ''
+        if [[ "$(uname)" == Linux && -n "''${WAYLAND_DISPLAY-}" ]]; then
+          current_display="''${DISPLAY-}"
+          current_socket=""
+          if [[ -n "$current_display" && "$current_display" == :* ]]; then
+            display_num="''${current_display#:}"
+            display_num="''${display_num%%.*}"
+            current_socket="/tmp/.X11-unix/X$display_num"
+          fi
+          if [[ -z "$current_display" || ! -S "$current_socket" ]]; then
+            if [[ -S /tmp/.X11-unix/X0 ]]; then
+              export DISPLAY=:0
+            fi
+          fi
+        fi
+
         if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
           source "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh"
         fi
