@@ -1,0 +1,226 @@
+# oh-my-codex top-level settings (must be before any [table])
+notify = ["node", "/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/notify-hook.js"]
+model_reasoning_effort = "medium"
+developer_instructions = "You have oh-my-codex installed. AGENTS.md is your orchestration brain and the main orchestration surface. Use skill/keyword routing like $name plus spawned role-specialized subagents for specialized work. Codex native subagents are available via .codex/agents and may be used for independent parallel subtasks within a single session or team pane. Skills are loaded from installed SKILL.md files under .codex/skills, not from native agent TOMLs. Use workflow skills via $name when explicitly invoked or clearly routed by AGENTS.md. Treat installed prompts as narrower internal execution surfaces under AGENTS.md authority, even when user-facing docs prefer $name keywords."
+
+
+
+
+model = "gpt-5.4"
+model_context_window = 1000000
+model_auto_compact_token_limit = 900000
+
+[projects."/home/mei/Documents/ignition"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/fizzbuzz_asm"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/tsune"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/eterea"]
+trust_level = "trusted"
+
+[projects."/home/mei"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/plasmas"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/ML-Compiler-TVM-MLIR"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/RISC-V-FPGA-Based-Accelerator-Simulation"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/type_gemm"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/blog"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/brainf*ck"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/rustcc"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/rvcoverify"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/go_fast"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Obsidian Vault"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/rs-find"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/plasmas"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/tsune"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig-conway"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/eterea"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/clawhip-machine-setup"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig-shell"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig-server"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig-dns"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig-kafka"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/rs-torrent"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/haskell-git"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/rs-sqlite"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/ocaml-redis"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/grep-plus"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/cpp-grep"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/haskell-compiler"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/deep-learning/tiny-tpu"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/cpp-graphics"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/c_sudoku"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/tiny-rasterizer"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/zig/zig-scheduler"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/c_javascript_runtime"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/jsrt"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/redis"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/bolt"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/test"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/fox/ignition"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/Projects/test-2"]
+trust_level = "trusted"
+
+[projects."/home/mei/.config/niri"]
+trust_level = "trusted"
+
+[projects."/home/mei/Documents/nix"]
+trust_level = "trusted"
+[features]
+multi_agent = true
+child_agents_md = true
+
+codex_hooks = true
+[env]
+USE_OMX_EXPLORE_CMD = "1"
+
+[agents]
+max_threads = 6
+max_depth = 2
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+# OMX TUI StatusLine (Codex CLI v0.101.0+)
+startup_timeout_sec = 15
+
+[tui]
+status_line = ["model-with-reasoning", "git-branch", "context-remaining", "total-input-tokens", "total-output-tokens", "five-hour-limit", "weekly-limit"]
+
+[tui.model_availability_nux]
+"gpt-5.5" = 2
+
+[notice]
+hide_rate_limit_model_nudge = true
+
+[notice.model_migrations]
+"gpt-5.2" = "gpt-5.4"
+
+# ============================================================
+# End oh-my-codex
+
+# ============================================================
+# oh-my-codex (OMX) Configuration
+# Managed by omx setup - manual edits preserved on next setup
+# ============================================================
+
+# OMX State Management MCP Server
+[mcp_servers.omx_state]
+command = "node"
+args = ["/home/mei/.local/lib/node_modules/oh-my-codex/dist/mcp/state-server.js"]
+enabled = true
+startup_timeout_sec = 5
+
+# OMX Project Memory MCP Server
+[mcp_servers.omx_memory]
+command = "node"
+args = ["/home/mei/.local/lib/node_modules/oh-my-codex/dist/mcp/memory-server.js"]
+enabled = true
+startup_timeout_sec = 5
+
+# OMX Code Intelligence MCP Server (LSP diagnostics, AST search)
+[mcp_servers.omx_code_intel]
+command = "node"
+args = ["/home/mei/.local/lib/node_modules/oh-my-codex/dist/mcp/code-intel-server.js"]
+enabled = true
+startup_timeout_sec = 10
+
+# OMX Trace MCP Server (agent flow timeline & statistics)
+[mcp_servers.omx_trace]
+command = "node"
+args = ["/home/mei/.local/lib/node_modules/oh-my-codex/dist/mcp/trace-server.js"]
+enabled = true
+startup_timeout_sec = 5
+
+# OMX Wiki MCP Server (persistent project knowledge base)
+[mcp_servers.omx_wiki]
+command = "node"
+args = ["/home/mei/.local/lib/node_modules/oh-my-codex/dist/mcp/wiki-server.js"]
+enabled = true
+startup_timeout_sec = 5
+# ============================================================
+# End oh-my-codex

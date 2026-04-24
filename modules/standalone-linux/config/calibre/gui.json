@@ -1,0 +1,1790 @@
+{
+  "action-layout-toolbar": [
+    "Preferences",
+    "Add Books",
+    "Edit Metadata",
+    null,
+    "Convert Books",
+    "View",
+    null,
+    "Embed Metadata",
+    "Polish Books",
+    "Save To Disk",
+    "Choose Library",
+    null,
+    "Remove Books",
+    "Tweak ePub",
+    "Restart",
+    "Author Mapper",
+    "Virtual library",
+    "Count Pages"
+  ],
+  "action-layout-toolbar-device": [
+    "Add Books",
+    "Edit Metadata",
+    null,
+    "Convert Books",
+    "View",
+    "Send To Device",
+    null,
+    null,
+    "Location Manager",
+    null,
+    null,
+    "Fetch News",
+    "Save To Disk",
+    "Store",
+    "Connect Share",
+    null,
+    "Remove Books",
+    null,
+    "Help",
+    "Preferences",
+    "Clean Meatadata",
+    "Count Pages"
+  ],
+  "advanced search dialog current tab": 1,
+  "advanced_search_simple_tab_focused_field": "title_box",
+  "basic_metadata_widget_splitter_state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAADAAABHQAAAa0AAAFfAf////8BAAAAAQA="
+  },
+  "book_info_dialog_splitter_state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAABXgAAAV4B/////wEAAAABAA=="
+  },
+  "book_list_pin_splitter_state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAABAAAAAEYA/////wEAAAABAA=="
+  },
+  "bookshelf view visible": false,
+  "browse-notes-dialog-splitter-state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAAB9AAAAZAA/////wEAAAABAA=="
+  },
+  "bulk-mde-casing-algorithm": "title_case",
+  "bulk_metadata_window_tab": 0,
+  "choose-merge-cb-merge_metadata": true,
+  "choose-merge-dialog-splitter-state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAABUgAAAQAA/////wEAAAABAA=="
+  },
+  "color_palette": "dark",
+  "cover_corner_radius": 5,
+  "cover_corner_radius_unit": "%",
+  "cover_grid_background": {
+    "dark": [
+      45,
+      45,
+      45
+    ],
+    "dark_texture": null,
+    "light": [
+      80,
+      80,
+      80
+    ],
+    "light_texture": null,
+    "migrated": true
+  },
+  "custom_colors_for_color_dialog": [
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ],
+    [
+      255,
+      255,
+      255,
+      255
+    ]
+  ],
+  "dark_palette_name": "__current__",
+  "dark_palettes": {
+    "__current__": {
+      "AlternateBase": "#2d2d2d",
+      "Base": "#121212",
+      "BrightText": "#ff0000",
+      "BrightText-disabled": "#ff0000",
+      "Button": "#2d2d2d",
+      "ButtonText": "#dddddd",
+      "ButtonText-disabled": "#7f7f7f",
+      "Highlight": "#0b45c4",
+      "HighlightedText": "#dddddd",
+      "HighlightedText-disabled": "#7f7f7f",
+      "Link": "#6cb4ee",
+      "LinkVisited": "#800080",
+      "PlaceholderText": "#7f7f7f",
+      "PlaceholderText-disabled": "#7f7f7f",
+      "Text": "#dddddd",
+      "Text-disabled": "#7f7f7f",
+      "ToolTipBase": "#2d2d2d",
+      "ToolTipText": "#dddddd",
+      "ToolTipText-disabled": "#dddddd",
+      "Window": "#2d2d2d",
+      "WindowText": "#dddddd",
+      "WindowText-disabled": "#dddddd"
+    }
+  },
+  "fts_search_splitter_state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAABzwAAAEQA/////wEAAAABAA=="
+  },
+  "general_category_editor_row_height": 30,
+  "geometry-of-Plugin Updater plugin:plugin updater dialog": {
+    "frame_geometry": {
+      "height": 480,
+      "width": 832,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 480,
+      "width": 832,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 480,
+      "width": 832,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAz8AAAHfAAAAAAAAAAAAAAM/AAAB3wAAAAAAAAAADXAAAAAAAAAAAAAAAz8AAAHf"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-book_info_dialog_geometry": {
+    "frame_geometry": {
+      "height": 1340,
+      "width": 1670,
+      "x": 3,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1340,
+      "width": 1670,
+      "x": 3,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1340,
+      "width": 1670,
+      "x": 3,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAADAAAAAAAABogAAAU7AAAAAwAAAAAAAAaIAAAFOwAAAAAAAAAADXAAAAADAAAAAAAABogAAAU7"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-browse-notes-dialog-geometry": {
+    "frame_geometry": {
+      "height": 631,
+      "width": 900,
+      "x": 1260,
+      "y": 396
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 600,
+      "width": 900,
+      "x": 1260,
+      "y": 427
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 600,
+      "width": 900,
+      "x": 1260,
+      "y": 427
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAATsAAABjAAACG8AAAQCAAAE7AAAAasAAAhvAAAEAgAAAAAAAAAADXAAAATsAAABqwAACG8AAAQC"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-bulk_metadata_window_geometry": {
+    "frame_geometry": {
+      "height": 793,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 793,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 793,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAA7IAAAMYAAAAAAAAAAAAAAOyAAADGAAAAAAAAAAADXAAAAAAAAAAAAAAA7IAAAMY"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-calibre_main_window_geometry": {
+    "frame_geometry": {
+      "height": 676,
+      "width": 1691,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 676,
+      "width": 1691,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 676,
+      "width": 1691,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAABpoAAAKjAAAAAAAAAAAAAAaaAAACowAAAAAAAAAADXAAAAAAAAAAAAAABpoAAAKj"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-choose-icon-theme-dialog-geometry": {
+    "frame_geometry": {
+      "height": 1364,
+      "width": 900,
+      "x": 1381,
+      "y": 67
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1333,
+      "width": 900,
+      "x": 1381,
+      "y": 98
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1333,
+      "width": 900,
+      "x": 1381,
+      "y": 98
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAVlAAAAQwAACOgAAAWWAAAFZQAAAGIAAAjoAAAFlgAAAAAAAAAADXAAAAVlAAAAYgAACOgAAAWW"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-choose-merge-dialog-geometry": {
+    "frame_geometry": {
+      "height": 629,
+      "width": 1644,
+      "x": 1748,
+      "y": 79
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 598,
+      "width": 1644,
+      "x": 1748,
+      "y": 110
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 598,
+      "width": 1644,
+      "x": 1748,
+      "y": 110
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAbUAAAATwAADT8AAALDAAAG1AAAAG4AAA0/AAACwwAAAAAAAAAADXAAAAbUAAAAbgAADT8AAALD"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-config_widget_dialog_geometry_Sharing_Metadata download": {
+    "frame_geometry": {
+      "height": 507,
+      "width": 487,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 507,
+      "width": 487,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 507,
+      "width": 487,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAeYAAAH6AAAAAAAAAAAAAAHmAAAB+gAAAAAAAAAADXAAAAAAAAAAAAAAAeYAAAH6"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-convert_single_dialog_geom": {
+    "frame_geometry": {
+      "height": 1301,
+      "width": 828,
+      "x": 1731,
+      "y": 78
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1270,
+      "width": 828,
+      "x": 1731,
+      "y": 109
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1270,
+      "width": 828,
+      "x": 1731,
+      "y": 109
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAbDAAAATgAACf4AAAViAAAGwwAAAG0AAAn+AAAFYgAAAAAAAAAADXAAAAbDAAAAbQAACf4AAAVi"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-copy_to_choose_library_dialog-geometry": {
+    "frame_geometry": {
+      "height": 550,
+      "width": 800,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 550,
+      "width": 800,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 550,
+      "width": 800,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAx8AAAIlAAAAAAAAAAAAAAMfAAACJQAAAAAAAAAADXAAAAAAAAAAAAAAAx8AAAIl"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-create-virtual-library-dialog": {
+    "frame_geometry": {
+      "height": 585,
+      "width": 1062,
+      "x": 1849,
+      "y": 328
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 554,
+      "width": 1062,
+      "x": 1849,
+      "y": 359
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 554,
+      "width": 1062,
+      "x": 1849,
+      "y": 359
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAc5AAABSAAAC14AAAOQAAAHOQAAAWcAAAteAAADkAAAAAAAAAAADXAAAAc5AAABZwAAC14AAAOQ"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-customize-palette-geometry": {
+    "frame_geometry": {
+      "height": 580,
+      "width": 826,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 580,
+      "width": 826,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 580,
+      "width": 826,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAzkAAAJDAAAAAAAAAAAAAAM5AAACQwAAAAAAAAAADXAAAAAAAAAAAAAAAzkAAAJD"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-diff_dialog_geom": {
+    "frame_geometry": {
+      "height": 454,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 454,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 454,
+      "width": 947,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAA7IAAAHFAAAAAAAAAAAAAAOyAAABxQAAAAAAAAAADXAAAAAAAAAAAAAAA7IAAAHF"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-duplicates-question-dialog-geometry": {
+    "frame_geometry": {
+      "height": 1284,
+      "width": 828,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1284,
+      "width": 828,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1284,
+      "width": 828,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAzsAAAUDAAAAAAAAAAAAAAM7AAAFAwAAAAAAAAAADXAAAAAAAAAAAAAAAzsAAAUD"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-edit-author-mapping-rule-geometry": {
+    "frame_geometry": {
+      "height": 177,
+      "width": 699,
+      "x": 1361,
+      "y": 629
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 146,
+      "width": 699,
+      "x": 1361,
+      "y": 660
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 146,
+      "width": 699,
+      "x": 1361,
+      "y": 660
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAVRAAACdQAACAsAAAMlAAAFUQAAApQAAAgLAAADJQAAAAAAAAAADXAAAAVRAAAClAAACAsAAAMl"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-edit-author-mapping-rules-geometry": {
+    "frame_geometry": {
+      "height": 389,
+      "width": 922,
+      "x": 2089,
+      "y": 516
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 358,
+      "width": 922,
+      "x": 2089,
+      "y": 547
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 358,
+      "width": 922,
+      "x": 2089,
+      "y": 547
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAgpAAACBAAAC8IAAAOIAAAIKQAAAiMAAAvCAAADiAAAAAAAAAAADXAAAAgpAAACIwAAC8IAAAOI"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-job-detail-view-dialog-geometry": {
+    "frame_geometry": {
+      "height": 500,
+      "width": 700,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 500,
+      "width": 700,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 500,
+      "width": 700,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAArsAAAHzAAAAAAAAAAAAAAK7AAAB8wAAAAAAAAAADXAAAAAAAAAAAAAAArsAAAHz"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-jobs_dialog_geometry": {
+    "frame_geometry": {
+      "height": 334,
+      "width": 354,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 334,
+      "width": 354,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 334,
+      "width": 354,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAWEAAAFNAAAAAAAAAAAAAAFhAAABTQAAAAAAAAAADXAAAAAAAAAAAAAAAWEAAAFN"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-library-annotations-browser-geometry": {
+    "frame_geometry": {
+      "height": 683,
+      "width": 922,
+      "x": 2089,
+      "y": 369
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 652,
+      "width": 922,
+      "x": 2089,
+      "y": 400
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 652,
+      "width": 922,
+      "x": 2089,
+      "y": 400
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAgpAAABcQAAC8IAAAQbAAAIKQAAAZAAAAvCAAAEGwAAAAAAAAAADXAAAAgpAAABkAAAC8IAAAQb"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-library-fts-dialog-geometry": {
+    "frame_geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAABp8AAAVDAAAAAAAAAAAAAAafAAAFQwAAAAAAAAAADXAAAAAAAAAAAAAABp8AAAVD"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-manage_authors_dialog_geometry": {
+    "frame_geometry": {
+      "height": 598,
+      "width": 825,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 598,
+      "width": 825,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 598,
+      "width": 825,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAzgAAAJVAAAAAAAAAAAAAAM4AAACVQAAAAEAAAAADXAAAAAAAAAAAAAAAzgAAAJV"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 1,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-metadata_single_gui_geom": {
+    "frame_geometry": {
+      "height": 597,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 597,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 597,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAxkAAAJUAAAAAAAAAAAAAAMZAAACVAAAAAAAAAAADXAAAAAAAAAAAAAAAxkAAAJU"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-metasingle_window_geometry3": {
+    "frame_geometry": {
+      "height": 598,
+      "width": 1644,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 598,
+      "width": 1644,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 598,
+      "width": 1644,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAABmsAAAJVAAAAAAAAAAAAAAZrAAACVQAAAAAAAAAADXAAAAAAAAAAAAAABmsAAAJV"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-preferences dialog geometry": {
+    "frame_geometry": {
+      "height": 720,
+      "width": 930,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 720,
+      "width": 930,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 720,
+      "width": 930,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAA6EAAALPAAAAAAAAAAAAAAOhAAACzwAAAAAAAAAADXAAAAAAAAAAAAAAA6EAAALP"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-quickview_dialog_geometry": {
+    "frame_geometry": {
+      "height": 297,
+      "width": 1060,
+      "x": 1180,
+      "y": 567
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 266,
+      "width": 1060,
+      "x": 1180,
+      "y": 598
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 266,
+      "width": 1060,
+      "x": 1180,
+      "y": 598
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAScAAACNwAACL8AAANfAAAEnAAAAlYAAAi/AAADXwAAAAAAAAAADXAAAAScAAACVgAACL8AAANf"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-single-cover-fetch-dialog-geometry": {
+    "frame_geometry": {
+      "height": 598,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 598,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 598,
+      "width": 794,
+      "x": 0,
+      "y": 0
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAAAxkAAAJVAAAAAAAAAAAAAAMZAAACVQAAAAAAAAAADXAAAAAAAAAAAAAAAxkAAAJV"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "geometry-of-tag_list_editor_dialog_geometry": {
+    "frame_geometry": {
+      "height": 541,
+      "width": 920,
+      "x": 115,
+      "y": 437
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 510,
+      "width": 920,
+      "x": 115,
+      "y": 468
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 510,
+      "width": 920,
+      "x": 115,
+      "y": 468
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAABzAAABtQAABAoAAAPRAAAAcwAAAdQAAAQKAAAD0QAAAAAAAAAADXAAAABzAAAB1AAABAoAAAPR"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 0,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DELL S3422DWG",
+      "serial": "6V24KK3",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 2520,
+        "width": 3440,
+        "x": 0,
+        "y": -1080
+      }
+    }
+  },
+  "geometry-of-viewer_image_popup_geometry": {
+    "frame_geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 1270,
+      "y": 618
+    },
+    "full_screened": false,
+    "geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 1270,
+      "y": 618
+    },
+    "maximized": false,
+    "normal_geometry": {
+      "height": 1348,
+      "width": 1696,
+      "x": 1270,
+      "y": 618
+    },
+    "qt": {
+      "__class__": "bytearray",
+      "__value__": "AdnQywADAAAAAAT2AAACagAAC5UAAAetAAAE9gAAAmoAAAuVAAAHrQAAAAEAAAAADXAAAAT2AAACagAAC5UAAAet"
+    },
+    "screen": {
+      "depth": 32,
+      "device_pixel_ratio": 1.0,
+      "geometry_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440,
+        "x": 0,
+        "y": 0
+      },
+      "index_in_screens_list": 1,
+      "manufacturer": "Dell Inc.",
+      "model": "DELL S3422DWG",
+      "name": "DP-1",
+      "serial": "",
+      "size_in_logical_pixels": {
+        "height": 1440,
+        "width": 3440
+      },
+      "virtual_geometry": {
+        "height": 1440,
+        "width": 5360,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "grid view visible": true,
+  "jobs view column layout3": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAAAAAABAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAfQAAAAFAQEBAAAAAAAAAAAAAAAAAGT/////AAAAhAAAAAAAAAAFAAAAZAAAAAEAAAAAAAAAZAAAAAEAAAAAAAAAZAAAAAEAAAAAAAAAZAAAAAEAAAAAAAAAZAAAAAEAAAAAAAAD6AAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=="
+  },
+  "library-annotations-browser-splitter-state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAABwgAAAcIA/////wEAAAABAA=="
+  },
+  "library_usage_stats": {
+    "/media/mei3/Calibre/Fantasy - Science Fiction": 3,
+    "/media/mei3/Calibre/General": 107,
+    "/media/mei3/Calibre/NYRB": 5,
+    "/media/mei3/Calibre/Science and Math": 27,
+    "/media/mei3/Calibre/Temp": 9,
+    "/media/mei3/Calibre/Theory": 102
+  },
+  "light_palette_name": "",
+  "light_palettes": {
+    "__current__": {
+      "AlternateBase": "#f5f5f5",
+      "Base": "#ffffff",
+      "BrightText": "#ff0000",
+      "BrightText-disabled": "#ff0000",
+      "Button": "#f0f0f0",
+      "ButtonText": "#000000",
+      "ButtonText-disabled": "#787878",
+      "Highlight": "#308cc6",
+      "HighlightedText": "#ffffff",
+      "HighlightedText-disabled": "#787878",
+      "Link": "#0000ff",
+      "LinkVisited": "#ff00ff",
+      "PlaceholderText": "#787878",
+      "PlaceholderText-disabled": "#787878",
+      "Text": "#000000",
+      "Text-disabled": "#787878",
+      "ToolTipBase": "#ffffdc",
+      "ToolTipText": "#000000",
+      "ToolTipText-disabled": "#000000",
+      "Window": "#f0f0f0",
+      "WindowText": "#000000",
+      "WindowText-disabled": "#000000"
+    }
+  },
+  "main_window_central_widget_state": {
+    "layout": "wide",
+    "narrow_desires": {
+      "book_details_height": 0.23042505592841164,
+      "cover_browser_width": 0.3496677740863787,
+      "quick_view_height": 0.25615212527964204,
+      "tag_browser_width": 0.25
+    },
+    "narrow_visibility": {
+      "book_details": true,
+      "book_list": true,
+      "cover_browser": false,
+      "quick_view": false,
+      "tag_browser": true
+    },
+    "wide_desires": {
+      "book_details_width": 0.2536101083032491,
+      "cover_browser_height": 0.28556593977154726,
+      "quick_view_height": 0.23779854620976115,
+      "tag_browser_width": 0.18953068592057762
+    },
+    "wide_visibility": {
+      "book_details": true,
+      "book_list": true,
+      "cover_browser": false,
+      "quick_view": false,
+      "tag_browser": true
+    }
+  },
+  "manage_authors_table_widths": [
+    125,
+    125,
+    125,
+    125,
+    125
+  ],
+  "metadata-download-identify-widget-splitter-state": {
+    "__class__": "bytearray",
+    "__value__": "AAAA/wAAAAEAAAACAAACAAAAAQAA/////wEAAAABAA=="
+  },
+  "polish_show_reports": true,
+  "polishing_settings": {
+    "add_soft_hyphens": false,
+    "compress_images": false,
+    "do_cover": true,
+    "download_external_resources": false,
+    "embed": false,
+    "jacket": false,
+    "metadata": false,
+    "remove_jacket": false,
+    "remove_soft_hyphens": false,
+    "remove_unused_css": false,
+    "smarten_punctuation": false,
+    "subset": false,
+    "upgrade_book": true
+  },
+  "previous_sort_order_BooksView": {
+    "authors": false,
+    "pubdate": true,
+    "publisher": true,
+    "rating": true,
+    "series": false,
+    "tags": true,
+    "timestamp": false,
+    "title": false
+  },
+  "quick_start_guide_added": true,
+  "quickview_dialog_books_table_widths": [
+    263,
+    263,
+    263
+  ],
+  "qv_open_at_shutdown": false,
+  "recently_used_languages": [
+    "English",
+    "Arabic"
+  ],
+  "search bar visible": true,
+  "show-embed-failed-books": false,
+  "tag browser search box visible": false,
+  "tag_browser_rules_dialog_table_widths": [
+    20,
+    115,
+    115,
+    20,
+    115,
+    20,
+    115,
+    115
+  ],
+  "tag_list_editor_table_widths": [
+    28,
+    28,
+    28,
+    28,
+    28
+  ],
+  "windows_register_default_programs": "8.16.2"
+}

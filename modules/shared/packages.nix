@@ -201,20 +201,36 @@ in [
   terraform
   kubectl
   awscli2
+  claude-code
+  codex
   lazygit
   fzf
   direnv
+  flyctl
+  podman
+  zed-editor
   
   # Programming languages and runtimes
   elixir
   erlang
   go
   iverilog
+  gopls
+  jdt-language-server
+  nil
+  nixd
+  basedpyright
   rustc
   cargo
+  rust-analyzer
   openjdk
   pandoc
+  taplo
+  typescript-language-server
   valkey
+  vscode-langservers-extracted
+  yaml-language-server
+  zls
 
   # Python packages
   python3

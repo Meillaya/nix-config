@@ -4,6 +4,8 @@ with pkgs;
 let shared-packages = import ../shared/packages.nix { inherit pkgs; }; in
 shared-packages ++ [
   brightnessctl
+  brave
+  calibre
   cliphist
   fontconfig
   fuzzel
@@ -13,10 +15,12 @@ shared-packages ++ [
   libnotify
   mako
   obsidian
+  ollama
   pavucontrol
   playerctl
   qbittorrent
   swaybg
+  tailscale
   waybar
   wl-clipboard
   wlogout

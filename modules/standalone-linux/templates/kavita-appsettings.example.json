@@ -1,0 +1,15 @@
+{
+  "TokenKey": "REPLACE_WITH_SECRET",
+  "Port": 5000,
+  "IpAddresses": "",
+  "BaseUrl": "/",
+  "Cache": 75,
+  "AllowIFraming": false,
+  "OpenIdConnectSettings": {
+    "Authority": "",
+    "ClientId": "kavita",
+    "Secret": "",
+    "CustomScopes": [],
+    "Enabled": false
+  }
+}
