@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 let
   user =
@@ -18,7 +18,7 @@ in
     enableNixpkgsReleaseCheck = false;
     username = user;
     homeDirectory = homeDirectory;
-    packages = pkgs.callPackage ./packages.nix {};
+    packages = import ./packages.nix { inherit pkgs inputs; };
     file = shared-files // standalone-files;
     sessionVariables = {
       BROWSER = "firefox";

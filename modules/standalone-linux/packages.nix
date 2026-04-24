@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, inputs }:
 
 with pkgs;
 let shared-packages = import ../shared/packages.nix { inherit pkgs; }; in
@@ -27,4 +27,6 @@ shared-packages ++ [
   wofi
   xdg-utils
   zathura
+  opencode
+  inputs.zen-browser.packages.${pkgs.system}.default
 ]

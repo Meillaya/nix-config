@@ -31,8 +31,13 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, zen-browser } @inputs:
     let
       user = "mei";
       secrets = ./secrets;
@@ -160,7 +165,7 @@ EOF
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = { inherit secrets; };
+          extraSpecialArgs = { inherit secrets inputs; };
           modules = [
             ./modules/standalone-linux/home-manager.nix
           ];
@@ -279,6 +284,57 @@ EOF
               ''${hm_args[@]}
           '')}/bin/home-news";
         };
+      mkSyncSecretsApp = system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in {
+          type = "app";
+          program = "${(pkgs.writeShellScriptBin "sync-secrets" ''
+            set -euo pipefail
+
+            repo="''${NIX_SECRETS_REPO:-}"
+            workdir="$(mktemp -d)"
+            cleanup() { rm -rf "$workdir"; }
+            trap cleanup EXIT
+
+            while [ "$#" -gt 0 ]; do
+              case "$1" in
+                --repo)
+                  repo="$2"
+                  shift 2
+                  ;;
+                --help|-h)
+                  cat <<'EOF'
+Usage: nix run .#sync-secrets -- [--repo GIT_URL]
+
+Examples:
+  NIX_SECRETS_REPO=git@github.com:Meillaya/nix-screts.git nix run .#sync-secrets
+  nix run .#sync-secrets -- --repo git@github.com:Meillaya/nix-screts.git
+EOF
+                  exit 0
+                  ;;
+                *)
+                  echo "sync-secrets: unknown argument: $1" >&2
+                  exit 2
+                  ;;
+              esac
+            done
+
+            if [ -z "$repo" ]; then
+              echo "sync-secrets: set NIX_SECRETS_REPO or pass --repo" >&2
+              exit 2
+            fi
+
+            ${pkgs.git}/bin/git clone --depth=1 "$repo" "$workdir/repo"
+            ${pkgs.rsync}/bin/rsync -a --delete \
+              --exclude='.git' \
+              --exclude='README.md' \
+              "$workdir/repo"/ \
+              ${self}/secrets/
+
+            echo "Secrets synced into ./secrets from $repo"
+          '')}/bin/sync-secrets";
+        };
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
@@ -286,6 +342,7 @@ EOF
         "copy-keys" = mkApp "copy-keys" system;
         "create-keys" = mkApp "create-keys" system;
         "check-keys" = mkApp "check-keys" system;
+        "sync-secrets" = mkSyncSecretsApp system;
         "install" = mkApp "install" system;
         "install-with-secrets" = mkApp "install-with-secrets" system;
         "home-news" = mkHomeNewsApp system;

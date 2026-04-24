@@ -2,6 +2,7 @@
   ".config/niri/config.kdl".source = ./config/niri/config.kdl;
 
   ".config/calibre/gui.json".source = ./config/calibre/gui.json;
+  ".config/calibre/tweaks.json".source = ./config/calibre/tweaks.json;
   ".config/opencode/opencode.json".source = ./config/opencode/opencode.json;
   ".config/zed/settings.json".source = ./config/zed/settings.json;
 

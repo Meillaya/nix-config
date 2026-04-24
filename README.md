@@ -84,6 +84,12 @@ To read Home Manager news with this flake-based setup, use:
 nix run .#home-news
 ```
 
+To sync ignored local secrets from a private repo into `./secrets`, use:
+
+```bash
+NIX_SECRETS_REPO=git@github.com:Meillaya/nix-screts.git nix run .#sync-secrets
+```
+
 If you need to override the detected user or home directory on a machine:
 
 ```bash
