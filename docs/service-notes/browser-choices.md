@@ -3,6 +3,7 @@
 This repo now declares:
 
 - `brave`
+- `helium`
 
 ## Not yet declared from locked nixpkgs
 
@@ -10,12 +11,15 @@ The following requested browser packages were **not present** in the repo's
 currently locked nixpkgs input during migration:
 
 - `zen-browser`
-- `helium`
 
-That means they currently stay **host-managed** on this machine unless you later:
+That means `zen-browser` needed a separate flake source, while `helium` needed a
+local package overlay built from the official `imputnet/helium-linux` AppImage
+releases.
 
-1. add an overlay/package expression for them, or
-2. update/pin a nixpkgs input that contains them
+Only the following now remain host-managed unless you later add another source:
+
+1. `zen-browser` profile data
+2. `helium` profile data
 
 ## Why browser profiles are not committed
 

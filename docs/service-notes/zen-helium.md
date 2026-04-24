@@ -19,16 +19,16 @@ Source used:
 
 ## Helium
 
-Helium is **not** yet declaratively packaged in this repo.
+Helium is now declared through a local overlay package that wraps the official
+Linux AppImage release from:
 
-The official upstream repository documents Linux releases and Linux packaging,
-but there was no nixpkgs package or existing flake/package already present in
-this repo's locked inputs during migration.
+- `https://github.com/imputnet/helium-linux/releases`
 
-So Helium remains host-managed for now until we either:
+The package is pinned to the official upstream release artifacts for:
 
-1. package it in an overlay, or
-2. adopt a dedicated Helium Nix package source.
+- `x86_64-linux`
+- `aarch64-linux`
 
 Source used:
 - https://github.com/imputnet/helium
+- https://github.com/imputnet/helium-linux

@@ -41,9 +41,27 @@
     let
       user = "mei";
       secrets = ./secrets;
+      emacsOverlaySha256 = "11p1c1l04zrn8dd5w8zyzlv172z05dwi9avbckav4d5fk043m754";
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
+      sharedOverlays =
+        let
+          path = ./overlays;
+        in
+        with builtins;
+        map (n: import (path + ("/" + n)))
+          (filter
+            (n:
+              match ".*\\.nix" n != null ||
+              pathExists (path + ("/" + n + "/default.nix")))
+            (attrNames (readDir path)))
+        ++ [
+          (import (builtins.fetchTarball {
+            url = "https://github.com/dustinlyons/emacs-overlay/archive/refs/heads/master.tar.gz";
+            sha256 = emacsOverlaySha256;
+          }))
+        ];
       devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
         default = with pkgs; mkShell {
           nativeBuildInputs = with pkgs; [ bashInteractive git age age-plugin-yubikey ];
@@ -161,6 +179,7 @@ EOF
               allowInsecure = false;
               allowUnsupportedSystem = true;
             };
+            overlays = sharedOverlays;
           };
         in
         home-manager.lib.homeManagerConfiguration {

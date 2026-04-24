@@ -11,6 +11,7 @@ shared-packages ++ [
   fuzzel
   gimp
   ghostty
+  helium
   keepassxc
   libnotify
   mako
