@@ -7,6 +7,9 @@ let
   xdg_stateHome  = "${home}/.local/state"; in
 {
 
+  "${xdg_configHome}/niri/config.kdl".source = ../linux/config/niri/config.kdl;
+  "${xdg_configHome}/noctalia/settings.json".source = ../standalone-linux/config/noctalia/settings.json;
+
   "${xdg_configHome}/bspwm/bspwmrc" = {
     executable = true;
     text = ''

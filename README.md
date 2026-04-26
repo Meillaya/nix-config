@@ -12,6 +12,10 @@ Personal Nix config for:
 - Shell UX is aligned across `zsh`, `bash`, `fish`, and Readline-backed shells.
 - Package lookup now works through `nix run .#search-pkgs -- <query>` and installed `nixpkgs-search`.
 - Non-NixOS Linux now has a standalone Home Manager path for existing machines like Arch Linux with Niri.
+- Niri config is shared between NixOS and standalone Linux Home Manager.
+- Noctalia external monitor brightness is documented in
+  `docs/service-notes/noctalia-ddc-brightness.md`; standalone Linux installs
+  include the `setup-ddc-brightness` helper for DDC/CI I2C access.
 
 ## Search and add packages
 
@@ -45,6 +49,8 @@ nix --extra-experimental-features 'nix-command flakes' run .#build-switch
 ## NixOS
 
 This repo still includes bootstrap placeholders for Linux host values.
+The NixOS host enables Niri and links the shared `~/.config/niri/config.kdl`
+through Home Manager; BSPWM remains present as an alternate X11 session.
 
 To materialize them on a Linux machine:
 

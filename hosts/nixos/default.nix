@@ -6,6 +6,7 @@ let user = "mei";
   imports = [
     ../../modules/nixos/secrets.nix
     ../../modules/nixos/disk-config.nix
+    ../../modules/nixos/niri.nix
     ../../modules/shared
     agenix.nixosModules.default
   ];
@@ -25,6 +26,8 @@ let user = "mei";
     kernelPackages = pkgs.linuxPackages_latest;
     kernelModules = [ "uinput" ];
   };
+
+  hardware.i2c.enable = true;
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -263,6 +266,8 @@ let user = "mei";
       extraGroups = [
         "wheel" # Enable ‘sudo’ for the user.
         "docker"
+        "i2c"
+        "video"
       ];
       shell = pkgs.zsh;
       openssh.authorizedKeys.keys = keys;

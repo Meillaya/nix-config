@@ -17,6 +17,25 @@ shared-packages ++ [
   # Media and design tools
   fontconfig
 
+  # Wayland/Niri desktop
+  awww
+  brightnessctl
+  cliphist
+  ddcutil
+  fuzzel
+  kdePackages.polkit-kde-agent-1
+  mako
+  nautilus
+  niri
+  noctalia-shell
+  playerctl
+  quickshell
+  waybar
+  wl-clipboard
+  wlogout
+  wofi
+  xwayland-satellite
+
   # Productivity tools
 
   # Audio tools
@@ -53,6 +72,6 @@ shared-packages ++ [
 
   # Development tools
   firefox
-  
+
   # Music and entertainment
 ]
