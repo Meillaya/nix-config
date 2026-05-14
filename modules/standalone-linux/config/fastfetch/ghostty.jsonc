@@ -1,0 +1,200 @@
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "kitty",
+    "source": "~/.config/fastfetch/snoopy-mugiwara.png",
+    "width": 40,
+    "preserveAspectRatio": true,
+    "position": "left",
+    "padding": {
+      "top": 2,
+      "left": 2,
+      "right": 4
+    }
+  },
+  "display": {
+    "separator": " ➜  ",
+    "color": "white",
+    "percent": {
+      "type": 2
+    },
+    "key": {
+      "width": 20
+    }
+  },
+  "modules": [
+    "title",
+    "separator",
+    {
+      "type": "datetime",
+      "key": "󰃭  Date & Time",
+      "format": "{1}/{3}/{11} - {14}:{17}",
+      "keyColor": "cyan"
+    },
+    {
+      "type": "command",
+      "key": "󰖐  Current Weather",
+      "text": "curl -s 'wttr.in/YOUR_LOCATION?format=%t' | xargs", // Change YOUR_LOCATION to your city
+      "keyColor": "cyan"
+    },
+    "break",
+    {
+      "type": "os",
+      "key": "󰣇 Distro",
+      "keyColor": "blue"
+    },
+    {
+      "type": "kernel",
+      "key": " Kernel",
+      "keyColor": "blue"
+    },
+    {
+      "type": "de",
+      "key": " DE",
+      "keyColor": "blue"
+    },
+    {
+      "type": "uptime",
+      "key": "󱎫 Uptime",
+      "keyColor": "blue"
+    },
+    {
+      "type": "packages",
+      "key": "󰏖 Packages",
+      "keyColor": "blue"
+    },
+    "break",
+    {
+      "type": "cpu",
+      "key": " CPU",
+      "temp": true,
+      "keyColor": "yellow"
+    },
+    {
+      "type": "gpu",
+      "key": "󰢮 GPU",
+      "temp": true,
+      "keyColor": "yellow"
+    },
+    {
+      "type": "board",
+      "key": "󰢮 Motherboard",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "bios",
+      "key": "󰾲 BIOS",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "memory",
+      "key": "󰍛 RAM",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "swap",
+      "key": "󰾴 Swap",
+      "keyColor": "yellow"
+    },
+    {
+      "type": "command",
+      "key": "󱛟 Storage Devices",
+      "text": "lsblk -dno NAME,SIZE,MODEL | grep -v '^zram' | sed -E 's/[[:space:]]+/ /g' | sed ':a;N;$!ba;s/\\n/ | /g'",
+      "keyColor": "cyan"
+    },
+    "break",
+    {
+      "type": "disk",
+      "key": "󱛟 Disk Usage",
+      "folders": "",
+      "showRegular": true,
+      "showExternal": true,
+      "showHidden": false,
+      "showSubvolumes": false,
+      "showReadOnly": true,
+      "showUnknown": true,
+      "keyColor": "cyan"
+    },
+    "break",
+    {
+      "type": "display",
+      "key": "󰍹 Monitor",
+      "keyColor": "green"
+    },
+    {
+      "type": "wm",
+      "key": " WM",
+      "keyColor": "green"
+    },
+    {
+      "type": "theme",
+      "key": "󰉼 Theme",
+      "keyColor": "green"
+    },
+    {
+      "type": "font",
+      "key": " Font",
+      "keyColor": "green"
+    },
+    {
+      "type": "cursor",
+      "key": "󰆿 Cursor",
+      "keyColor": "green"
+    },
+    {
+      "type": "shell",
+      "key": "󱆃 Shell",
+      "keyColor": "green"
+    },
+    {
+      "type": "terminal",
+      "key": " Terminal",
+      "keyColor": "green"
+    },
+    {
+      "type": "terminalfont",
+      "key": " Font",
+      "keyColor": "green"
+    },
+    "break",
+    {
+      "type": "localip",
+      "key": "󰈀 Ethernet",
+      "showIpv4": true,
+      "keyColor": "white"
+    },
+    {
+      "type": "wifi",
+      "key": " WiFi",
+      "keyColor": "white"
+    },
+    {
+      "type": "bluetooth",
+      "key": " Bluetooth",
+      "keyColor": "white"
+    },
+    {
+      "type": "locale",
+      "key": "󰗊 Locale",
+      "keyColor": "white"
+    },
+    "break",
+    {
+      "type": "sound",
+      "key": "󱍚 Audio Device",
+      "keyColor": "red"
+    },
+    {
+      "type": "media",
+      "key": "󰝚 Listening To",
+      "format": "{3} ➜ {1}",
+      "keyColor": "red"
+    },
+    "break",
+    {
+      "type": "colors",
+      "key": " Colors",
+      "symbol": "circle"
+    }
+  ]
+}

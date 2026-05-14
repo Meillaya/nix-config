@@ -25,6 +25,8 @@ let
 
 in
 {
+  imports = [ ../linux/home-manager.nix ];
+
   home = {
     enableNixpkgsReleaseCheck = false;
     username = "${user}";

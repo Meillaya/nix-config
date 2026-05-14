@@ -297,6 +297,7 @@ let user = "mei";
     emacs-all-the-icons-fonts
     feather-font # from overlay
     jetbrains-mono
+    nerd-fonts.fira-code
     font-awesome
     noto-fonts
     noto-fonts-color-emoji

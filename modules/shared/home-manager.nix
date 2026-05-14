@@ -80,6 +80,21 @@ in
       shell() {
           nix-shell '<nixpkgs>' -A "$1"
       }
+
+      fastfetch() {
+          local arg
+          for arg in "$@"; do
+              case "$arg" in
+                  -c|--config|--config=*) command fastfetch "$@"; return ;;
+              esac
+          done
+
+          if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
+              command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+          else
+              command fastfetch "$@"
+          fi
+      }
     '';
   };
 
@@ -99,6 +114,21 @@ in
       '';
       shell.body = ''
         nix-shell '<nixpkgs>' -A $argv[1]
+      '';
+      fastfetch.body = ''
+        for arg in $argv
+          switch $arg
+            case -c --config '--config=*'
+              command fastfetch $argv
+              return
+          end
+        end
+
+        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty; and test -r "$HOME/.config/fastfetch/ghostty.jsonc"
+          command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" $argv
+        else
+          command fastfetch $argv
+        end
       '';
     };
     shellInit = ''
@@ -259,6 +289,21 @@ in
             nix-shell '<nixpkgs>' -A "$1"
         }
 
+        fastfetch() {
+            local arg
+            for arg in "$@"; do
+                case "$arg" in
+                    -c|--config|--config=*) command fastfetch "$@"; return ;;
+                esac
+            done
+
+            if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
+                command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+            else
+                command fastfetch "$@"
+            fi
+        }
+
         # pnpm is a javascript package manager
         alias pn=pnpm
         alias px=pnpx
@@ -308,6 +353,10 @@ in
       pull.rebase = true;
       rebase.autoStash = true;
     };
+  };
+
+  fastfetch = {
+    enable = true;
   };
 
   vim = {
@@ -430,7 +479,11 @@ in
       };
 
       cursor = {
-        style = "Underline";
+        style = {
+          # Garuda's Konsole profile uses CursorShape=2 (underline) and blinking.
+          shape = "Underline";
+          blinking = "On";
+        };
         vi_mode_style = "None";
         unfocused_hollow = true;
         thickness = 0.15;
@@ -466,23 +519,29 @@ in
       };
 
       scrolling = {
+        # Garuda's Konsole profile keeps scrollback; keep Alacritty's large buffer.
         history = 10000;
         multiplier = 3;
       };
 
       selection = {
-        semantic_escape_chars = ",│`|:\\\"' ()[]{}<>\\t";
+        semantic_escape_chars = '',│`|:"' ()[]{}<>'';
+        # Match Konsole's AutoCopySelectedText=true behavior.
         save_to_clipboard = true;
       };
 
       window = {
-        dynamic_padding = true;
         decorations = "full";
-        title = "Alacritty@CachyOS";
-        opacity = 0.8;
         decorations_theme_variant = "Dark";
+        dynamic_padding = true;
+        dynamic_title = true;
+        # Sweet.colorscheme from Garuda Dr460nized uses Blur=true and Opacity=0.65.
+        blur = true;
+        opacity = 0.65;
+        title = "fish - Alacritty";
         dimensions = {
-          columns = 100;
+          # Garuda.profile sets TerminalColumns=110.
+          columns = 110;
           lines = 30;
         };
         class = {
@@ -490,70 +549,114 @@ in
           general = "Alacritty";
         };
         padding = {
-          x = 24;
-          y = 24;
+          x = 14;
+          y = 10;
         };
       };
 
-      # Fix for shell path when launching from desktop
-      # When launching from desktop, $SHELL may point to /bin/zsh instead of
-      # the Nix-managed shell, causing environment issues
+      # Garuda.profile launches fish. Use the Nix store path so desktop launches
+      # do not depend on a distro-managed /usr/bin/fish.
       terminal.shell = {
-        program = "${pkgs.zsh}/bin/zsh";
+        program = "${pkgs.fish}/bin/fish";
+        args = [ "--login" ];
       };
 
       font = {
         normal = {
-          family = "monospace";
+          family = "FiraCode Nerd Font Mono";
           style = "Regular";
         };
         bold = {
-          family = "monospace";
+          family = "FiraCode Nerd Font Mono";
           style = "Bold";
         };
         italic = {
-          family = "monospace";
-          style = "Italic";
+          family = "FiraCode Nerd Font Mono";
+          style = "Regular";
         };
         bold_italic = {
-          family = "monospace";
-          style = "Bold Italic";
+          family = "FiraCode Nerd Font Mono";
+          style = "Bold";
         };
         size = lib.mkMerge [
           (lib.mkIf pkgs.stdenv.hostPlatform.isLinux 12)
           (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin 14)
         ];
+        offset = {
+          x = 0;
+          y = 1;
+        };
       };
-
 
       colors = {
         draw_bold_text_with_bright_colors = true;
 
+        # Garuda Dr460nized's Konsole profile selects the Sweet color scheme.
+        # Values below are converted directly from Sweet.colorscheme RGB entries.
         primary = {
-          background = "0x2E3440";
-          foreground = "0xD8DEE9";
+          background = "0x161925";
+          foreground = "0xc3c7d1";
+          dim_foreground = "0x5c6370";
+          bright_foreground = "0x828997";
+        };
+
+        cursor = {
+          text = "0x161925";
+          cursor = "0xff0000";
+        };
+
+        vi_mode_cursor = {
+          text = "0x161925";
+          cursor = "0xff0000";
+        };
+
+        selection = {
+          text = "0xffffff";
+          background = "0x1e92ff";
+        };
+
+        search = {
+          matches = {
+            foreground = "0x161925";
+            background = "0xf9dc5c";
+          };
+          focused_match = {
+            foreground = "0xffffff";
+            background = "0xc50ed2";
+          };
         };
 
         normal = {
-          black = "0x3B4252";
-          red = "0xBF616A";
-          green = "0xA3BE8C";
-          yellow = "0xEBCB8B";
-          blue = "0x81A1C1";
-          magenta = "0xB48EAD";
-          cyan = "0x88C0D0";
-          white = "0xE5E9F0";
+          black = "0x697388";
+          red = "0xed254e";
+          green = "0x71f79f";
+          yellow = "0xf9dc5c";
+          blue = "0x7cb7ff";
+          magenta = "0xc74ded";
+          cyan = "0x00c1e4";
+          white = "0xdcdfe4";
         };
 
         bright = {
-          black = "0x4C566A";
-          red = "0xBF616A";
-          green = "0xA3BE8C";
-          yellow = "0xEBCB8B";
-          blue = "0x81A1C1";
-          magenta = "0xB48EAD";
-          cyan = "0x8FBCBB";
-          white = "0xECEFF4";
+          black = "0x697388";
+          red = "0xed254e";
+          green = "0x71f79f";
+          yellow = "0xf9dc5c";
+          blue = "0x7cb7ff";
+          magenta = "0xc74ded";
+          cyan = "0x00c1e4";
+          white = "0xdcdfe4";
+        };
+
+        dim = {
+          black = "0x697388";
+          red = "0xed254e";
+          green = "0x71f79f";
+          yellow = "0xf9dc5c";
+          blue = "0x7cb7ff";
+          magenta = "0xc74ded";
+          cyan = "0x00c1e4";
+          white = "0xdcdfe4";
         };
       };
     };

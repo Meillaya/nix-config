@@ -24,12 +24,22 @@ shared-packages ++ [
   ddcutil
   fuzzel
   kdePackages.polkit-kde-agent-1
+
+  # KDE file manager, document viewer, and Sweet/Dr460nized Qt theming
+  kdePackages.ark
+  kdePackages.dolphin
+  kdePackages.dolphin-plugins
+  kdePackages.ffmpegthumbs
+  kdePackages.kio-admin
+  kdePackages.kio-extras
+  kdePackages.okular
+  kdePackages.qt6ct
+  kdePackages.qtstyleplugin-kvantum
+  libsForQt5.qt5ct
+  libsForQt5.qtstyleplugin-kvantum
   mako
-  nautilus
   niri
-  noctalia-shell
   playerctl
-  quickshell
   waybar
   wl-clipboard
   wlogout

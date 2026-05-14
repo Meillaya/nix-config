@@ -1,4 +1,4 @@
-{ pkgs, zen-browser, ... }:
+{ pkgs, zen-browser, noctalia, ... }:
 
 {
   programs = {
@@ -25,20 +25,34 @@
     extraPortals = with pkgs; [
       xdg-desktop-portal-gnome
       xdg-desktop-portal-gtk
+      kdePackages.xdg-desktop-portal-kde
     ];
-    config.common.default = [
-      "gnome"
-      "gtk"
-    ];
+    config.common = {
+      default = [
+        "gnome"
+        "gtk"
+      ];
+      "org.freedesktop.impl.portal.FileChooser" = [
+        "kde"
+        "gtk"
+      ];
+      "org.freedesktop.impl.portal.AppChooser" = [
+        "kde"
+        "gtk"
+      ];
+      "org.freedesktop.impl.portal.Settings" = [
+        "kde"
+        "gtk"
+      ];
+    };
   };
 
   environment.systemPackages = with pkgs; [
     awww
     kdePackages.polkit-kde-agent-1
     niri
-    noctalia-shell
-    quickshell
+    noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
     xwayland-satellite
-    zen-browser.packages.${pkgs.system}.default
+    zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

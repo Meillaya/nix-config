@@ -23,4 +23,6 @@
   # ".config/emacs/config.org" = {
   #   text = builtins.readFile ../shared/config/emacs/config.org;
   # };
+
+  ".config/fastfetch/config.jsonc".source = ../shared/config/fastfetch/config.jsonc;
 }

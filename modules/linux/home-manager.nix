@@ -1,0 +1,686 @@
+{ config, pkgs, lib, ... }:
+
+let
+  garudaDr460nized = pkgs.fetchzip {
+    url = "https://gitlab.com/garuda-linux/themes-and-settings/settings/garuda-dr460nized/-/archive/35eb3abbc534f4046257c43ad9e05a9c010235cf/garuda-dr460nized-35eb3abbc534f4046257c43ad9e05a9c010235cf.tar.gz";
+    hash = "sha256-4kRU4h3WRuVjixhK5B/x19bIxtHc9vcfbv5QPjFMBfc=";
+  };
+
+  beautylineSrc = pkgs.fetchzip {
+    url = "https://gitlab.com/garuda-linux/themes-and-settings/artwork/beautyline/-/archive/3a501dcc1a0a1bb2281a62e5507e5843f8bea531/beautyline-3a501dcc1a0a1bb2281a62e5507e5843f8bea531.tar.gz";
+    hash = "sha256-KQ7t+vNyC76LateNE5LkN63X31HLCu9i75ybnC0W6rI=";
+  };
+
+  candyIconsSrc = pkgs.fetchzip {
+    url = "https://github.com/EliverLara/candy-icons/archive/83512fbcadcb7e1015ebbe1729a1894946b021be.tar.gz";
+    hash = "sha256-TzovzmfrUuaSrtpKCQxyXcih7cKSBhBtMpZLVwY/ScA=";
+  };
+
+  patchedDr460nizedKvantum = pkgs.runCommand "dr460nized-kvantum-white-text" { } ''
+    cp -R ${garudaDr460nized}/usr/share/Kvantum/Dr460nized "$out"
+    chmod -R u+w "$out"
+    ${pkgs.perl}/bin/perl -0pi -e '
+      s/transparent_dolphin_view=true/transparent_dolphin_view=false/g;
+      s/opaque_colors=false/opaque_colors=true/g;
+      s/text\.color=#aaaaac/text.color=#ffffff/g;
+      s/window\.text\.color=#aaaaac/window.text.color=#ffffff/g;
+      s/button\.text\.color=#aaaaac/button.text.color=#ffffff/g;
+      s/disabled\.text\.color=#aaaaac78/disabled.text.color=#c8c8d0/g;
+      s/tooltip\.text\.color=#aaaaac/tooltip.text.color=#ffffff/g;
+      s/progress\.indicator\.text\.color=#aaaaac/progress.indicator.text.color=#ffffff/g;
+      s/text\.normal\.color=#aaaaac/text.normal.color=#ffffff/g;
+      s/text\.focus\.color=#c8c8ca/text.focus.color=#ffffff/g;
+      s/text\.press\.color=#d2d2d4/text.press.color=#ffffff/g;
+      s/text\.toggle\.color=#(?:aaaaac|d2d2d4)/text.toggle.color=#ffffff/g;
+    ' "$out/Dr460nized.kvconfig"
+  '';
+
+  sweetColorScheme = pkgs.runCommand "Sweet.colors" { } ''
+    cp ${garudaDr460nized}/usr/share/plasma/desktoptheme/Dr460nized/colors "$out"
+    chmod u+w "$out"
+    ${pkgs.perl}/bin/perl -0pi -e '
+      s/ForegroundNormal=[^\n]*/ForegroundNormal=255,255,255/g;
+      s/ForegroundInactive=[^\n]*/ForegroundInactive=205,205,210/g;
+    ' "$out"
+  '';
+
+  beautylineTheme = pkgs.runCommand "BeautyLine-icons" { } ''
+    mkdir -p "$out"
+    cp -R \
+      ${beautylineSrc}/actions \
+      ${beautylineSrc}/apps \
+      ${beautylineSrc}/devices \
+      ${beautylineSrc}/index.theme \
+      ${beautylineSrc}/mimetypes \
+      ${beautylineSrc}/places \
+      ${beautylineSrc}/preferences \
+      ${beautylineSrc}/status \
+      "$out/"
+  '';
+
+  dolphinEnv = "QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma-";
+  dolphinBin = "${pkgs.kdePackages.dolphin}/bin/dolphin";
+  okularBin = "${pkgs.kdePackages.okular}/bin/okular";
+  arkBin = "${pkgs.kdePackages.ark}/bin/ark";
+
+  archiveMimeTypes = [
+    "application/zip"
+    "application/x-7z-compressed"
+    "application/vnd.rar"
+    "application/x-rar"
+    "application/x-tar"
+    "application/x-compressed-tar"
+    "application/x-bzip-compressed-tar"
+    "application/x-xz-compressed-tar"
+    "application/x-zstd-compressed-tar"
+    "application/gzip"
+    "application/x-bzip"
+    "application/x-xz"
+    "application/zstd"
+  ];
+
+  arkDesktopMimeTypes = archiveMimeTypes ++ [
+    "application/x-archive"
+    "application/x-arj"
+    "application/x-bzip2"
+    "application/x-cbr"
+    "application/x-cbz"
+    "application/x-cd-image"
+    "application/x-compress"
+    "application/x-cpio"
+    "application/x-deb"
+    "application/x-gzip"
+    "application/x-java-archive"
+    "application/x-lrzip"
+    "application/x-lz4"
+    "application/x-lzip"
+    "application/x-lzma"
+    "application/x-rpm"
+    "application/x-source-rpm"
+    "application/x-tzo"
+    "application/x-xar"
+    "application/x-zoo"
+    "application/x-zstd"
+  ];
+
+  mimeDefaults = {
+    "inode/directory" = "org.kde.dolphin.desktop";
+    "application/x-directory" = "org.kde.dolphin.desktop";
+    "application/x-gnome-saved-search" = "org.kde.dolphin.desktop";
+    "x-scheme-handler/file" = "org.kde.dolphin.desktop";
+
+    "application/zip" = "org.kde.ark.desktop";
+    "application/x-7z-compressed" = "org.kde.ark.desktop";
+    "application/vnd.rar" = "org.kde.ark.desktop";
+    "application/x-rar" = "org.kde.ark.desktop";
+    "application/x-tar" = "org.kde.ark.desktop";
+    "application/x-compressed-tar" = "org.kde.ark.desktop";
+    "application/x-bzip-compressed-tar" = "org.kde.ark.desktop";
+    "application/x-xz-compressed-tar" = "org.kde.ark.desktop";
+    "application/x-zstd-compressed-tar" = "org.kde.ark.desktop";
+    "application/gzip" = "org.kde.ark.desktop";
+    "application/x-bzip" = "org.kde.ark.desktop";
+    "application/x-xz" = "org.kde.ark.desktop";
+    "application/zstd" = "org.kde.ark.desktop";
+
+    "application/pdf" = "okularApplication_pdf.desktop";
+    "application/x-gzpdf" = "okularApplication_pdf.desktop";
+    "application/x-bzpdf" = "okularApplication_pdf.desktop";
+    "text/markdown" = "okularApplication_md.desktop";
+    "application/epub+zip" = "okularApplication_epub.desktop";
+    "application/vnd.comicbook+zip" = "okularApplication_comicbook.desktop";
+    "application/vnd.comicbook-rar" = "okularApplication_comicbook.desktop";
+    "image/png" = "okularApplication_kimgio.desktop";
+    "image/jpeg" = "okularApplication_kimgio.desktop";
+    "image/webp" = "okularApplication_kimgio.desktop";
+    "image/gif" = "okularApplication_kimgio.desktop";
+    "image/tiff" = "okularApplication_tiff.desktop";
+
+    "text/plain" = "sublime_text.desktop";
+    "video/mp4" = "mpv.desktop";
+    "video/x-matroska" = "mpv.desktop";
+    "video/webm" = "mpv.desktop";
+  };
+
+  mimeAssociations = {
+    "inode/directory" = [ "org.kde.dolphin.desktop" "org.gnome.Nautilus.desktop" "thunar.desktop" "yazi.desktop" ];
+    "application/x-directory" = [ "org.kde.dolphin.desktop" ];
+    "application/x-gnome-saved-search" = [ "org.kde.dolphin.desktop" ];
+    "x-scheme-handler/file" = [ "org.kde.dolphin.desktop" ];
+
+    "application/zip" = [ "org.kde.ark.desktop" ];
+    "application/x-7z-compressed" = [ "org.kde.ark.desktop" ];
+    "application/vnd.rar" = [ "org.kde.ark.desktop" ];
+    "application/x-rar" = [ "org.kde.ark.desktop" ];
+    "application/x-tar" = [ "org.kde.ark.desktop" ];
+    "application/x-compressed-tar" = [ "org.kde.ark.desktop" ];
+    "application/x-bzip-compressed-tar" = [ "org.kde.ark.desktop" ];
+    "application/x-xz-compressed-tar" = [ "org.kde.ark.desktop" ];
+    "application/x-zstd-compressed-tar" = [ "org.kde.ark.desktop" ];
+    "application/gzip" = [ "org.kde.ark.desktop" ];
+    "application/x-bzip" = [ "org.kde.ark.desktop" ];
+    "application/x-xz" = [ "org.kde.ark.desktop" ];
+    "application/zstd" = [ "org.kde.ark.desktop" ];
+
+    "application/pdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" "zen.desktop" "brave-browser.desktop" ];
+    "application/x-gzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
+    "application/x-bzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
+    "text/markdown" = [ "okularApplication_md.desktop" "sublime_text.desktop" "dev.zed.Zed.desktop" "micro.desktop" ];
+    "application/epub+zip" = [ "okularApplication_epub.desktop" "calibre-ebook-viewer.desktop" "calibre-gui.desktop" ];
+    "application/vnd.comicbook+zip" = [ "okularApplication_comicbook.desktop" ];
+    "application/vnd.comicbook-rar" = [ "okularApplication_comicbook.desktop" ];
+    "image/png" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
+    "image/jpeg" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
+    "image/webp" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
+    "image/gif" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
+    "image/tiff" = [ "okularApplication_tiff.desktop" "okularApplication_kimgio.desktop" "gimp.desktop" ];
+
+    "text/plain" = [ "sublime_text.desktop" "dev.zed.Zed.desktop" "micro.desktop" "okularApplication_txt.desktop" ];
+    "video/mp4" = [ "mpv.desktop" "brave-browser.desktop" ];
+    "video/x-matroska" = [ "mpv.desktop" ];
+    "video/webm" = [ "mpv.desktop" "brave-browser.desktop" ];
+  };
+
+  mimeAppsText = ''
+    [Default Applications]
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (mime: desktop: "${mime}=${desktop}") mimeDefaults)}
+
+    [Added Associations]
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (mime: desktops: "${mime}=${lib.concatStringsSep ";" desktops};") mimeAssociations)}
+  '';
+
+  okularDesktop = mimeTypes: ''
+    [Desktop Entry]
+    Type=Application
+    Name=Okular
+    GenericName=Document Viewer
+    Exec=env ${dolphinEnv} ${okularBin} %U
+    Icon=okular
+    Terminal=false
+    NoDisplay=true
+    Categories=Qt;KDE;Graphics;Office;Viewer;
+    MimeType=${lib.concatStringsSep ";" mimeTypes};
+  '';
+
+  dolphinDesktop = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Dolphin
+    GenericName=File Manager
+    Comment=Manage your files
+    Exec=env ${dolphinEnv} ${dolphinBin} %u
+    Icon=org.kde.dolphin
+    Terminal=false
+    Categories=Qt;KDE;System;FileTools;FileManager;
+    MimeType=inode/directory;
+    InitialPreference=10
+  '';
+
+  arkDesktop = ''
+    [Desktop Entry]
+    Type=Application
+    Name=Ark
+    GenericName=Archive Manager
+    Comment=Work with file archives
+    Exec=env ${dolphinEnv} ${arkBin} %U
+    Icon=ark
+    Terminal=false
+    Categories=Qt;KDE;Utility;Archiving;Compression;
+    MimeType=${lib.concatStringsSep ";" arkDesktopMimeTypes};
+  '';
+
+  obsStudioDesktop = ''
+    [Desktop Entry]
+    Version=1.0
+    Type=Application
+    Name=OBS Studio
+    GenericName=Streaming/Recording Software
+    Comment=Free and Open Source Streaming/Recording Software
+    Exec=env QT_QPA_PLATFORM=xcb obs
+    Icon=com.obsproject.Studio
+    Terminal=false
+    Categories=AudioVideo;Recorder;
+    StartupNotify=true
+    StartupWMClass=obs
+  '';
+
+  applicationsMenu = ''
+    <!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN" "http://www.freedesktop.org/standards/menu-spec/1.0/menu.dtd">
+    <Menu>
+      <Name>Applications</Name>
+      <DefaultAppDirs/>
+      <DefaultDirectoryDirs/>
+      <DefaultMergeDirs/>
+      <Include>
+        <All/>
+      </Include>
+    </Menu>
+  '';
+
+  portalConfig = ''
+    [preferred]
+    default=gnome;gtk;
+    org.freedesktop.impl.portal.ScreenCast=gnome;
+    org.freedesktop.impl.portal.RemoteDesktop=gnome;
+    org.freedesktop.impl.portal.Screenshot=gnome;
+    org.freedesktop.impl.portal.FileChooser=kde-niri;gtk;
+    org.freedesktop.impl.portal.AppChooser=kde-niri;gtk;
+    org.freedesktop.impl.portal.Settings=kde-niri;gtk;
+    org.freedesktop.impl.portal.Access=gtk;
+    org.freedesktop.impl.portal.Notification=gtk;
+    org.freedesktop.impl.portal.Secret=gnome-keyring;
+  '';
+
+  kdeNiriPortal = ''
+    [portal]
+    DBusName=org.freedesktop.impl.portal.desktop.kde
+    Interfaces=org.freedesktop.impl.portal.FileChooser;org.freedesktop.impl.portal.AppChooser;org.freedesktop.impl.portal.Settings
+    UseIn=niri
+  '';
+
+  gtkSettings = ''
+    [Settings]
+    gtk-theme-name=Sweet-Dark
+    gtk-icon-theme-name=BeautyLine
+    gtk-font-name=Fira Sans 10
+    gtk-cursor-theme-name=Sweet-cursors
+    gtk-application-prefer-dark-theme=true
+  '';
+
+  gtkFileChooserSettings = ''
+    [Filechooser Settings]
+    LocationMode=path-bar
+    ShowHidden=false
+    ShowSizeColumn=true
+    GeometryWidth=1100
+    GeometryHeight=720
+    SortColumn=name
+    SortOrder=ascending
+    StartupMode=cwd
+  '';
+
+  serviceMenu = ''
+    [Desktop Entry]
+    Type=Service
+    Name=Dr460nized Dolphin Actions
+    ServiceTypes=KonqPopupMenu/Plugin
+    X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+    MimeType=inode/directory;
+    Actions=OpenDr460nizedDolphin;OpenAdminDolphin;CopyPath;
+    X-KDE-Priority=TopLevel
+
+    [Desktop Action OpenDr460nizedDolphin]
+    Name=Open in Dr460nized Dolphin
+    Icon=org.kde.dolphin
+    Exec=env ${dolphinEnv} ${dolphinBin} %U
+
+    [Desktop Action OpenAdminDolphin]
+    Name=Open as Administrator
+    Icon=system-file-manager
+    Exec=${dolphinBin} --admin %U
+
+    [Desktop Action CopyPath]
+    Name=Copy Path
+    Icon=edit-copy
+    Exec=${config.home.homeDirectory}/.local/bin/omx-copy-path-to-clipboard %f
+  '';
+
+  arkServiceMenu = ''
+    [Desktop Entry]
+    Type=Service
+    Name=Ark Archive Actions
+    ServiceTypes=KonqPopupMenu/Plugin
+    X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+    MimeType=all/allfiles;inode/directory;${lib.concatStringsSep ";" archiveMimeTypes};
+    Actions=CompressWithArk;CompressZipWithArk;ExtractHere;ExtractToSubfolder;
+    X-KDE-Priority=TopLevel
+    X-KDE-Submenu=Archive
+
+    [Desktop Action CompressWithArk]
+    Name=Compress...
+    Icon=ark
+    Exec=${arkBin} --add --changetofirstpath --dialog %F
+
+    [Desktop Action CompressZipWithArk]
+    Name=Compress to ZIP Here
+    Icon=ark
+    Exec=${arkBin} --batch --add --changetofirstpath --autofilename zip %F
+
+    [Desktop Action ExtractHere]
+    Name=Extract Here
+    Icon=archive-extract
+    Exec=${arkBin} --batch --destination %d %F
+
+    [Desktop Action ExtractToSubfolder]
+    Name=Extract to Subfolder
+    Icon=archive-extract
+    Exec=${arkBin} --batch --autodestination --autosubfolder %F
+  '';
+in
+{
+  home.packages = with pkgs; [
+    sweet
+    kdePackages.xdg-desktop-portal-kde
+    xdg-desktop-portal-gnome
+    xdg-desktop-portal-gtk
+  ];
+
+  home.sessionVariables = {
+    QT_STYLE_OVERRIDE = "kvantum";
+    QT_QUICK_CONTROLS_STYLE = "org.kde.desktop";
+    XDG_MENU_PREFIX = "plasma-";
+    GTK_THEME = lib.mkForce "Sweet-Dark";
+    GTK_USE_PORTAL = "1";
+  };
+
+  xdg = {
+    enable = true;
+
+    mimeApps = {
+      enable = true;
+      defaultApplications = mimeDefaults;
+      associations.added = mimeAssociations;
+    };
+
+    configFile = {
+      "mimeapps.list".force = true;
+      "menus/applications.menu" = {
+        text = applicationsMenu;
+        force = true;
+      };
+      "xdg-desktop-portal/niri-portals.conf" = {
+        text = portalConfig;
+        force = true;
+      };
+      "xdg-desktop-portal/portals.conf" = {
+        text = portalConfig;
+        force = true;
+      };
+      "gtk-3.0/settings.ini" = {
+        text = gtkSettings;
+        force = true;
+      };
+      "gtk-3.0/gtkfilechooser.ini" = {
+        text = gtkFileChooserSettings;
+        force = true;
+      };
+      "gtk-4.0/settings.ini" = {
+        text = gtkSettings;
+        force = true;
+      };
+
+      "Kvantum/Dr460nized" = {
+        source = patchedDr460nizedKvantum;
+        force = true;
+      };
+      "Kvantum/kvantum.kvconfig" = {
+        text = ''
+          [General]
+          theme=Dr460nized
+        '';
+        force = true;
+      };
+      "systemd/user/xdg-desktop-portal-gnome.service" = {
+        source = "${pkgs.xdg-desktop-portal-gnome}/share/systemd/user/xdg-desktop-portal-gnome.service";
+        force = true;
+      };
+    };
+
+    dataFile = {
+      "applications/mimeapps.list" = {
+        text = mimeAppsText;
+        force = true;
+      };
+      "applications/org.kde.dolphin.desktop" = {
+        text = dolphinDesktop;
+        force = true;
+      };
+      "applications/org.kde.ark.desktop" = {
+        text = arkDesktop;
+        force = true;
+      };
+      "applications/com.obsproject.Studio.desktop" = {
+        text = obsStudioDesktop;
+        force = true;
+      };
+      "xdg-desktop-portal/portals/kde-niri.portal" = {
+        text = kdeNiriPortal;
+        force = true;
+      };
+      "applications/org.kde.okular.desktop" = {
+        text = okularDesktop [ "application/vnd.kde.okular-archive" ];
+        force = true;
+      };
+      "applications/okularApplication_pdf.desktop" = {
+        text = okularDesktop [ "application/pdf" "application/x-gzpdf" "application/x-bzpdf" "application/x-wwf" ];
+        force = true;
+      };
+      "applications/okularApplication_md.desktop" = {
+        text = okularDesktop [ "text/markdown" ];
+        force = true;
+      };
+      "applications/okularApplication_txt.desktop" = {
+        text = okularDesktop [ "text/plain" ];
+        force = true;
+      };
+      "applications/okularApplication_kimgio.desktop" = {
+        text = okularDesktop [ "image/bmp" "image/gif" "image/jpeg" "image/png" "image/webp" "image/tiff" "image/avif" "image/heif" "image/jxl" ];
+        force = true;
+      };
+      "applications/okularApplication_tiff.desktop" = {
+        text = okularDesktop [ "image/tiff" ];
+        force = true;
+      };
+      "applications/okularApplication_epub.desktop" = {
+        text = okularDesktop [ "application/epub+zip" ];
+        force = true;
+      };
+      "applications/okularApplication_comicbook.desktop" = {
+        text = okularDesktop [ "application/vnd.comicbook+zip" "application/vnd.comicbook-rar" ];
+        force = true;
+      };
+
+      "dbus-1/services/org.freedesktop.FileManager1.service" = {
+        text = ''
+          [D-BUS Service]
+          Name=org.freedesktop.FileManager1
+          Exec=env ${dolphinEnv} ${dolphinBin} --daemon
+        '';
+        force = true;
+      };
+      "kio/servicemenus/dolphin-dr460nized-actions.desktop" = {
+        text = serviceMenu;
+        force = true;
+      };
+      "kio/servicemenus/ark-compress-extract.desktop" = {
+        text = arkServiceMenu;
+        force = true;
+      };
+
+      "color-schemes/Sweet.colors" = {
+        source = sweetColorScheme;
+        force = true;
+      };
+      "icons/BeautyLine" = {
+        source = beautylineTheme;
+        force = true;
+      };
+      "icons/candy-icons" = {
+        source = candyIconsSrc;
+        force = true;
+      };
+      "themes/Sweet-Dark" = {
+        source = "${pkgs.sweet}/share/themes/Sweet-Dark";
+        force = true;
+      };
+      "plasma/desktoptheme/Dr460nized" = {
+        source = "${garudaDr460nized}/usr/share/plasma/desktoptheme/Dr460nized";
+        force = true;
+      };
+      "plasma/desktoptheme/Dr460nized-Candy" = {
+        source = "${garudaDr460nized}/usr/share/plasma/desktoptheme/Dr460nized-Candy";
+        force = true;
+      };
+      "plasma/look-and-feel/Dr460nized" = {
+        source = "${garudaDr460nized}/usr/share/plasma/look-and-feel/Dr460nized";
+        force = true;
+      };
+      "aurorae/themes/Sweet-Dark" = {
+        source = "${garudaDr460nized}/usr/share/aurorae/themes/Sweet-Dark";
+        force = true;
+      };
+      "wallpapers/Malefor" = {
+        source = "${garudaDr460nized}/usr/share/wallpapers/Malefor";
+        force = true;
+      };
+    };
+  };
+
+  home.file.".local/bin/omx-copy-path-to-clipboard" = {
+    force = true;
+    executable = true;
+    text = ''
+      #!/bin/sh
+      set -eu
+      path=''${1:-}
+      [ -n "$path" ] || exit 0
+      if command -v wl-copy >/dev/null 2>&1; then
+        printf '%s' "$path" | wl-copy
+      elif command -v xclip >/dev/null 2>&1; then
+        printf '%s' "$path" | xclip -selection clipboard
+      elif command -v xsel >/dev/null 2>&1; then
+        printf '%s' "$path" | xsel --clipboard --input
+      else
+        exit 127
+      fi
+    '';
+  };
+
+  home.file.".local/bin/obs" = {
+    force = true;
+    executable = true;
+    text = ''
+      #!/bin/sh
+      set -eu
+
+      self="$(readlink -f "$0" 2>/dev/null || printf '%s\n' "$0")"
+      obs_bin=
+
+      old_ifs=$IFS
+      IFS=:
+      for dir in $PATH; do
+        candidate="$dir/obs"
+        candidate_real="$(readlink -f "$candidate" 2>/dev/null || printf '%s\n' "$candidate")"
+        if [ -x "$candidate" ] && [ "$candidate_real" != "$self" ]; then
+          obs_bin=$candidate
+          break
+        fi
+      done
+      IFS=$old_ifs
+
+      if [ -z "$obs_bin" ]; then
+        echo "obs wrapper: could not find the real OBS executable" >&2
+        exit 127
+      fi
+
+      # OBS 32.1.2 with Qt 6.11 crashes under native Wayland/niri while
+      # showing its main window.  XCB launches reliably through Xwayland.
+      exec env QT_QPA_PLATFORM="''${OBS_QPA_PLATFORM:-xcb}" "$obs_bin" "$@"
+    '';
+  };
+
+  home.activation.configureDolphinSweet = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    export QT_STYLE_OVERRIDE=kvantum
+    export QT_QUICK_CONTROLS_STYLE=org.kde.desktop
+    export XDG_MENU_PREFIX=plasma-
+    export GTK_THEME=Sweet-Dark
+    export GTK_USE_PORTAL=1
+
+    kwrite=${pkgs.kdePackages.kconfig}/bin/kwriteconfig6
+
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key ColorScheme Sweet
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key fixed 'FiraCode Nerd Font Mono,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1'
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key font 'Fira Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1'
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key menuFont 'Fira Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1'
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key smallestReadableFont 'Fira Sans,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1'
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group General --key toolBarFont 'Fira Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1'
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group KDE --key LookAndFeelPackage Dr460nized
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group KDE --key SingleClick true
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group KDE --key widgetStyle kvantum
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group KDE --key contrast 4
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group Icons --key Theme BeautyLine
+    $DRY_RUN_CMD "$kwrite" --file kdeglobals --group WM --key activeFont 'Fira Sans,10,-1,5,75,0,0,0,0,0,Bold'
+
+    $DRY_RUN_CMD "$kwrite" --file okularrc --group UiSettings --key ColorScheme Sweet
+    $DRY_RUN_CMD "$kwrite" --file okularrc --group General --key ShowSidebar true
+    $DRY_RUN_CMD "$kwrite" --file okularrc --group General --key LockSidebar true
+
+    # Keep Dolphin's view state user-owned.  Dolphin stores view mode, hidden
+    # files, previews, sorting, and per-folder/global view properties in
+    # dolphinrc and ~/.local/share/dolphin/view_properties.  Do not rewrite
+    # those here; otherwise Home Manager activations reset interactive Dolphin
+    # choices between sessions.
+    $DRY_RUN_CMD mkdir -p "$HOME/.config/qt5ct" "$HOME/.config/qt6ct"
+
+    # qt5ct stores some settings as Qt-serialized @Variant/@ByteArray values.
+    # Stale values may contain short \x escapes that KConfig warns about every
+    # time kwriteconfig6 rewrites this file. They are UI-local/volatile, so
+    # drop them before writing the declarative settings below.
+    if [ -f "$HOME/.config/qt5ct/qt5ct.conf" ]; then
+      $DRY_RUN_CMD ${pkgs.perl}/bin/perl -0pi -e 's/^\[Fonts\]\n(?:.*\n)*?(?=^\[|\z)//mg; s/^\[SettingsWindow\]\n(?:.*\n)*?(?=^\[|\z)//mg' "$HOME/.config/qt5ct/qt5ct.conf"
+    fi
+
+    $DRY_RUN_CMD "$kwrite" --file qt5ct/qt5ct.conf --group Appearance --key style kvantum
+    $DRY_RUN_CMD "$kwrite" --file qt5ct/qt5ct.conf --group Appearance --key icon_theme BeautyLine
+    $DRY_RUN_CMD "$kwrite" --file qt5ct/qt5ct.conf --group Interface --key activate_item_on_single_click 1
+    $DRY_RUN_CMD "$kwrite" --file qt5ct/qt5ct.conf --group Interface --key dialog_buttons_have_icons 1
+    $DRY_RUN_CMD "$kwrite" --file qt5ct/qt5ct.conf --group Interface --key menus_have_icons true
+    $DRY_RUN_CMD "$kwrite" --file qt6ct/qt6ct.conf --group Appearance --key style kvantum
+    $DRY_RUN_CMD "$kwrite" --file qt6ct/qt6ct.conf --group Appearance --key icon_theme BeautyLine
+    $DRY_RUN_CMD "$kwrite" --file qt6ct/qt6ct.conf --group Interface --key activate_item_on_single_click 1
+    $DRY_RUN_CMD "$kwrite" --file qt6ct/qt6ct.conf --group Interface --key dialog_buttons_have_icons 1
+    $DRY_RUN_CMD "$kwrite" --file qt6ct/qt6ct.conf --group Interface --key menus_have_icons true
+
+    $DRY_RUN_CMD ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface gtk-theme Sweet-Dark 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface icon-theme BeautyLine 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.glib}/bin/gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.python3}/bin/python3 - <<'PY'
+    from pathlib import Path
+
+    prefs = {
+        'widget.use-xdg-desktop-portal.file-picker': 1,
+        'widget.use-xdg-desktop-portal.mime-handler': 1,
+        'widget.use-xdg-desktop-portal.open-uri': 1,
+    }
+
+    home = Path.home()
+    profiles = []
+    for root in [home / ".zen", home / ".mozilla" / "firefox"]:
+        if root.exists():
+            profiles.extend({p.parent for p in root.glob("*/prefs.js")})
+
+    for profile in profiles:
+        user_js = profile / "user.js"
+        existing = user_js.read_text() if user_js.exists() else ""
+        lines = [
+            line for line in existing.splitlines()
+            if not any(f'"{key}"' in line for key in prefs)
+        ]
+        if lines and lines[-1].strip():
+            lines.append("")
+        lines.append("// Managed by Home Manager: use themed xdg-desktop-portal file dialogs.")
+        for key, value in prefs.items():
+            lines.append(f'user_pref("{key}", {value});')
+        user_js.write_text("\n".join(lines) + "\n")
+    PY
+    if [ -f "$HOME/.local/share/xdg-desktop-portal/portals/kde.portal" ] && [ ! -L "$HOME/.local/share/xdg-desktop-portal/portals/kde.portal" ]; then
+      $DRY_RUN_CMD rm "$HOME/.local/share/xdg-desktop-portal/portals/kde.portal"
+    fi
+    $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user import-environment QT_STYLE_OVERRIDE QT_QUICK_CONTROLS_STYLE XDG_MENU_PREFIX GTK_THEME GTK_USE_PORTAL 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd QT_STYLE_OVERRIDE QT_QUICK_CONTROLS_STYLE XDG_MENU_PREFIX GTK_THEME GTK_USE_PORTAL 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.desktop-file-utils}/bin/update-desktop-database "$HOME/.local/share/applications" >/dev/null 2>&1 || true
+    $DRY_RUN_CMD env XDG_MENU_PREFIX=plasma- ${pkgs.kdePackages.kservice}/bin/kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
+    $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user daemon-reload 2>/dev/null || true
+    $DRY_RUN_CMD ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal.service xdg-desktop-portal-gnome.service xdg-desktop-portal-kde.service xdg-desktop-portal-gtk.service 2>/dev/null || true
+  '';
+}

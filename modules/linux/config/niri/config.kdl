@@ -42,10 +42,10 @@ binds {
 
     // ─── Launchers ───
     MOD+RETURN hotkey-overlay-title="Open Terminal: Alacritty" { spawn-sh "alacritty"; }
-    MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "qs -c noctalia-shell ipc call launcher toggle"; }
+    MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "noctalia-shell ipc call launcher toggle"; }
     MOD+B hotkey-overlay-title="Open Browser: Zen" { spawn-sh "zen"; }
-    MOD+E hotkey-overlay-title="Open Files: Nautilus" { spawn-sh "nautilus"; }
-    MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "qs -c noctalia-shell ipc call lockScreen lock"; }
+    MOD+E hotkey-overlay-title="Open Files: Dolphin" { spawn-sh "env QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma- GTK_THEME=Sweet-Dark GTK_USE_PORTAL=1 dolphin"; }
+    MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "noctalia-shell ipc call lockScreen lock"; }
 
     // ─── Media / Audio ───
     XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
@@ -175,11 +175,11 @@ binds {
 }
 
 // ────────────── Startup / Misc ──────────────
-spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ]; then export DISPLAY=:0; fi; dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR PATH"
+spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ]; then export DISPLAY=:0; fi; export QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma- GTK_THEME=Sweet-Dark GTK_USE_PORTAL=1; dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_RUNTIME_DIR PATH QT_STYLE_OVERRIDE QT_QUICK_CONTROLS_STYLE XDG_MENU_PREFIX GTK_THEME GTK_USE_PORTAL"
 spawn-sh-at-startup "if command -v polkit-kde-authentication-agent-1 >/dev/null 2>&1; then polkit-kde-authentication-agent-1 & elif [ -x /usr/lib/polkit-kde-authentication-agent-1 ]; then /usr/lib/polkit-kde-authentication-agent-1 & fi"
 spawn-sh-at-startup "xwayland-satellite"
 spawn-sh-at-startup "if command -v awww-daemon >/dev/null 2>&1; then awww-daemon; elif command -v swww-daemon >/dev/null 2>&1; then swww-daemon; fi"
-spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ]; then export DISPLAY=:0; fi; exec qs -c noctalia-shell"
+spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ]; then export DISPLAY=:0; fi; exec noctalia-shell"
 
 prefer-no-csd
 screenshot-path null
@@ -189,23 +189,10 @@ cursor {
     hide-after-inactive-ms 1500
 }
 
-overview {
-    zoom 0.28
-    backdrop-color "#120d16"
-
-    workspace-shadow {
-        softness 90
-        spread 24
-        offset x=0 y=28
-        color "#12081288"
-    }
-}
-
 // ────────────── Layout ──────────────
 layout {
     gaps 18
-    center-focused-column "on-overflow"
-    always-center-single-column
+    center-focused-column "never"
     background-color "#120d16"
 
     preset-column-widths {
@@ -216,7 +203,7 @@ layout {
         proportion 0.74
     }
 
-    default-column-width { proportion 0.56; }
+    default-column-width { proportion 0.50; }
 
     preset-window-heights {
         proportion 0.25
@@ -324,13 +311,20 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"^org\.gnome\.Nautilus$"#
-    default-column-width { proportion 0.58; }
+    match app-id=r#"^org\.kde\.dolphin$"#
+    default-column-width { proportion 0.50; }
+}
+
+window-rule {
+    match title=r#"(Copying|Moving|Deleting|Trash|Emptying Trash|File Operation|Progress|Extracting|Compressing)"#
+    open-floating true
+    open-focused false
+    default-column-width { fixed 520; }
 }
 
 window-rule {
     match app-id=r#"^obsidian$"#
-    default-column-width { proportion 0.52; }
+    default-column-width { proportion 0.50; }
 }
 
 window-rule {

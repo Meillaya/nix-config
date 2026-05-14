@@ -36,8 +36,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    noctalia = {
+      url = "github:noctalia-dev/noctalia-shell";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
-  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, zen-browser } @inputs:
+  outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia } @inputs:
     let
       user = "mei";
       secrets = ./secrets;
@@ -202,7 +206,7 @@ EOF
             set -euo pipefail
 
             target="${defaultTarget}"
-            backup_ext="hm-backup"
+            backup_ext="hm-backup-$(${pkgs.coreutils}/bin/date +%Y%m%d%H%M%S)"
             hm_args=()
 
             while [ "$#" -gt 0 ]; do
@@ -222,7 +226,7 @@ Usage: nix run .#home-switch -- [--target HOME] [home-manager args...]
 Defaults:
   x86_64-linux -> standalone-linux
   aarch64-linux -> standalone-linux-aarch64
-  backup extension -> hm-backup
+  backup extension -> hm-backup-<timestamp>
 
 Examples:
   nix run .#home-switch

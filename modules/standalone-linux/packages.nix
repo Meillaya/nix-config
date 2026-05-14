@@ -49,17 +49,29 @@ shared-packages ++ [
   ghostty
   helium
   kdePackages.polkit-kde-agent-1
+
+  # KDE file manager, document viewer, and Sweet/Dr460nized Qt theming
+  kdePackages.ark
+  kdePackages.dolphin
+  kdePackages.dolphin-plugins
+  kdePackages.ffmpegthumbs
+  kdePackages.kio-admin
+  kdePackages.kio-extras
+  kdePackages.okular
+  kdePackages.qt6ct
+  kdePackages.qtstyleplugin-kvantum
+  libsForQt5.qt5ct
+  libsForQt5.qtstyleplugin-kvantum
   keepassxc
   libnotify
   mako
-  nautilus
   niri
   obsidian
   ollama
   pavucontrol
   playerctl
   qbittorrent
-  quickshell
+  inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   swaybg
   tailscale
   waybar
@@ -71,5 +83,5 @@ shared-packages ++ [
   zathura
   opencode
   setup-ddc-brightness
-  inputs.zen-browser.packages.${pkgs.system}.default
+  inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 ]
