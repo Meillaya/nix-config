@@ -43,6 +43,7 @@ binds {
     // ─── Launchers ───
     MOD+RETURN hotkey-overlay-title="Open Terminal: Alacritty" { spawn-sh "alacritty"; }
     MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "noctalia-shell ipc call launcher toggle"; }
+    MOD+V hotkey-overlay-title="Open Clipboard History: Noctalia" { spawn-sh "noctalia-shell ipc call launcher clipboard"; }
     MOD+B hotkey-overlay-title="Open Browser: Zen" { spawn-sh "zen"; }
     MOD+E hotkey-overlay-title="Open Files: Dolphin" { spawn-sh "env QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma- GTK_THEME=Sweet-Dark GTK_USE_PORTAL=1 dolphin"; }
     MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "noctalia-shell ipc call lockScreen lock"; }
