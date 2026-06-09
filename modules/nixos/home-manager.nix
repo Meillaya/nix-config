@@ -4,7 +4,7 @@ let
   user = "mei";
   xdg_configHome  = "/home/${user}/.config";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib secrets; };
-  shared-files = import ../shared/files.nix { inherit config pkgs; };
+  shared-files = import ../shared/files.nix { inherit config pkgs lib; };
 
   polybar-user_modules = builtins.readFile (pkgs.replaceVars ./config/polybar/user_modules.ini {
     packages = "${xdg_configHome}/polybar/bin/check-nixos-updates.sh";

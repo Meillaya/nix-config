@@ -30,12 +30,12 @@ in
 {
   oh-my-codex-sidecar = mkNodeSidecar {
     pname = "oh-my-codex";
-    version = "0.14.4";
+    version = "0.15.0";
     owner = "Yeachan-Heo";
     repo = "oh-my-codex";
-    rev = "v0.14.4";
-    sha256 = "19r1hna2g4mbjzjh8jxjqsm87l6xgwnil8qw3fjq1257yadvdkjb";
-    npmDepsHash = "sha256-25FD3k89kwz9gq9+9h8BGiCEj5Rl/JgnKvrGaxnKENQ=";
+    rev = "v0.15.0";
+    sha256 = "sha256-jtyHUtV7N6uKNtvBoqYJU2VYJra6PpcB6hvZhl1ChRE=";
+    npmDepsHash = "sha256-LqGRFLAT45mm927PoWnD+q5jroM1/cYod7rG9cFLlqU=";
   };
 
   oh-my-claude-sisyphus-sidecar = mkNodeSidecar {

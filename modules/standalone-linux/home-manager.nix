@@ -10,7 +10,7 @@ let
         ambient = builtins.getEnv "HOME";
     in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
-  shared-files = import ../shared/files.nix { inherit config pkgs; };
+  shared-files = import ../shared/files.nix { inherit config pkgs lib; };
   standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
   codexConfig =
     builtins.replaceStrings

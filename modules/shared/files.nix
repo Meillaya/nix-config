@@ -1,9 +1,32 @@
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 
-# let
-#  githubPublicKey = "ssh-ed25519 AAAA...";
-# in
+let
+  homeDirectory =
+    let
+      hmHome = lib.attrByPath [ "home" "homeDirectory" ] null config;
+      primaryUser =
+        lib.attrByPath [ "home" "username" ]
+          (lib.attrByPath [ "system" "primaryUser" ] null config)
+          config;
+      managedUserHome =
+        if primaryUser == null then
+          null
+        else
+          lib.attrByPath [ "users" "users" primaryUser "home" ] null config;
+    in
+    if hmHome != null then hmHome else if managedUserHome != null then managedUserHome else "$HOME";
+in
 {
+  ".npmrc" = {
+    text = ''
+      prefix=${homeDirectory}/.local
+    '';
+  };
+
+  ".config/fastfetch" = {
+    source = ../shared/config/fastfetch;
+    recursive = true;
+  };
 
   # ".ssh/id_github.pub" = {
   #   text = githubPublicKey;

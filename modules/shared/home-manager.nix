@@ -26,7 +26,11 @@ in
 
   bash = {
     enable = true;
-    enableCompletion = true;
+    # macOS still ships /bin/bash 3.2, which does not understand Home
+    # Manager's bash-completion guard (`[[ -v ... ]]`) or newer shopts.
+    enableCompletion = !pkgs.stdenv.hostPlatform.isDarwin;
+    shellOptions = [ "histappend" "extglob" ]
+      ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [ "globstar" "checkjobs" ];
     historyControl = [ "ignoreboth" "erasedups" ];
     historyIgnore = [ "pwd" "ls" "cd" ];
     shellAliases = {
@@ -37,6 +41,14 @@ in
       ls = "ls --color=auto";
       search = "rg -p --glob '!node_modules/*'";
     };
+    bashrcExtra = ''
+      if [[ $- == *i* && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
+        export FASTFETCH_SHELL_INIT_DONE=1
+        fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
+        fastfetch --config "$fastfetch_config"
+        echo
+      fi
+    '';
     initExtra = ''
       if [[ "$(uname)" == Linux && -n "''${WAYLAND_DISPLAY-}" ]]; then
         current_display="''${DISPLAY-}"
@@ -141,6 +153,13 @@ in
       set -gx ALTERNATE_EDITOR ""
       set -gx EDITOR "emacsclient -t"
       set -gx VISUAL "emacsclient -c -a emacs"
+
+      if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test -z "$FASTFETCH_SHELL_INIT_DONE"; and command -q fastfetch
+        set -gx FASTFETCH_SHELL_INIT_DONE 1
+        set -l fastfetch_config "$HOME/.config/fastfetch/config.jsonc"
+        fastfetch --config "$fastfetch_config"
+        echo
+      end
     '';
   };
 
@@ -209,6 +228,13 @@ in
               export DISPLAY=:0
             fi
           fi
+        fi
+
+        if [[ -o interactive && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
+          export FASTFETCH_SHELL_INIT_DONE=1
+          fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
+          fastfetch --config "$fastfetch_config"
+          echo
         fi
 
         if [[ -r "''${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-''${(%):-%n}.zsh" ]]; then
@@ -471,7 +497,7 @@ in
       };
 
       selection = {
-        semantic_escape_chars = ",│`|:\\\"' ()[]{}<>\\t";
+        semantic_escape_chars = ",│`|:\\\\\"' ()[]{}<>\\t";
         save_to_clipboard = true;
       };
 
@@ -502,21 +528,27 @@ in
         program = "${pkgs.zsh}/bin/zsh";
       };
 
-      font = {
+      font =
+        let
+          family =
+            if pkgs.stdenv.hostPlatform.isDarwin
+            then "JetBrains Mono"
+            else "monospace";
+        in {
         normal = {
-          family = "monospace";
+          family = family;
           style = "Regular";
         };
         bold = {
-          family = "monospace";
+          family = family;
           style = "Bold";
         };
         italic = {
-          family = "monospace";
+          family = family;
           style = "Italic";
         };
         bold_italic = {
-          family = "monospace";
+          family = family;
           style = "Bold Italic";
         };
         size = lib.mkMerge [

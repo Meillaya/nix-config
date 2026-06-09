@@ -8,7 +8,7 @@ This repo now provides:
 
 Pinned helper versions:
 
-- `oh-my-codex@0.14.4`
+- `oh-my-codex@0.15.0`
 - `oh-my-claude-sisyphus@4.13.3`
 
 ## Install/update the sidecars
@@ -25,6 +25,10 @@ AI_SIDECAR_PREFIX=$HOME/.local sync-ai-sidecars
 
 This installs the npm packages into the expected local prefix so the repo's
 managed wrappers and config keep working without hand-managed global installs.
+
+Home Manager also seeds `~/.npmrc` with `prefix=~/.local` so OMX self-updates
+and other `npm install -g ...` commands do not try to write into the read-only
+Nix store.
 
 ## Safe config now tracked
 

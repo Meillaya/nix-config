@@ -110,8 +110,116 @@ let
 
     prefix="''${AI_SIDECAR_PREFIX:-$HOME/.local}"
     ${nodejs_24}/bin/npm install --global --prefix "$prefix" \
-      oh-my-codex@0.14.4 \
+      oh-my-codex@0.15.0 \
       oh-my-claude-sisyphus@4.13.3
+  '';
+  brewPinUpdate = writeShellScriptBin "brew-pin-update" ''
+    set -euo pipefail
+
+    usage() {
+      cat <<'EOF'
+Usage: brew-pin-update [--formula] [--reinstall] <package> [package...]
+
+Update this repo's nix-homebrew pin(s), rebuild the Darwin config, then upgrade
+the requested Homebrew package(s).
+
+Defaults to casks. Use --formula for Homebrew formulae.
+
+Examples:
+  brew-pin-update codex
+  brew-pin-update claude-code
+  brew-pin-update --reinstall codex
+  brew-pin-update --formula ripgrep
+EOF
+    }
+
+    if [ "$(uname)" != "Darwin" ]; then
+      echo "brew-pin-update only supports Darwin hosts managed by nix-homebrew." >&2
+      exit 1
+    fi
+
+    repo_root="$PWD"
+    if [ ! -f "$repo_root/flake.nix" ]; then
+      if repo_root="$(${git}/bin/git rev-parse --show-toplevel 2>/dev/null)"; then
+        :
+      else
+        echo "brew-pin-update must run from this repo or a git worktree inside it." >&2
+        exit 1
+      fi
+    fi
+
+    reinstall=0
+    package_mode="cask"
+
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --formula)
+          package_mode="formula"
+          shift
+          ;;
+        --cask)
+          package_mode="cask"
+          shift
+          ;;
+        --reinstall)
+          reinstall=1
+          shift
+          ;;
+        --help|-h)
+          usage
+          exit 0
+          ;;
+        --)
+          shift
+          break
+          ;;
+        -*)
+          echo "Unknown option: $1" >&2
+          usage >&2
+          exit 2
+          ;;
+        *)
+          break
+          ;;
+      esac
+    done
+
+    if [ "$#" -eq 0 ]; then
+      echo "brew-pin-update: missing package name" >&2
+      usage >&2
+      exit 2
+    fi
+
+    cd "$repo_root"
+
+    if [ "$package_mode" = "cask" ]; then
+      echo "Updating pinned Homebrew cask input..."
+      ${nix}/bin/nix flake lock --update-input homebrew-cask
+    else
+      echo "Updating pinned Homebrew core input..."
+      ${nix}/bin/nix flake lock --update-input homebrew-core
+    fi
+
+    echo "Rebuilding nix-darwin configuration..."
+    ${nix}/bin/nix run .#build-switch
+
+    if [ "$package_mode" = "cask" ]; then
+      if [ "$reinstall" -eq 1 ]; then
+        echo "Reinstalling Homebrew cask(s): $*"
+        /opt/homebrew/bin/brew reinstall --cask "$@"
+      else
+        echo "Upgrading Homebrew cask(s): $*"
+        /opt/homebrew/bin/brew upgrade --cask "$@"
+      fi
+    else
+      if [ "$reinstall" -eq 1 ]; then
+        echo "Reinstalling Homebrew formula(e): $*"
+        /opt/homebrew/bin/brew reinstall "$@"
+      else
+        echo "Upgrading Homebrew formula(e): $*"
+        /opt/homebrew/bin/brew upgrade "$@"
+      fi
+    fi
   '';
   nixpkgsSearch = writeShellScriptBin "nixpkgs-search" ''
     set -euo pipefail
@@ -250,6 +358,7 @@ in [
   nodejs_24
 
   # Text and terminal utilities
+  brewPinUpdate
   htop
   jetbrains-mono
   jq
