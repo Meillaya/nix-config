@@ -66,6 +66,9 @@ in
       if [[ $- == *i* && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
         export FASTFETCH_SHELL_INIT_DONE=1
         fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
+        if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
+          fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+        fi
         fastfetch --config "$fastfetch_config"
         echo
       fi
@@ -208,6 +211,9 @@ in
       if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test -z "$FASTFETCH_SHELL_INIT_DONE"; and command -q fastfetch
         set -gx FASTFETCH_SHELL_INIT_DONE 1
         set -l fastfetch_config "$HOME/.config/fastfetch/config.jsonc"
+        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty; and test -r "$HOME/.config/fastfetch/ghostty.jsonc"
+          set fastfetch_config "$HOME/.config/fastfetch/ghostty.jsonc"
+        end
         fastfetch --config "$fastfetch_config"
         echo
       end
@@ -292,6 +298,9 @@ in
         if [[ -o interactive && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
           export FASTFETCH_SHELL_INIT_DONE=1
           fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
+          if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
+            fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+          fi
           fastfetch --config "$fastfetch_config"
           echo
         fi
