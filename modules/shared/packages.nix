@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, includeDocker ? true }:
 
 with pkgs;
 let
@@ -339,10 +339,6 @@ in [
   gnupg
   libfido2
 
-  # Cloud-related tools and SDKs
-  docker
-  docker-compose
-
   # Media-related packages
   emacs-all-the-icons-fonts
   dejavu_fonts
@@ -420,4 +416,8 @@ in [
   omxLauncher
   syncAiSidecars
   nixpkgsSearch
+] ++ pkgs.lib.optionals includeDocker [
+  # Cloud-related tools and SDKs
+  docker
+  docker-compose
 ]

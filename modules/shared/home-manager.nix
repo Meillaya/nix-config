@@ -4,6 +4,27 @@ let
     user = config.home.username or "mei";
     gitName = "Meillaya";
     gitEmail = "nathanagbomed@proton.me";
+    yaziPalette = {
+      pink = "#f5c2e7";
+      mauve = "#cba6f7";
+      red = "#f38ba8";
+      peach = "#fab387";
+      yellow = "#f9e2af";
+      green = "#a6e3a1";
+      teal = "#94e2d5";
+      sky = "#89dceb";
+      blue = "#89b4fa";
+      lavender = "#b4befe";
+      text = "#cdd6f4";
+      subtext1 = "#bac2de";
+      overlay1 = "#7f849c";
+      surface2 = "#585b70";
+      surface1 = "#45475a";
+      surface0 = "#313244";
+      base = "#1e1e2e";
+      mantle = "#181825";
+      crust = "#11111b";
+    };
 in
 {
   # Shared shell configuration
@@ -166,6 +187,11 @@ in
   zsh = {
     enable = true;
     enableCompletion = true;
+    envExtra = ''
+      # Home Manager owns zsh startup; skip global zshrc files that can run
+      # unmanaged Homebrew completions before Powerlevel10k instant prompt.
+      unsetopt GLOBAL_RCS
+    '';
     autocd = false;
     cdpath = [ "~/Projects" ];
     autosuggestion = {
@@ -186,8 +212,10 @@ in
         "sudo"
         "aws"
         "direnv"
+      ] ++ lib.optionals (!pkgs.stdenv.hostPlatform.isDarwin) [
         "docker"
         "docker-compose"
+      ] ++ [
         "gh"
         "kubectl"
         "terraform"
@@ -198,7 +226,8 @@ in
         DISABLE_UPDATE_PROMPT="true"
         CASE_SENSITIVE="false"
         HYPHEN_INSENSITIVE="true"
-        ZSH_COMPDUMP="$HOME/.cache/zsh/.zcompdump-$ZSH_VERSION"
+        ZSH_CACHE_DIR="$HOME/.cache/oh-my-zsh-${pkgs.stdenv.hostPlatform.system}-hm-v2"
+        ZSH_COMPDUMP="$HOME/.cache/zsh/.zcompdump-${pkgs.stdenv.hostPlatform.system}-hm-v2-$ZSH_VERSION"
       '';
     };
     plugins = [
@@ -265,6 +294,10 @@ in
           return
         fi
 
+        # Start from a deterministic function search path so nested shells do
+        # not inherit stale oh-my-zsh plugin completion paths.
+        fpath=("${pkgs.zsh}/share/zsh/$ZSH_VERSION/functions")
+
         # Remove history data we don't want to see
         export HISTIGNORE="pwd:ls:cd"
 
@@ -311,6 +344,299 @@ in
         zstyle ':completion:*:warnings' format 'no matches for: %d'
       '')
     ];
+  };
+
+  yazi = {
+    enable = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
+    enableZshIntegration = true;
+    shellWrapperName = "yy";
+
+    plugins = {
+      full-border = pkgs.yaziPlugins.full-border;
+      yatline = pkgs.yaziPlugins.yatline;
+    };
+
+    settings = {
+      mgr = {
+        ratio = [ 1 3 4 ];
+        sort_by = "natural";
+        sort_sensitive = false;
+        sort_reverse = false;
+        sort_dir_first = true;
+        sort_translit = true;
+        sort_fallback = "alphabetical";
+        linemode = "size";
+        show_hidden = false;
+        show_symlink = true;
+        scrolloff = 8;
+        mouse_events = [ "click" "scroll" "drag" ];
+      };
+
+      preview = {
+        wrap = "no";
+        tab_size = 2;
+        max_width = 1000;
+        max_height = 1200;
+        image_delay = 20;
+        image_filter = "lanczos3";
+        image_quality = 85;
+      };
+
+      input = {
+        cursor_blink = true;
+        cd_origin = "top-center";
+        create_origin = "top-center";
+        filter_origin = "top-center";
+        find_origin = "top-center";
+        search_origin = "top-center";
+        shell_origin = "top-center";
+      };
+    };
+
+    keymap = {
+      mgr.append_keymap = [
+        { on = [ "g" "p" ]; run = "cd ~/Projects"; desc = "Go ~/Projects"; }
+        { on = [ "g" "D" ]; run = "cd ~/Documents"; desc = "Go ~/Documents"; }
+        { on = [ "g" "m" ]; run = "cd ~/Music"; desc = "Go ~/Music"; }
+        { on = [ "g" "n" ]; run = "cd /nix/store"; desc = "Go /nix/store"; }
+        { on = [ "g" "l" ]; run = "cd ~/.local/share"; desc = "Go ~/.local/share"; }
+        { on = [ "g" "b" ]; run = "cd ~/.local/bin"; desc = "Go ~/.local/bin"; }
+      ];
+    };
+
+    theme = {
+      mgr = {
+        cwd = { fg = yaziPalette.blue; bold = true; };
+        find_keyword = { fg = yaziPalette.yellow; bold = true; italic = true; underline = true; };
+        find_position = { fg = yaziPalette.mauve; bold = true; };
+        symlink_target = { fg = yaziPalette.teal; italic = true; };
+        marker_copied = { fg = yaziPalette.green; bg = yaziPalette.green; };
+        marker_cut = { fg = yaziPalette.red; bg = yaziPalette.red; };
+        marker_marked = { fg = yaziPalette.sky; bg = yaziPalette.sky; };
+        marker_selected = { fg = yaziPalette.yellow; bg = yaziPalette.yellow; };
+        marker_symbol = "▌";
+        count_copied = { fg = yaziPalette.base; bg = yaziPalette.green; bold = true; };
+        count_cut = { fg = yaziPalette.base; bg = yaziPalette.red; bold = true; };
+        count_selected = { fg = yaziPalette.base; bg = yaziPalette.yellow; bold = true; };
+        border_symbol = "│";
+        border_style = { fg = yaziPalette.surface2; };
+      };
+
+      tabs = {
+        active = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
+        inactive = { fg = yaziPalette.subtext1; bg = yaziPalette.surface0; };
+        sep_inner = { open = ""; close = ""; };
+        sep_outer = { open = ""; close = ""; };
+      };
+
+      mode = {
+        normal_main = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
+        normal_alt = { fg = yaziPalette.mauve; bg = yaziPalette.surface0; };
+        select_main = { fg = yaziPalette.base; bg = yaziPalette.peach; bold = true; };
+        select_alt = { fg = yaziPalette.peach; bg = yaziPalette.surface0; };
+        unset_main = { fg = yaziPalette.base; bg = yaziPalette.red; bold = true; };
+        unset_alt = { fg = yaziPalette.red; bg = yaziPalette.surface0; };
+      };
+
+      indicator = {
+        parent = { fg = yaziPalette.mauve; reversed = true; };
+        current = { fg = yaziPalette.blue; reversed = true; };
+        preview = { fg = yaziPalette.green; underline = true; };
+        padding = { open = "▐"; close = "▌"; };
+      };
+
+      status = {
+        overall = { fg = yaziPalette.text; bg = yaziPalette.mantle; };
+        sep_left = { open = ""; close = ""; };
+        sep_right = { open = ""; close = ""; };
+        perm_sep = { fg = yaziPalette.overlay1; };
+        perm_type = { fg = yaziPalette.green; };
+        perm_read = { fg = yaziPalette.yellow; };
+        perm_write = { fg = yaziPalette.red; };
+        perm_exec = { fg = yaziPalette.sky; };
+        progress_label = { fg = yaziPalette.text; bold = true; };
+        progress_normal = { fg = yaziPalette.green; bg = yaziPalette.surface0; };
+        progress_error = { fg = yaziPalette.red; bg = yaziPalette.surface0; };
+      };
+
+      which = {
+        cols = 3;
+        mask = { bg = yaziPalette.crust; };
+        cand = { fg = yaziPalette.sky; bold = true; };
+        rest = { fg = yaziPalette.overlay1; };
+        desc = { fg = yaziPalette.mauve; };
+        separator = " 󰁔 ";
+        separator_style = { fg = yaziPalette.surface2; };
+      };
+
+      confirm = {
+        border = { fg = yaziPalette.mauve; };
+        title = { fg = yaziPalette.mauve; bold = true; };
+        body = { fg = yaziPalette.text; };
+        list = { fg = yaziPalette.subtext1; };
+        btn_yes = { fg = yaziPalette.base; bg = yaziPalette.green; bold = true; };
+        btn_no = { fg = yaziPalette.text; bg = yaziPalette.surface1; };
+        btn_labels = [ "  Yes  " "  No  " ];
+      };
+
+      spot = {
+        border = { fg = yaziPalette.blue; };
+        title = { fg = yaziPalette.blue; bold = true; };
+        tbl_col = { fg = yaziPalette.mauve; bold = true; };
+        tbl_cell = { fg = yaziPalette.yellow; };
+      };
+
+      notify = {
+        title_info = { fg = yaziPalette.green; bold = true; };
+        title_warn = { fg = yaziPalette.yellow; bold = true; };
+        title_error = { fg = yaziPalette.red; bold = true; };
+        icon_info = "";
+        icon_warn = "";
+        icon_error = "";
+      };
+
+      pick = {
+        border = { fg = yaziPalette.mauve; };
+        active = { fg = yaziPalette.pink; bold = true; };
+        inactive = { fg = yaziPalette.subtext1; };
+      };
+
+      input = {
+        border = { fg = yaziPalette.blue; };
+        title = { fg = yaziPalette.blue; bold = true; };
+        value = { fg = yaziPalette.text; };
+        selected = { fg = yaziPalette.base; bg = yaziPalette.sky; bold = true; };
+      };
+
+      cmp = {
+        border = { fg = yaziPalette.blue; };
+        active = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
+        inactive = { fg = yaziPalette.subtext1; };
+        icon_file = "";
+        icon_folder = "";
+        icon_command = "";
+      };
+
+      tasks = {
+        border = { fg = yaziPalette.mauve; };
+        title = { fg = yaziPalette.mauve; bold = true; };
+        hovered = { fg = yaziPalette.base; bg = yaziPalette.peach; bold = true; };
+      };
+
+      help = {
+        on = { fg = yaziPalette.sky; bold = true; };
+        run = { fg = yaziPalette.pink; };
+        desc = { fg = yaziPalette.text; };
+        hovered = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
+        footer = { fg = yaziPalette.base; bg = yaziPalette.lavender; bold = true; };
+      };
+
+      filetype.rules = [
+        { mime = "image/*"; fg = yaziPalette.yellow; }
+        { mime = "{audio,video}/*"; fg = yaziPalette.mauve; }
+        { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}"; fg = yaziPalette.red; }
+        { mime = "application/{pdf,doc,rtf}"; fg = yaziPalette.sky; }
+        { mime = "application/{json,ndjson}"; fg = yaziPalette.green; }
+        { mime = "vfs/{absent,stale}"; fg = yaziPalette.overlay1; }
+        { url = "*"; is = "orphan"; bg = yaziPalette.red; }
+        { url = "*"; is = "exec"; fg = yaziPalette.green; bold = true; }
+        { url = "*"; is = "link"; fg = yaziPalette.teal; }
+        { url = "*/"; fg = yaziPalette.blue; bold = true; }
+      ];
+    };
+
+    initLua = ''
+      require("full-border"):setup({ type = ui.Border.ROUNDED })
+
+      require("yatline"):setup({
+        section_separator = { open = "", close = "" },
+        part_separator = { open = "", close = "" },
+        inverse_separator = { open = "", close = "" },
+        padding = { inner = 1, outer = 0 },
+
+        style_a = {
+          fg = "${yaziPalette.base}",
+          bg = "${yaziPalette.mauve}",
+          bg_mode = {
+            normal = "${yaziPalette.mauve}",
+            select = "${yaziPalette.peach}",
+            un_set = "${yaziPalette.red}",
+          },
+        },
+        style_b = { fg = "${yaziPalette.text}", bg = "${yaziPalette.surface1}" },
+        style_c = { fg = "${yaziPalette.subtext1}", bg = "${yaziPalette.mantle}" },
+
+        permissions_t_fg = "${yaziPalette.green}",
+        permissions_r_fg = "${yaziPalette.yellow}",
+        permissions_w_fg = "${yaziPalette.red}",
+        permissions_x_fg = "${yaziPalette.sky}",
+        permissions_s_fg = "${yaziPalette.overlay1}",
+
+        selected = { icon = "󰻭", fg = "${yaziPalette.yellow}" },
+        copied = { icon = "", fg = "${yaziPalette.green}" },
+        cut = { icon = "", fg = "${yaziPalette.red}" },
+        files = { icon = "󰈔", fg = "${yaziPalette.blue}" },
+        filtereds = { icon = "", fg = "${yaziPalette.mauve}" },
+        total = { icon = "󰮍", fg = "${yaziPalette.yellow}" },
+        success = { icon = "", fg = "${yaziPalette.green}" },
+        failed = { icon = "", fg = "${yaziPalette.red}" },
+
+        show_background = true,
+        display_header_line = true,
+        display_status_line = true,
+        component_positions = { "header", "tab", "status" },
+        tab_width = 18,
+
+        header_line = {
+          left = {
+            section_a = {
+              { type = "line", name = "tabs" },
+            },
+            section_b = {
+              { type = "string", name = "tab_path", params = { true, 48, 16 } },
+            },
+            section_c = {},
+          },
+          right = {
+            section_a = {
+              { type = "string", name = "date", params = { "%H:%M" } },
+            },
+            section_b = {
+              { type = "string", name = "date", params = { "%a %d %b" } },
+            },
+            section_c = {},
+          },
+        },
+
+        status_line = {
+          left = {
+            section_a = {
+              { type = "string", name = "tab_mode" },
+            },
+            section_b = {
+              { type = "string", name = "hovered_size" },
+            },
+            section_c = {
+              { type = "string", custom = true, name = "󰌌 q quit · ~ help · / find · s search · z fzf · Z zoxide · Space select" },
+            },
+          },
+          right = {
+            section_a = {
+              { type = "string", name = "cursor_position" },
+            },
+            section_b = {
+              { type = "string", name = "cursor_percentage" },
+            },
+            section_c = {
+              { type = "coloreds", name = "count" },
+              { type = "coloreds", name = "permissions" },
+            },
+          },
+        },
+      })
+    '';
   };
 
   git = {
