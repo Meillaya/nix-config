@@ -1,6 +1,6 @@
 { pkgs, homeDirectory }:
 {
-  ".config/niri/config.kdl".source = ./config/niri/config.kdl;
+  ".config/niri/config.kdl".source = ../linux/config/niri/config.kdl;
 
   ".config/calibre/gui.json".source = ./config/calibre/gui.json;
   ".config/calibre/tweaks.json".source = ./config/calibre/tweaks.json;
@@ -13,6 +13,13 @@
   ".claude/CLAUDE.md".source = ./config/claude/CLAUDE.md;
   ".config/opencode/opencode.json".source = ./config/opencode/opencode.json;
   ".config/zed/settings.json".source = ./config/zed/settings.json;
+  ".config/ghostty/config" = {
+    source = ./config/ghostty/config.ghostty;
+    force = true;
+  };
+  ".config/ghostty/config.ghostty".source = ./config/ghostty/config.ghostty;
+  ".config/fastfetch/ghostty.jsonc".source = ./config/fastfetch/ghostty.jsonc;
+  ".config/fastfetch/snoopy-mugiwara.png".source = ./config/fastfetch/snoopy-mugiwara.png;
 
   ".config/waybar/config".source = ./config/waybar/config;
   ".config/waybar/modules.json".source = ./config/waybar/modules.json;

@@ -346,6 +346,7 @@ in [
   fd
   font-awesome
   hack-font
+  nerd-fonts.fira-code
   noto-fonts
   noto-fonts-color-emoji
   meslo-lgs-nf

@@ -1,0 +1,8 @@
+# Ghostty loads built-in themes with the `theme` key.
+# See: https://ghostty.org/docs/features/theme
+# Verify available theme names with: ghostty +list-themes
+theme = Catppuccin Mocha
+
+# On Linux/GTK, make Ghostty's own window chrome follow the terminal theme
+# instead of staying on the desktop/system theme.
+window-theme = ghostty

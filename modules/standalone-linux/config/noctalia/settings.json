@@ -106,7 +106,7 @@
                     "iconPosition": "left",
                     "id": "CustomButton",
                     "ipcIdentifier": "",
-                    "leftClickExec": "qs -c noctalia-shell ipc call launcher toggle",
+                    "leftClickExec": "noctalia-shell ipc call launcher toggle",
                     "leftClickUpdateText": false,
                     "maxTextLength": {
                         "horizontal": 10,
@@ -248,7 +248,7 @@
     "brightness": {
         "backlightDeviceMappings": [],
         "brightnessStep": 5,
-        "enableDdcSupport": false,
+        "enableDdcSupport": true,
         "enforceMinimum": true
     },
     "calendar": {
@@ -297,7 +297,7 @@
                 "id": "audio-card"
             },
             {
-                "enabled": false,
+                "enabled": true,
                 "id": "brightness-card"
             },
             {

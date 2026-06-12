@@ -17,6 +17,35 @@ shared-packages ++ [
   # Media and design tools
   fontconfig
 
+  # Wayland/Niri desktop
+  awww
+  brightnessctl
+  cliphist
+  ddcutil
+  fuzzel
+  kdePackages.polkit-kde-agent-1
+
+  # KDE file manager, document viewer, and Sweet/Dr460nized Qt theming
+  kdePackages.ark
+  kdePackages.dolphin
+  kdePackages.dolphin-plugins
+  kdePackages.ffmpegthumbs
+  kdePackages.kio-admin
+  kdePackages.kio-extras
+  kdePackages.okular
+  kdePackages.qt6ct
+  kdePackages.qtstyleplugin-kvantum
+  libsForQt5.qt5ct
+  libsForQt5.qtstyleplugin-kvantum
+  mako
+  niri
+  playerctl
+  waybar
+  wl-clipboard
+  wlogout
+  wofi
+  xwayland-satellite
+
   # Productivity tools
 
   # Audio tools
@@ -53,6 +82,6 @@ shared-packages ++ [
 
   # Development tools
   firefox
-  
+
   # Music and entertainment
 ]
