@@ -329,6 +329,12 @@ window-rule {
 }
 
 window-rule {
+    match app-id="gamescope" title=r#"(?i)(trainer|cheat|fling)"#
+    default-column-width { fixed 900; }
+    default-window-height { fixed 720; }
+}
+
+window-rule {
     geometry-corner-radius 24
     clip-to-geometry true
 }
