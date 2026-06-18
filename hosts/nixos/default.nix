@@ -46,8 +46,15 @@ let user = "mei";
     settings = {
       allowed-users = [ "${user}" ];
       trusted-users = [ "@admin" "${user}" ];
-      substituters = [ "https://nix-community.cachix.org" "https://cache.nixos.org" ];
-      trusted-public-keys = [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ];
+      substituters = [
+        "https://noctalia.cachix.org"
+        "https://nix-community.cachix.org"
+        "https://cache.nixos.org"
+      ];
+      trusted-public-keys = [
+        "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      ];
     };
 
     package = pkgs.nix;

@@ -1,0 +1,113 @@
+# Noctalia v5 alpha configuration.
+#
+# v5 is no longer Quickshell-based and ignores the old v4 settings.json file.
+# User/runtime changes made in Noctalia's Settings UI are written to
+# ~/.local/state/noctalia/settings.toml and override this declarative file.
+
+[shell]
+avatar_path = "/home/mei/.face"
+font_family = "Sans Serif"
+telemetry_enabled = false
+ui_scale = 1.0
+
+[shell.panel]
+background_blur = true
+control_center_placement = "attached"
+launcher_placement = "centered"
+session_placement = "attached"
+transparency_mode = "solid"
+wallpaper_placement = "attached"
+
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Noctalia"
+wallpaper_scheme = "m3-tonal-spot"
+
+[bar]
+order = ["main"]
+
+[bar.main]
+position = "top"
+enabled = true
+auto_hide = false
+reserve_space = true
+background_opacity = 1.0
+start = ["launcher", "wallpaper", "workspaces"]
+center = ["clock"]
+end = ["media", "tray", "notifications", "clipboard", "network", "bluetooth", "volume", "brightness", "battery", "control-center", "session"]
+
+[dock]
+enabled = true
+position = "bottom"
+auto_hide = true
+show_running = true
+
+[wallpaper]
+enabled = true
+directory = "/home/mei/Pictures/Wallpapers"
+fill_mode = "crop"
+fill_color = "#000000"
+transition = ["fade", "disc", "stripes", "wipe", "honeycomb"]
+transition_duration = 1500
+edge_smoothness = 0.05
+per_monitor_directories = false
+
+[wallpaper.default]
+path = "/home/mei/Pictures/Wallpapers/wallhaven_e89l8k.jpg"
+
+[wallpaper.automation]
+enabled = false
+interval_minutes = 5
+order = "random"
+recursive = true
+
+[backdrop]
+enabled = false
+blur_intensity = 0.4
+tint_intensity = 0.6
+
+[brightness]
+enable_ddcutil = true
+ignore_mmids = []
+
+[weather]
+enabled = true
+auto_locate = false
+address = "Caledon, ON"
+refresh_minutes = 30
+unit = "metric"
+
+[audio]
+enable_overdrive = false
+enable_sounds = false
+sound_volume = 0.5
+
+[nightlight]
+enabled = false
+force = false
+use_weather_location = true
+temperature_day = 6500
+temperature_night = 4000
+start_time = "18:30"
+stop_time = "06:30"
+
+[notification]
+enable_daemon = true
+position = "top_right"
+layer = "overlay"
+background_opacity = 1.0
+
+[idle]
+pre_action_fade_seconds = 5.0
+
+[idle.behavior.lock]
+enabled = false
+timeout = 660
+command = "noctalia:screen-lock"
+
+[idle.behavior.screen-off]
+enabled = false
+timeout = 600
+command = "noctalia:dpms-off"
+resume_command = "noctalia:dpms-on"

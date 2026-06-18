@@ -48,6 +48,7 @@ shared-packages ++ [
   gimp
   ghostty
   helium
+  kdePackages.konsole
   kdePackages.polkit-kde-agent-1
 
   # KDE file manager, document viewer, and Sweet/Dr460nized Qt theming
@@ -73,7 +74,6 @@ shared-packages ++ [
   qbittorrent
   inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   swaybg
-  tailscale
   waybar
   wl-clipboard
   wlogout
@@ -81,7 +81,6 @@ shared-packages ++ [
   xwayland-satellite
   xdg-utils
   zathura
-  opencode
   setup-ddc-brightness
   inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 ]

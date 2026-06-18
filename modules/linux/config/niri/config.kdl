@@ -42,21 +42,24 @@ binds {
 
     // ─── Launchers ───
     MOD+RETURN hotkey-overlay-title="Open Terminal: Alacritty" { spawn-sh "alacritty"; }
-    MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "noctalia-shell ipc call launcher toggle"; }
-    MOD+V hotkey-overlay-title="Open Clipboard History: Noctalia" { spawn-sh "noctalia-shell ipc call launcher clipboard"; }
+    MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "noctalia msg panel-toggle launcher"; }
+    MOD+S hotkey-overlay-title="Open Control Center: Noctalia" { spawn-sh "noctalia msg panel-toggle control-center"; }
+    MOD+V hotkey-overlay-title="Open Clipboard History: Noctalia" { spawn-sh "noctalia msg panel-toggle clipboard"; }
     MOD+B hotkey-overlay-title="Open Browser: Zen" { spawn-sh "zen"; }
     MOD+E hotkey-overlay-title="Open Files: Dolphin" { spawn-sh "env QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma- GTK_THEME=Sweet-Dark GTK_USE_PORTAL=1 dolphin"; }
-    MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "noctalia-shell ipc call lockScreen lock"; }
+    MOD+ALT+L hotkey-overlay-title="Lock Screen" { spawn-sh "noctalia msg screen-lock"; }
 
     // ─── Media / Audio ───
-    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
-    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
-    XF86AudioMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
-    XF86AudioMicMute allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+    XF86AudioMicMute allow-when-locked=true { spawn-sh "noctalia msg mic-mute"; }
     XF86AudioNext allow-when-locked=true { spawn "playerctl" "next"; }
     XF86AudioPause allow-when-locked=true { spawn "playerctl" "play-pause"; }
     XF86AudioPlay allow-when-locked=true { spawn "playerctl" "play-pause"; }
     XF86AudioPrev allow-when-locked=true { spawn "playerctl" "previous"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
 
     // ─── Window Focus ───
     MOD+Q hotkey-overlay-title=null { close-window; }
@@ -145,8 +148,9 @@ binds {
     MOD+CTRL+SHIFT+EQUAL hotkey-overlay-title="Reset Window Height" { reset-window-height; }
 
     // Fast horizontal / vertical layout cycling.
-    MOD+COMMA hotkey-overlay-title="Previous Column Width Preset" { switch-preset-column-width-back; }
-    MOD+PERIOD hotkey-overlay-title="Next Column Width Preset" { switch-preset-column-width; }
+    MOD+COMMA hotkey-overlay-title="Open Settings: Noctalia" { spawn-sh "noctalia msg settings-toggle"; }
+    MOD+ALT+COMMA hotkey-overlay-title="Previous Column Width Preset" { switch-preset-column-width-back; }
+    MOD+ALT+PERIOD hotkey-overlay-title="Next Column Width Preset" { switch-preset-column-width; }
     MOD+SHIFT+COMMA hotkey-overlay-title="Previous Window Height Preset" { switch-preset-window-height-back; }
     MOD+SHIFT+PERIOD hotkey-overlay-title="Next Window Height Preset" { switch-preset-window-height; }
 
@@ -180,7 +184,7 @@ spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ];
 spawn-sh-at-startup "if command -v polkit-kde-authentication-agent-1 >/dev/null 2>&1; then polkit-kde-authentication-agent-1 & elif [ -x /usr/lib/polkit-kde-authentication-agent-1 ]; then /usr/lib/polkit-kde-authentication-agent-1 & fi"
 spawn-sh-at-startup "xwayland-satellite"
 spawn-sh-at-startup "if command -v awww-daemon >/dev/null 2>&1; then awww-daemon; elif command -v swww-daemon >/dev/null 2>&1; then swww-daemon; fi"
-spawn-sh-at-startup "if [ -n \"$WAYLAND_DISPLAY\" ] && [ -S /tmp/.X11-unix/X0 ]; then export DISPLAY=:0; fi; exec noctalia-shell"
+spawn-at-startup "noctalia"
 
 prefer-no-csd
 screenshot-path null
@@ -337,6 +341,18 @@ window-rule {
 window-rule {
     geometry-corner-radius 24
     clip-to-geometry true
+}
+
+window-rule {
+    match app-id="dev.noctalia.Noctalia.Settings"
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+layer-rule {
+    match namespace="^noctalia-backdrop"
+    place-within-backdrop true
 }
 
 debug {

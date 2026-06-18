@@ -37,8 +37,9 @@
       inputs.home-manager.follows = "home-manager";
     };
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # v5 alpha; keep its upstream nixpkgs input so the Noctalia Cachix
+      # binaries match the package derivation advertised by upstream.
+      url = "github:noctalia-dev/noctalia-shell/v5";
     };
   };
   outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia } @inputs:

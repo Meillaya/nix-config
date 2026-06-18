@@ -299,6 +299,154 @@ let
     StartupMode=cwd
   '';
 
+  konsoleRc = ''
+    [Desktop Entry]
+    DefaultProfile=Garuda.profile
+
+    [KonsoleWindow]
+    SaveGeometryOnExit=true
+    ShowMenuBarByDefault=false
+
+    [MainWindow]
+    MenuBar=Disabled
+    RestorePositionForNextInstance=true
+    StatusBar=Disabled
+  '';
+
+  konsoleProfile = ''
+    [Appearance]
+    ColorScheme=Sweet
+    Font=FiraCode Nerd Font Mono,12,-1,5,50,0,0,0,0,0
+    UseFontLineChararacters=true
+    UseFontLineCharacters=true
+
+    [Cursor Options]
+    CursorShape=2
+    CustomCursorColor=255,0,0
+    UseCustomCursorColor=true
+
+    [General]
+    Command=${pkgs.fish}/bin/fish --login
+    Name=Garuda
+    Parent=FALLBACK/
+    TerminalColumns=110
+    TerminalRows=30
+
+    [Interaction Options]
+    AutoCopySelectedText=true
+    TrimLeadingSpacesInSelectedText=true
+    TrimTrailingSpacesInSelectedText=true
+    UnderlineFilesEnabled=true
+
+    [Keyboard]
+    KeyBindings=default
+
+    [Scrolling]
+    HistoryMode=1
+
+    [Terminal Features]
+    BlinkingCursorEnabled=true
+  '';
+
+  konsoleSweetColorScheme = ''
+    [Background]
+    Color=22,25,37
+
+    [BackgroundFaint]
+    Color=22,25,37
+
+    [BackgroundIntense]
+    Color=105,115,136
+
+    [Color0]
+    Color=105,115,136
+
+    [Color0Faint]
+    Color=105,115,136
+
+    [Color0Intense]
+    Color=105,115,136
+
+    [Color1]
+    Color=237,37,78
+
+    [Color1Faint]
+    Color=237,37,78
+
+    [Color1Intense]
+    Color=237,37,78
+
+    [Color2]
+    Color=113,247,159
+
+    [Color2Faint]
+    Color=113,247,159
+
+    [Color2Intense]
+    Color=113,247,159
+
+    [Color3]
+    Color=249,220,92
+
+    [Color3Faint]
+    Color=249,220,92
+
+    [Color3Intense]
+    Color=249,220,92
+
+    [Color4]
+    Color=124,183,255
+
+    [Color4Faint]
+    Color=124,183,255
+
+    [Color4Intense]
+    Color=124,183,255
+
+    [Color5]
+    Color=199,77,237
+
+    [Color5Faint]
+    Color=199,77,237
+
+    [Color5Intense]
+    Color=199,77,237
+
+    [Color6]
+    Color=0,193,228
+
+    [Color6Faint]
+    Color=0,193,228
+
+    [Color6Intense]
+    Color=0,193,228
+
+    [Color7]
+    Color=220,223,228
+
+    [Color7Faint]
+    Color=220,223,228
+
+    [Color7Intense]
+    Color=220,223,228
+
+    [Foreground]
+    Color=195,199,209
+
+    [ForegroundFaint]
+    Color=92,99,112
+
+    [ForegroundIntense]
+    Color=130,137,151
+
+    [General]
+    Blur=true
+    ColorRandomization=false
+    Description=Sweet
+    Opacity=0.65
+    Wallpaper=
+  '';
+
   serviceMenu = ''
     [Desktop Entry]
     Type=Service
@@ -408,6 +556,10 @@ in
         text = gtkSettings;
         force = true;
       };
+      "konsolerc" = {
+        text = konsoleRc;
+        force = true;
+      };
 
       "Kvantum/Dr460nized" = {
         source = patchedDr460nizedKvantum;
@@ -441,6 +593,14 @@ in
       };
       "applications/com.obsproject.Studio.desktop" = {
         text = obsStudioDesktop;
+        force = true;
+      };
+      "konsole/Garuda.profile" = {
+        text = konsoleProfile;
+        force = true;
+      };
+      "konsole/Sweet.colorscheme" = {
+        text = konsoleSweetColorScheme;
         force = true;
       };
       "xdg-desktop-portal/portals/kde-niri.portal" = {

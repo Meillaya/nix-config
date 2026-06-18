@@ -119,14 +119,23 @@ in
 
       fastfetch() {
           local arg
+          local fastfetch_config=""
           for arg in "$@"; do
               case "$arg" in
                   -c|--config|--config=*) command fastfetch "$@"; return ;;
               esac
           done
 
-          if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-              command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+          if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+          elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
+          elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
+          fi
+
+          if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
+              command fastfetch --config "$fastfetch_config" "$@"
           else
               command fastfetch "$@"
           fi
@@ -152,6 +161,8 @@ in
         nix-shell '<nixpkgs>' -A $argv[1]
       '';
       fastfetch.body = ''
+        set -l fastfetch_config ""
+
         for arg in $argv
           switch $arg
             case -c --config '--config=*'
@@ -160,8 +171,16 @@ in
           end
         end
 
-        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty; and test -r "$HOME/.config/fastfetch/ghostty.jsonc"
-          command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" $argv
+        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty
+          set fastfetch_config "$HOME/.config/fastfetch/ghostty.jsonc"
+        else if test -n "$KITTY_PID" -o -n "$KITTY_WINDOW_ID" -o "$TERM" = xterm-kitty
+          set fastfetch_config "$HOME/.config/fastfetch/kitty.jsonc"
+        else if test -n "$KONSOLE_VERSION"
+          set fastfetch_config "$HOME/.config/fastfetch/konsole.jsonc"
+        end
+
+        if test -n "$fastfetch_config" -a -r "$fastfetch_config"
+          command fastfetch --config "$fastfetch_config" $argv
         else
           command fastfetch $argv
         end
@@ -359,14 +378,23 @@ in
 
         fastfetch() {
             local arg
+            local fastfetch_config=""
             for arg in "$@"; do
                 case "$arg" in
                     -c|--config|--config=*) command fastfetch "$@"; return ;;
                 esac
             done
 
-            if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-                command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+            if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+            elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
+            elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
+            fi
+
+            if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
+                command fastfetch --config "$fastfetch_config" "$@"
             else
                 command fastfetch "$@"
             fi
@@ -1038,6 +1066,78 @@ in
           white = "0xdcdfe4";
         };
       };
+    };
+  };
+
+  kitty = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    enable = true;
+    shellIntegration.enableFishIntegration = true;
+    settings = {
+      shell = "${pkgs.fish}/bin/fish --login";
+      term = "xterm-kitty";
+
+      font_family = "FiraCode Nerd Font Mono";
+      bold_font = "FiraCode Nerd Font Mono Bold";
+      italic_font = "FiraCode Nerd Font Mono";
+      bold_italic_font = "FiraCode Nerd Font Mono Bold";
+      font_size = 12;
+      adjust_line_height = 1;
+
+      cursor_shape = "underline";
+      cursor_blink_interval = "0.5";
+      cursor_stop_blinking_after = 0;
+      cursor = "#ff0000";
+      cursor_text_color = "#161925";
+
+      scrollback_lines = 10000;
+      wheel_scroll_multiplier = 3;
+      mouse_hide_wait = 0;
+      copy_on_select = "clipboard";
+      strip_trailing_spaces = "smart";
+      open_url_with = "default";
+
+      remember_window_size = "no";
+      initial_window_width = "110c";
+      initial_window_height = "30c";
+      window_padding_width = 14;
+      background_opacity = "0.65";
+      dynamic_background_opacity = "yes";
+      background_blur = 1;
+      linux_display_server = "auto";
+      wayland_titlebar_color = "background";
+
+      foreground = "#c3c7d1";
+      background = "#161925";
+      selection_foreground = "#ffffff";
+      selection_background = "#1e92ff";
+      url_color = "#7cb7ff";
+
+      color0 = "#697388";
+      color1 = "#ed254e";
+      color2 = "#71f79f";
+      color3 = "#f9dc5c";
+      color4 = "#7cb7ff";
+      color5 = "#c74ded";
+      color6 = "#00c1e4";
+      color7 = "#dcdfe4";
+      color8 = "#697388";
+      color9 = "#ed254e";
+      color10 = "#71f79f";
+      color11 = "#f9dc5c";
+      color12 = "#7cb7ff";
+      color13 = "#c74ded";
+      color14 = "#00c1e4";
+      color15 = "#dcdfe4";
+    };
+    keybindings = {
+      "ctrl+shift+v" = "paste_from_clipboard";
+      "ctrl+shift+c" = "copy_to_clipboard";
+      "ctrl+shift+f" = "show_scrollback";
+      "ctrl+0" = "restore_font_size";
+      "shift+page_up" = "scroll_page_up";
+      "shift+page_down" = "scroll_page_down";
+      "shift+home" = "scroll_home";
+      "shift+end" = "scroll_end";
     };
   };
 
