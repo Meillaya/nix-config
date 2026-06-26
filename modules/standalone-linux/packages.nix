@@ -39,7 +39,6 @@ in
 shared-packages ++ [
   awww
   brightnessctl
-  brave
   calibre
   cliphist
   ddcutil

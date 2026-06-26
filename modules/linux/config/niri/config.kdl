@@ -62,7 +62,7 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
 
     // ─── Window Focus ───
-    MOD+Q hotkey-overlay-title=null { close-window; }
+    MOD+Q hotkey-overlay-title=null allow-inhibiting=false { spawn-sh "$HOME/.local/bin/niri-close-window"; }
     MOD+SHIFT+TAB hotkey-overlay-title="Previous Window" { focus-window-previous; }
 
     MOD+LEFT  { focus-column-left; }
@@ -368,6 +368,7 @@ environment {
     QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
     XDG_SESSION_TYPE "wayland"
     XDG_CURRENT_DESKTOP "niri"
+    NOCTALIA_PAM_SERVICE "noctalia"
 }
 
 hotkey-overlay {

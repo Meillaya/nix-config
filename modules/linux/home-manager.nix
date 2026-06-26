@@ -162,23 +162,23 @@ let
     "application/x-xz" = [ "org.kde.ark.desktop" ];
     "application/zstd" = [ "org.kde.ark.desktop" ];
 
-    "application/pdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" "zen.desktop" "brave-browser.desktop" ];
+    "application/pdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" "zen.desktop" ];
     "application/x-gzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
     "application/x-bzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
     "text/markdown" = [ "okularApplication_md.desktop" "sublime_text.desktop" "dev.zed.Zed.desktop" "micro.desktop" ];
     "application/epub+zip" = [ "okularApplication_epub.desktop" "calibre-ebook-viewer.desktop" "calibre-gui.desktop" ];
     "application/vnd.comicbook+zip" = [ "okularApplication_comicbook.desktop" ];
     "application/vnd.comicbook-rar" = [ "okularApplication_comicbook.desktop" ];
-    "image/png" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
-    "image/jpeg" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
-    "image/webp" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
-    "image/gif" = [ "okularApplication_kimgio.desktop" "gimp.desktop" "brave-browser.desktop" ];
+    "image/png" = [ "okularApplication_kimgio.desktop" "gimp.desktop" ];
+    "image/jpeg" = [ "okularApplication_kimgio.desktop" "gimp.desktop" ];
+    "image/webp" = [ "okularApplication_kimgio.desktop" "gimp.desktop" ];
+    "image/gif" = [ "okularApplication_kimgio.desktop" "gimp.desktop" ];
     "image/tiff" = [ "okularApplication_tiff.desktop" "okularApplication_kimgio.desktop" "gimp.desktop" ];
 
     "text/plain" = [ "sublime_text.desktop" "dev.zed.Zed.desktop" "micro.desktop" "okularApplication_txt.desktop" ];
-    "video/mp4" = [ "mpv.desktop" "brave-browser.desktop" ];
+    "video/mp4" = [ "mpv.desktop" ];
     "video/x-matroska" = [ "mpv.desktop" ];
-    "video/webm" = [ "mpv.desktop" "brave-browser.desktop" ];
+    "video/webm" = [ "mpv.desktop" ];
   };
 
   mimeAppsText = ''
@@ -236,7 +236,7 @@ let
     Name=OBS Studio
     GenericName=Streaming/Recording Software
     Comment=Free and Open Source Streaming/Recording Software
-    Exec=env QT_QPA_PLATFORM=xcb obs
+    Exec=env OBS_QPA_PLATFORM=wayland obs
     Icon=com.obsproject.Studio
     Terminal=false
     Categories=AudioVideo;Recorder;
@@ -696,6 +696,92 @@ in
     };
   };
 
+
+  home.file.".local/bin/niri-close-window" = {
+    force = true;
+    executable = true;
+    text = ''
+      #!/bin/sh
+      set -eu
+
+      window_id=
+      if [ "''${1:-}" = "--id" ]; then
+        window_id="''${2:-}"
+      fi
+
+      if [ -n "$window_id" ]; then
+        window_info="$(niri msg windows 2>/dev/null | awk -v id="$window_id" '
+          $0 == "Window ID " id ":" { print; capture=1; next }
+          capture && /^Window ID / { exit }
+          capture { print }
+        ')"
+      else
+        window_info="$(niri msg focused-window 2>/dev/null || true)"
+      fi
+
+      if [ -z "$window_info" ]; then
+        exec niri msg action close-window
+      fi
+
+      id="$(printf '%s\n' "$window_info" | sed -n 's/^Window ID \([0-9][0-9]*\):.*/\1/p' | head -n1)"
+      app_id="$(printf '%s\n' "$window_info" | sed -n 's/^  App ID: "\(.*\)"/\1/p' | head -n1)"
+      title="$(printf '%s\n' "$window_info" | sed -n 's/^  Title: "\(.*\)"/\1/p' | head -n1)"
+      pid="$(printf '%s\n' "$window_info" | sed -n 's/^  PID: \([0-9][0-9]*\).*/\1/p' | head -n1)"
+
+      is_trainer=0
+      case "$app_id:$title" in
+        gamescope:*[Tt][Rr][Aa][Ii][Nn][Ee][Rr]*|\
+        gamescope:*[Cc][Hh][Ee][Aa][Tt]*|\
+        gamescope:*[Ff][Ll][Ii][Nn][Gg]*)
+          is_trainer=1
+          ;;
+      esac
+
+      if [ "$is_trainer" -ne 1 ]; then
+        if [ -n "$id" ]; then
+          exec niri msg action close-window --id "$id"
+        fi
+        exec niri msg action close-window
+      fi
+
+      # Wine trainer windows inside gamescope ignore Niri's normal close-window
+      # request, so keep MOD+Q graceful for normal windows but make it a hard
+      # close for the focused LaLa trainer container.
+      if [ -n "$id" ]; then
+        niri msg action close-window --id "$id" >/dev/null 2>&1 || true
+      fi
+      sleep 0.25
+      if [ -n "$id" ] && ! niri msg windows 2>/dev/null | grep -q "^Window ID $id:"; then
+        exit 0
+      fi
+
+      descendants() {
+        parent="$1"
+        pgrep -P "$parent" 2>/dev/null | while read -r child; do
+          printf '%s\n' "$child"
+          descendants "$child"
+        done
+      }
+
+      if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+        children="$(descendants "$pid" | awk '!seen[$0]++' || true)"
+        targets="$(printf '%s\n%s\n' "$children" "$pid" | awk 'NF && !seen[$0]++')"
+        if [ -n "$targets" ]; then
+          printf '%s\n' "$targets" | xargs -r kill -TERM 2>/dev/null || true
+          sleep 0.75
+          still_alive="$(printf '%s\n' "$targets" | while read -r target; do
+            if [ -n "$target" ] && kill -0 "$target" 2>/dev/null; then
+              printf '%s\n' "$target"
+            fi
+          done)"
+          if [ -n "$still_alive" ]; then
+            printf '%s\n' "$still_alive" | xargs -r kill -KILL 2>/dev/null || true
+          fi
+        fi
+      fi
+    '';
+  };
+
   home.file.".local/bin/omx-copy-path-to-clipboard" = {
     force = true;
     executable = true;
@@ -743,9 +829,10 @@ in
         exit 127
       fi
 
-      # OBS 32.1.2 with Qt 6.11 crashes under native Wayland/niri while
-      # showing its main window.  XCB launches reliably through Xwayland.
-      exec env QT_QPA_PLATFORM="''${OBS_QPA_PLATFORM:-xcb}" "$obs_bin" "$@"
+      # Niri/Wayland window capture works through OBS' PipeWire portal source.
+      # Keep OBS_QPA_PLATFORM=xcb as an explicit fallback for Qt/Wayland regressions,
+      # but default to Wayland so OBS does not steer users toward Xcomposite capture.
+      exec env QT_QPA_PLATFORM="''${OBS_QPA_PLATFORM:-wayland}" "$obs_bin" "$@"
     '';
   };
 
