@@ -37,9 +37,11 @@
       inputs.home-manager.follows = "home-manager";
     };
     noctalia = {
-      # v5 alpha; keep its upstream nixpkgs input so the Noctalia Cachix
-      # binaries match the package derivation advertised by upstream.
-      url = "github:noctalia-dev/noctalia-shell/v5";
+      # v5 alpha (native C++ rewrite, builds from source via Meson).
+      # Replaces the legacy noctalia-shell flake that used to publish
+      # Cachix binaries; that repo is gone, so we now track the
+      # `noctalia-dev/noctalia` `main` branch (the v5 line).
+      url = "github:noctalia-dev/noctalia/main";
     };
   };
   outputs = { self, darwin, nix-homebrew, homebrew-bundle, homebrew-core, homebrew-cask, barutsrb-homebrew-tap, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia } @inputs:
