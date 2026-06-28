@@ -1,13 +1,12 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    "type": "builtin",
-    "source": "NixOS",
-    "position": "left",
+    "type": "kitty",
+    "source": "~/.config/fastfetch/snoopy-mugiwara.png",
+    "width": 40,
     "padding": {
-      "top": 1,
-      "left": 2,
-      "right": 4
+      "top": 2,
+      "left": 2
     }
   },
   "display": {
@@ -21,8 +20,8 @@
     }
   },
   "modules": [
-    "title",
-    "separator",
+    { "type": "custom", "format": "" },
+    { "type": "custom", "format": "" },
     {
       "type": "datetime",
       "key": "󰃭  Date & Time",
@@ -56,11 +55,6 @@
       "key": "󱎫 Uptime",
       "keyColor": "blue"
     },
-    {
-      "type": "packages",
-      "key": "󰏖 Packages",
-      "keyColor": "blue"
-    },
     "break",
     {
       "type": "cpu",
@@ -90,11 +84,6 @@
       "keyColor": "yellow"
     },
     {
-      "type": "swap",
-      "key": "󰾴 Swap",
-      "keyColor": "yellow"
-    },
-    {
       "type": "command",
       "key": "󱛟 Storage Devices",
       "text": "lsblk -dno NAME,SIZE,MODEL | grep -v '^zram' | sed -E 's/[[:space:]]+/ /g' | sed ':a;N;$!ba;s/\\n/ | /g'",
@@ -117,26 +106,6 @@
     {
       "type": "display",
       "key": "󰍹 Monitor",
-      "keyColor": "green"
-    },
-    {
-      "type": "wm",
-      "key": " WM",
-      "keyColor": "green"
-    },
-    {
-      "type": "theme",
-      "key": "󰉼 Theme",
-      "keyColor": "green"
-    },
-    {
-      "type": "font",
-      "key": " Font",
-      "keyColor": "green"
-    },
-    {
-      "type": "cursor",
-      "key": "󰆿 Cursor",
       "keyColor": "green"
     },
     {
@@ -169,11 +138,6 @@
     {
       "type": "bluetooth",
       "key": " Bluetooth",
-      "keyColor": "white"
-    },
-    {
-      "type": "locale",
-      "key": "󰗊 Locale",
       "keyColor": "white"
     },
     "break",

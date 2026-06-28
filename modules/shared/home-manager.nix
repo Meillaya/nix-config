@@ -4,27 +4,6 @@ let
     user = config.home.username or "mei";
     gitName = "Meillaya";
     gitEmail = "nathanagbomed@proton.me";
-    yaziPalette = {
-      pink = "#f5c2e7";
-      mauve = "#cba6f7";
-      red = "#f38ba8";
-      peach = "#fab387";
-      yellow = "#f9e2af";
-      green = "#a6e3a1";
-      teal = "#94e2d5";
-      sky = "#89dceb";
-      blue = "#89b4fa";
-      lavender = "#b4befe";
-      text = "#cdd6f4";
-      subtext1 = "#bac2de";
-      overlay1 = "#7f849c";
-      surface2 = "#585b70";
-      surface1 = "#45475a";
-      surface0 = "#313244";
-      base = "#1e1e2e";
-      mantle = "#181825";
-      crust = "#11111b";
-    };
 in
 {
   # Shared shell configuration
@@ -65,11 +44,7 @@ in
     bashrcExtra = ''
       if [[ $- == *i* && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
         export FASTFETCH_SHELL_INIT_DONE=1
-        fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
-        if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-          fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
-        fi
-        fastfetch --config "$fastfetch_config"
+        fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
         echo
       fi
     '';
@@ -115,26 +90,13 @@ in
       }
 
       fastfetch() {
-          local arg
-          local fastfetch_config=""
-          for arg in "$@"; do
-              case "$arg" in
-                  -c|--config|--config=*) command fastfetch "$@"; return ;;
-              esac
-          done
-
-          if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
-              fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
-          elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
-              fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
-          elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
-              fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
-          fi
-
-          if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
-              command fastfetch --config "$fastfetch_config" "$@"
-          else
+          # Always route through the rich profile (config.jsonc carries the
+          # Snoopy image + full module set). Pass through --config/-c if the
+          # caller wants a specific config; otherwise append no extra args.
+          if [[ "$*" == *-c* || "$*" == *--config* ]]; then
               command fastfetch "$@"
+          else
+              command fastfetch --config "$HOME/.config/fastfetch/config.jsonc" "$@"
           fi
       }
     '';
@@ -163,8 +125,9 @@ in
         nix-shell '<nixpkgs>' -A $argv[1]
       '';
       fastfetch.body = ''
-        set -l fastfetch_config ""
-
+        # Always route through the rich profile (config.jsonc carries the
+        # Snoopy image + full module set). Pass through --config/-c if the
+        # caller wants a specific config.
         for arg in $argv
           switch $arg
             case -c --config '--config=*'
@@ -172,20 +135,7 @@ in
               return
           end
         end
-
-        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty
-          set fastfetch_config "$HOME/.config/fastfetch/ghostty.jsonc"
-        else if test -n "$KITTY_PID" -o -n "$KITTY_WINDOW_ID" -o "$TERM" = xterm-kitty
-          set fastfetch_config "$HOME/.config/fastfetch/kitty.jsonc"
-        else if test -n "$KONSOLE_VERSION"
-          set fastfetch_config "$HOME/.config/fastfetch/konsole.jsonc"
-        end
-
-        if test -n "$fastfetch_config" -a -r "$fastfetch_config"
-          command fastfetch --config "$fastfetch_config" $argv
-        else
-          command fastfetch $argv
-        end
+        command fastfetch --config "$HOME/.config/fastfetch/config.jsonc" $argv
       '';
     };
     shellInit = ''
@@ -211,6 +161,10 @@ in
 
       if test -f /usr/share/cachyos-fish-config/cachyos-config.fish
         source /usr/share/cachyos-fish-config/cachyos-config.fish
+        # CachyOS fish config defines `function fish_greeting; fastfetch; end`,
+        # which auto-runs at every interactive fish start — on top of the
+        # HM-managed auto-run above. Override it to silence the duplicate.
+        function fish_greeting; end
       end
 
       fish_add_path --prepend $HOME/.pnpm-packages/bin $HOME/.pnpm-packages
@@ -228,11 +182,7 @@ in
 
       if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test -z "$FASTFETCH_SHELL_INIT_DONE"; and command -q fastfetch
         set -gx FASTFETCH_SHELL_INIT_DONE 1
-        set -l fastfetch_config "$HOME/.config/fastfetch/config.jsonc"
-        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty; and test -r "$HOME/.config/fastfetch/ghostty.jsonc"
-          set fastfetch_config "$HOME/.config/fastfetch/ghostty.jsonc"
-        end
-        fastfetch --config "$fastfetch_config"
+        fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
         echo
       end
     '';
@@ -318,11 +268,7 @@ in
 
         if [[ -o interactive && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
           export FASTFETCH_SHELL_INIT_DONE=1
-          fastfetch_config="$HOME/.config/fastfetch/config.jsonc"
-          if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-            fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
-          fi
-          fastfetch --config "$fastfetch_config"
+          fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
           echo
         fi
 
@@ -384,19 +330,7 @@ in
                 esac
             done
 
-            if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
-                fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
-            elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
-                fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
-            elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
-                fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
-            fi
-
-            if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
-                command fastfetch --config "$fastfetch_config" "$@"
-            else
-                command fastfetch "$@"
-            fi
+            command fastfetch --config "$HOME/.config/fastfetch/config.jsonc" "$@"
         }
 
         # pnpm is a javascript package manager
@@ -433,161 +367,6 @@ in
     enableFishIntegration = true;
     enableZshIntegration = true;
     shellWrapperName = "yy";
-
-    plugins = {
-      full-border = pkgs.yaziPlugins.full-border;
-      yatline = pkgs.yaziPlugins.yatline;
-    };
-
-    settings = {
-      mgr = {
-        ratio = [ 1 3 4 ];
-        sort_by = "natural";
-        sort_sensitive = false;
-        sort_reverse = false;
-        sort_dir_first = true;
-        sort_translit = true;
-        sort_fallback = "alphabetical";
-        linemode = "size";
-        show_hidden = false;
-        show_symlink = true;
-        scrolloff = 8;
-        mouse_events = [ "click" "scroll" "drag" ];
-      };
-
-      preview = {
-        wrap = "no";
-        tab_size = 2;
-        max_width = 1000;
-        max_height = 1200;
-        image_delay = 20;
-        image_filter = "lanczos3";
-        image_quality = 85;
-      };
-
-      input = {
-        cursor_blink = true;
-        cd_origin = "top-center";
-        create_origin = "top-center";
-        filter_origin = "top-center";
-        find_origin = "top-center";
-        search_origin = "top-center";
-        shell_origin = "top-center";
-      };
-    };
-
-    keymap = {
-      mgr.append_keymap = [
-        { on = [ "g" "p" ]; run = "cd ~/Projects"; desc = "Go ~/Projects"; }
-        { on = [ "g" "D" ]; run = "cd ~/Documents"; desc = "Go ~/Documents"; }
-        { on = [ "g" "m" ]; run = "cd ~/Music"; desc = "Go ~/Music"; }
-        { on = [ "g" "n" ]; run = "cd /nix/store"; desc = "Go /nix/store"; }
-        { on = [ "g" "l" ]; run = "cd ~/.local/share"; desc = "Go ~/.local/share"; }
-        { on = [ "g" "b" ]; run = "cd ~/.local/bin"; desc = "Go ~/.local/bin"; }
-      ];
-    };
-
-    # Use the upstream `noctalia` flavor (yazi v25+ feature) instead of a
-    # hand-rolled theme. The flavor must be present at runtime in
-    # $XDG_CONFIG_HOME/yazi/flavors/ (or yazi's system flavor dir); noctalia
-    # ships it. See <https://yazi-rs.github.io/docs/flavors/overview>.
-    theme = {
-      flavor = {
-        dark = "noctalia";
-        light = "noctalia";
-      };
-    };
-
-    initLua = ''
-      require("full-border"):setup({ type = ui.Border.ROUNDED })
-
-      require("yatline"):setup({
-        section_separator = { open = "", close = "" },
-        part_separator = { open = "", close = "" },
-        inverse_separator = { open = "", close = "" },
-        padding = { inner = 1, outer = 0 },
-
-        style_a = {
-          fg = "${yaziPalette.base}",
-          bg = "${yaziPalette.mauve}",
-          bg_mode = {
-            normal = "${yaziPalette.mauve}",
-            select = "${yaziPalette.peach}",
-            un_set = "${yaziPalette.red}",
-          },
-        },
-        style_b = { fg = "${yaziPalette.text}", bg = "${yaziPalette.surface1}" },
-        style_c = { fg = "${yaziPalette.subtext1}", bg = "${yaziPalette.mantle}" },
-
-        permissions_t_fg = "${yaziPalette.green}",
-        permissions_r_fg = "${yaziPalette.yellow}",
-        permissions_w_fg = "${yaziPalette.red}",
-        permissions_x_fg = "${yaziPalette.sky}",
-        permissions_s_fg = "${yaziPalette.overlay1}",
-
-        selected = { icon = "󰻭", fg = "${yaziPalette.yellow}" },
-        copied = { icon = "", fg = "${yaziPalette.green}" },
-        cut = { icon = "", fg = "${yaziPalette.red}" },
-        files = { icon = "󰈔", fg = "${yaziPalette.blue}" },
-        filtereds = { icon = "", fg = "${yaziPalette.mauve}" },
-        total = { icon = "󰮍", fg = "${yaziPalette.yellow}" },
-        success = { icon = "", fg = "${yaziPalette.green}" },
-        failed = { icon = "", fg = "${yaziPalette.red}" },
-
-        show_background = true,
-        display_header_line = true,
-        display_status_line = true,
-        component_positions = { "header", "tab", "status" },
-        tab_width = 18,
-
-        header_line = {
-          left = {
-            section_a = {
-              { type = "line", name = "tabs" },
-            },
-            section_b = {
-              { type = "string", name = "tab_path", params = { true, 48, 16 } },
-            },
-            section_c = {},
-          },
-          right = {
-            section_a = {
-              { type = "string", name = "date", params = { "%H:%M" } },
-            },
-            section_b = {
-              { type = "string", name = "date", params = { "%a %d %b" } },
-            },
-            section_c = {},
-          },
-        },
-
-        status_line = {
-          left = {
-            section_a = {
-              { type = "string", name = "tab_mode" },
-            },
-            section_b = {
-              { type = "string", name = "hovered_size" },
-            },
-            section_c = {
-              { type = "string", custom = true, name = "󰌌 q quit · ~ help · / find · s search · z fzf · Z zoxide · Space select" },
-            },
-          },
-          right = {
-            section_a = {
-              { type = "string", name = "cursor_position" },
-            },
-            section_b = {
-              { type = "string", name = "cursor_percentage" },
-            },
-            section_c = {
-              { type = "coloreds", name = "count" },
-              { type = "coloreds", name = "permissions" },
-            },
-          },
-        },
-      })
-    '';
   };
 
   git = {
