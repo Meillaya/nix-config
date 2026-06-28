@@ -17,9 +17,6 @@
     force = true;
   };
   ".config/ghostty/config.ghostty".source = ./config/ghostty/config.ghostty;
-  ".config/fastfetch/ghostty.jsonc".source = ./config/fastfetch/ghostty.jsonc;
-  ".config/fastfetch/kitty.jsonc".source = ./config/fastfetch/ghostty.jsonc;
-  ".config/fastfetch/konsole.jsonc".source = ./config/fastfetch/ghostty.jsonc;
   ".config/fastfetch/snoopy-mugiwara.png".source = ./config/fastfetch/snoopy-mugiwara.png;
 
   ".config/waybar/config".source = ./config/waybar/config;

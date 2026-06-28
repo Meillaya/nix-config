@@ -42,8 +42,8 @@ in
       search = "rg -p --glob '!node_modules/*'";
     };
     bashrcExtra = ''
-      if [[ $- == *i* && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
-        export FASTFETCH_SHELL_INIT_DONE=1
+      if [[ $- == *i* && -t 1 && "''${TERM:-}" != "dumb" && "''${FASTFETCH_INIT_PID:-}" != "$$" ]] && command -v fastfetch >/dev/null 2>&1; then
+        export FASTFETCH_INIT_PID=$$
         fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
         echo
       fi
@@ -180,8 +180,8 @@ in
       set -gx EDITOR "emacsclient -t"
       set -gx VISUAL "emacsclient -c -a emacs"
 
-      if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test -z "$FASTFETCH_SHELL_INIT_DONE"; and command -q fastfetch
-        set -gx FASTFETCH_SHELL_INIT_DONE 1
+      if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test "$FASTFETCH_INIT_PID" != "$fish_pid"; and command -q fastfetch
+        set -gx FASTFETCH_INIT_PID $fish_pid
         fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
         echo
       end
@@ -266,8 +266,8 @@ in
           fi
         fi
 
-        if [[ -o interactive && -t 1 && "''${TERM:-}" != "dumb" && -z "''${FASTFETCH_SHELL_INIT_DONE:-}" ]] && command -v fastfetch >/dev/null 2>&1; then
-          export FASTFETCH_SHELL_INIT_DONE=1
+        if [[ -o interactive && -t 1 && "''${TERM:-}" != "dumb" && "''${FASTFETCH_INIT_PID:-}" != "$$" ]] && command -v fastfetch >/dev/null 2>&1; then
+          export FASTFETCH_INIT_PID=$$
           fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
           echo
         fi
