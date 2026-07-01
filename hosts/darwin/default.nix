@@ -34,10 +34,13 @@ let user = "mei"; in
 
   # Turn off NIX_PATH warnings now that we're using flakes
 
-  # Load configuration that is shared across systems
+  # Load Darwin packages at the system level so nix-darwin copies GUI app
+  # bundles into /Applications/Nix Apps, where LaunchServices and Spotlight can
+  # discover them. Home Manager still installs the same package set for user
+  # profile CLI access.
   environment.systemPackages = with pkgs; [
-    agenix.packages."${pkgs.system}".default
-  ] ++ (import ../../modules/shared/packages.nix { inherit pkgs; includeDocker = false; });
+    agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
+  ] ++ (import ../../modules/darwin/packages.nix { inherit pkgs; });
 
   system = {
     checks.verifyNixPath = false;

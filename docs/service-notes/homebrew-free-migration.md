@@ -40,8 +40,16 @@ open "/Applications/Nix Apps/Foo.app"
 Re-pin Dock aliases from the Nix-owned app bundle paths if macOS keeps pointing
 at an old app location.
 
-## Deferred apps
+## Former cask decisions
 
-The previous cask set included Helium, OmniWM, Stremio, and Sublime Text. They
-are intentionally not reintroduced here until each has a Nix-managed package,
-local derivation, or explicit manual-vendor install decision.
+No former app cask is deferred. The remaining apps have explicit non-Homebrew
+management decisions:
+
+- Helium: local Darwin derivation `helium` in `overlays/20-helium.nix`, sourced from the official `imputnet/helium-macos` DMG release.
+- OmniWM: local Darwin derivation `omniwm` in `overlays/20-helium.nix`, sourced from the upstream GitHub release zip and exposing `omniwmctl` through the Nix profile.
+- Stremio: local Darwin derivation `stremio` in `overlays/20-helium.nix`, sourced from the official Stremio macOS DMG.
+- Sublime Text: local Darwin derivation `sublimeText` in `overlays/20-helium.nix`, sourced from the official Sublime Text macOS zip.
+
+After `nix run .#build-switch`, these app bundles should appear under
+`/Applications/Nix Apps` and can be removed from Homebrew with `brew uninstall
+--cask` while preserving user data.

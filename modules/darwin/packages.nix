@@ -5,10 +5,14 @@ let shared-packages = import ../shared/packages.nix { inherit pkgs; includeDocke
 shared-packages ++ [
   # App replacements formerly installed as casks
   ghostty-bin
+  helium
   iterm2
   obsidian
+  omniwm
   postman
   raycast
+  stremio
+  sublimeText
   vesktop
 
   # Development tools
