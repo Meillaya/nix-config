@@ -50,7 +50,7 @@ in
     file = shared-files // standalone-files // secret-files;
     sessionVariables = {
       BROWSER = "firefox";
-      TERM = "alacritty";
+      TERM = "xterm-256color";
       QT_QPA_PLATFORMTHEME = "qt5ct";
       GTK_THEME = "adw-gtk3-dark";
     };

@@ -204,7 +204,6 @@ EOF
   '';
 in [
   # General packages for development and system management
-  alacritty
   ast-grep
   bash-completion
   bat

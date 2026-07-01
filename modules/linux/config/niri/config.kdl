@@ -41,7 +41,7 @@ binds {
     MOD+SHIFT+ESCAPE { show-hotkey-overlay; }
 
     // ─── Launchers ───
-    MOD+RETURN hotkey-overlay-title="Open Terminal: Alacritty" { spawn-sh "alacritty"; }
+    MOD+RETURN hotkey-overlay-title="Open Terminal: Ghostty" { spawn-sh "ghostty"; }
     MOD+SPACE hotkey-overlay-title="Open Launcher: Noctalia" { spawn-sh "noctalia-shell ipc call launcher toggle"; }
     MOD+B hotkey-overlay-title="Open Browser: Zen" { spawn-sh "zen"; }
     MOD+E hotkey-overlay-title="Open Files: Dolphin" { spawn-sh "env QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma- GTK_THEME=Sweet-Dark GTK_USE_PORTAL=1 dolphin"; }
@@ -306,7 +306,7 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"^Alacritty$"#
+    match app-id=r#"^(ghostty|com\.mitchellh\.ghostty)$"#
     default-column-width { proportion 0.50; }
 }
 
