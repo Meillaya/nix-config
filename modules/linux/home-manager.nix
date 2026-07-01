@@ -7,13 +7,13 @@ let
   };
 
   beautylineSrc = pkgs.fetchzip {
-    url = "https://gitlab.com/garuda-linux/themes-and-settings/artwork/beautyline/-/archive/3a501dcc1a0a1bb2281a62e5507e5843f8bea531/beautyline-3a501dcc1a0a1bb2281a62e5507e5843f8bea531.tar.gz";
-    hash = "sha256-KQ7t+vNyC76LateNE5LkN63X31HLCu9i75ybnC0W6rI=";
+    url = "https://gitlab.com/garuda-linux/themes-and-settings/artwork/beautyline/-/archive/cb19ed82a10c49e035a68000860c9a49fea79ff2/beautyline-cb19ed82a10c49e035a68000860c9a49fea79ff2.tar.gz";
+    hash = "sha256-gQPS0Zea02c0dWLUtTzvpfaYFnXSftEmVD1nuBEsh9g=";
   };
 
   candyIconsSrc = pkgs.fetchzip {
     url = "https://github.com/EliverLara/candy-icons/archive/83512fbcadcb7e1015ebbe1729a1894946b021be.tar.gz";
-    hash = "sha256-TzovzmfrUuaSrtpKCQxyXcih7cKSBhBtMpZLVwY/ScA=";
+    hash = "sha256-66uIsy2Z3K5ZPMKzCJeVjgsOULRFGVCPaJagef/j5WI=";
   };
 
   patchedDr460nizedKvantum = pkgs.runCommand "dr460nized-kvantum-white-text" { } ''

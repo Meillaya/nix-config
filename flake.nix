@@ -2,6 +2,10 @@
   description = "Starter Configuration with secrets for MacOS and NixOS";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    emacs-overlay = {
+      url = "github:dustinlyons/emacs-overlay";
+      flake = false;
+    };
     agenix.url = "github:ryantm/agenix";
     home-manager.url = "github:nix-community/home-manager";
     darwin = {
@@ -22,14 +26,61 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = { self, darwin, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia } @inputs:
+  outputs = { self, darwin, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia, emacs-overlay } @inputs:
     let
       user = "mei";
       secrets = ./secrets;
-      emacsOverlaySha256 = "11p1c1l04zrn8dd5w8zyzlv172z05dwi9avbckav4d5fk043m754";
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
       forAllSystems = f: nixpkgs.lib.genAttrs (linuxSystems ++ darwinSystems) f;
+      mkConfiguredPkgs = system: import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+          allowBroken = true;
+          allowInsecure = false;
+          permittedInsecurePackages = [
+            "pnpm-10.29.2"
+          ];
+          allowUnsupportedSystem = true;
+        };
+        overlays = sharedOverlays;
+      };
+      localPackageNamesFor = system:
+        [
+          "feather-font"
+          "helium"
+          "oh-my-codex-sidecar"
+          "oh-my-claude-sisyphus-sidecar"
+        ]
+        ++ nixpkgs.lib.optionals (nixpkgs.lib.elem system darwinSystems) [
+          "helium-browser"
+          "omniwm"
+          "raycast"
+          "stremio"
+          "sublimeText"
+          "sublime-text"
+        ];
+      localUpdaterNamesFor = system:
+        [
+          "feather-font"
+          "helium"
+          "oh-my-codex-sidecar"
+          "oh-my-claude-sisyphus-sidecar"
+        ]
+        ++ nixpkgs.lib.optionals (nixpkgs.lib.elem system darwinSystems) [
+          "omniwm"
+          "raycast"
+          "stremio"
+          "sublimeText"
+        ];
+      mkLocalPackages = system:
+        let
+          pkgs = mkConfiguredPkgs system;
+          packageOrNull = name: pkgs.${name} or null;
+        in
+        nixpkgs.lib.filterAttrs (_name: value: value != null)
+          (nixpkgs.lib.genAttrs (localPackageNamesFor system) packageOrNull);
       sharedOverlays =
         let
           path = ./overlays;
@@ -42,10 +93,7 @@
               pathExists (path + ("/" + n + "/default.nix")))
             (attrNames (readDir path)))
         ++ [
-          (import (builtins.fetchTarball {
-            url = "https://github.com/dustinlyons/emacs-overlay/archive/refs/heads/master.tar.gz";
-            sha256 = emacsOverlaySha256;
-          }))
+          (import emacs-overlay)
         ];
       devShell = system: let pkgs = nixpkgs.legacyPackages.${system}; in {
         default = with pkgs; mkShell {
@@ -156,16 +204,7 @@ EOF
       mkStandaloneLinuxHome =
         system:
         let
-          pkgs = import nixpkgs {
-            inherit system;
-            config = {
-              allowUnfree = true;
-              allowBroken = true;
-              allowInsecure = false;
-              allowUnsupportedSystem = true;
-            };
-            overlays = sharedOverlays;
-          };
+          pkgs = mkConfiguredPkgs system;
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
@@ -339,6 +378,251 @@ EOF
             echo "Secrets synced into ./secrets from $repo"
           '')}/bin/sync-secrets";
         };
+      mkUpdateApp = system:
+        let
+          pkgs = mkConfiguredPkgs system;
+          linuxHomeSourcesUpdater = pkgs.writeShellApplication {
+            name = "update-linux-home-sources";
+            runtimeInputs = [
+              pkgs.curl
+              pkgs.git
+              pkgs.jq
+              pkgs.nix
+              pkgs.python3
+            ];
+            text = ''
+              set -euo pipefail
+
+              repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+              cd "$repo_root"
+              source_file="''${LINUX_HOME_MANAGER_FILE:-modules/linux/home-manager.nix}"
+
+              garuda_sha="$(curl -fsSL 'https://gitlab.com/api/v4/projects/garuda-linux%2Fthemes-and-settings%2Fsettings%2Fgaruda-dr460nized/repository/commits?per_page=1' | jq -r '.[0].id')"
+              beautyline_sha="$(curl -fsSL 'https://gitlab.com/api/v4/projects/garuda-linux%2Fthemes-and-settings%2Fartwork%2Fbeautyline/repository/commits?per_page=1' | jq -r '.[0].id')"
+              candy_sha="$(curl -fsSL 'https://api.github.com/repos/EliverLara/candy-icons/commits?per_page=1' | jq -r '.[0].sha')"
+
+              if [[ -z "$garuda_sha" || "$garuda_sha" == "null" ]]; then
+                echo "Could not determine latest garuda-dr460nized commit" >&2
+                exit 1
+              fi
+              if [[ -z "$beautyline_sha" || "$beautyline_sha" == "null" ]]; then
+                echo "Could not determine latest beautyline commit" >&2
+                exit 1
+              fi
+              if [[ -z "$candy_sha" || "$candy_sha" == "null" ]]; then
+                echo "Could not determine latest candy-icons commit" >&2
+                exit 1
+              fi
+
+              garuda_url="https://gitlab.com/garuda-linux/themes-and-settings/settings/garuda-dr460nized/-/archive/$garuda_sha/garuda-dr460nized-$garuda_sha.tar.gz"
+              beautyline_url="https://gitlab.com/garuda-linux/themes-and-settings/artwork/beautyline/-/archive/$beautyline_sha/beautyline-$beautyline_sha.tar.gz"
+              candy_url="https://github.com/EliverLara/candy-icons/archive/$candy_sha.tar.gz"
+
+              prefetch_unpack() {
+                local url="$1"
+                local base32_hash
+                base32_hash="$(nix-prefetch-url --unpack "$url")"
+                nix hash convert --hash-algo sha256 --to sri "$base32_hash"
+              }
+
+              garuda_hash="$(prefetch_unpack "$garuda_url")"
+              beautyline_hash="$(prefetch_unpack "$beautyline_url")"
+              candy_hash="$(prefetch_unpack "$candy_url")"
+
+              python3 - "$source_file" \
+                "$garuda_url" "$garuda_hash" \
+                "$beautyline_url" "$beautyline_hash" \
+                "$candy_url" "$candy_hash" <<'PY'
+import os
+import re
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+garuda_url, garuda_hash, beautyline_url, beautyline_hash, candy_url, candy_hash = sys.argv[2:8]
+text = path.read_text()
+
+def replace_once(pattern, replacement, label, flags=re.S):
+    global text
+    text, count = re.subn(pattern, replacement, text, count=1, flags=flags)
+    if count != 1:
+        raise SystemExit(f"Could not update {label}; expected exactly one match, got {count}")
+
+replace_once(
+    r'(garudaDr460nized = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{garuda_url}";\g<2>"{garuda_hash}";',
+    "garudaDr460nized source",
+)
+replace_once(
+    r'(beautylineSrc = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{beautyline_url}";\g<2>"{beautyline_hash}";',
+    "beautyline source",
+)
+replace_once(
+    r'(candyIconsSrc = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{candy_url}";\g<2>"{candy_hash}";',
+    "candy-icons source",
+)
+
+with tempfile.NamedTemporaryFile("w", dir=path.parent, delete=False) as tmp:
+    tmp.write(text)
+    tmp_path = Path(tmp.name)
+os.replace(tmp_path, path)
+PY
+
+              echo "Linux Home Manager source pins are updated"
+            '';
+          };
+          packageUpdater = name:
+            let
+              pkg = pkgs.${name} or null;
+            in
+            if pkg != null && pkg ? passthru && pkg.passthru ? updateScript
+            then pkg.passthru.updateScript
+            else null;
+          validPackageUpdaterNames = nixpkgs.lib.filter
+            (name: packageUpdater name != null)
+            (localUpdaterNamesFor system);
+          validUpdaterNames = validPackageUpdaterNames ++ [ "linux-home-sources" ];
+          validUpdaterNamesShell = nixpkgs.lib.concatMapStringsSep " " nixpkgs.lib.escapeShellArg validUpdaterNames;
+          validUpdaterNamesText = nixpkgs.lib.concatStringsSep ", " validUpdaterNames;
+          updaterCommands =
+            nixpkgs.lib.concatMapStringsSep "\n"
+              (name:
+                let script = packageUpdater name;
+                in nixpkgs.lib.optionalString (script != null) ''
+                  run_local_updater ${nixpkgs.lib.escapeShellArg name} ${nixpkgs.lib.escapeShellArg (toString script)}
+                '')
+              validPackageUpdaterNames
+            + ''
+              run_local_updater linux-home-sources ${nixpkgs.lib.escapeShellArg (toString (nixpkgs.lib.getExe linuxHomeSourcesUpdater))}
+            '';
+        in {
+          type = "app";
+          program = "${(pkgs.writeShellScriptBin "update" ''
+            set -euo pipefail
+
+            repo_root="$(${pkgs.git}/bin/git rev-parse --show-toplevel 2>/dev/null || pwd)"
+            cd "$repo_root"
+
+            run_flake_update=1
+            run_local_updates=1
+            selected_packages=()
+            flake_args=()
+            valid_updaters=(${validUpdaterNamesShell})
+
+            usage() {
+              cat <<'EOF'
+Usage: nix run .#update -- [options] [flake-input...]
+
+Updates flake inputs and repo-local fixed-output package pins.
+
+Options:
+  --flake-only       Run only nix flake update
+  --local-only       Run only local package updaters
+  --skip-flake       Do not run nix flake update
+  --skip-local       Do not run local package updaters
+  --package NAME     Run only the named local package updater; repeatable
+  -h, --help         Show this help
+
+Examples:
+  nix run .#update
+  nix run .#update -- nixpkgs home-manager
+  nix run .#update -- --local-only --package raycast
+EOF
+            }
+
+            valid_updater() {
+              local name="$1"
+              local valid
+              for valid in "''${valid_updaters[@]}"; do
+                if [ "$valid" = "$name" ]; then
+                  return 0
+                fi
+              done
+              return 1
+            }
+
+            while [ "$#" -gt 0 ]; do
+              case "$1" in
+                --flake-only)
+                  run_local_updates=0
+                  shift
+                  ;;
+                --local-only)
+                  run_flake_update=0
+                  shift
+                  ;;
+                --skip-flake)
+                  run_flake_update=0
+                  shift
+                  ;;
+                --skip-local)
+                  run_local_updates=0
+                  shift
+                  ;;
+                --package)
+                  if [ "$#" -lt 2 ] || [[ "$2" == --* ]]; then
+                    echo "update: --package requires a local updater name" >&2
+                    usage >&2
+                    exit 2
+                  fi
+                  selected_packages+=("$2")
+                  shift 2
+                  ;;
+                --help|-h)
+                  usage
+                  exit 0
+                  ;;
+                *)
+                  flake_args+=("$1")
+                  shift
+                  ;;
+              esac
+            done
+
+            for selected in "''${selected_packages[@]}"; do
+              if ! valid_updater "$selected"; then
+                echo "update: unknown local updater: $selected" >&2
+                echo "valid local updaters: ${validUpdaterNamesText}" >&2
+                exit 2
+              fi
+            done
+
+            if [ "$run_flake_update" -eq 1 ]; then
+              ${pkgs.nix}/bin/nix flake update "''${flake_args[@]}"
+            fi
+
+            package_selected() {
+              local name="$1"
+              if [ "''${#selected_packages[@]}" -eq 0 ]; then
+                return 0
+              fi
+              local selected
+              for selected in "''${selected_packages[@]}"; do
+                if [ "$selected" = "$name" ]; then
+                  return 0
+                fi
+              done
+              return 1
+            }
+
+            run_local_updater() {
+              local name="$1"
+              local script="$2"
+              if ! package_selected "$name"; then
+                return 0
+              fi
+              printf '\n== Updating local package: %s ==\n' "$name"
+              "$script"
+            }
+
+            if [ "$run_local_updates" -eq 1 ]; then
+              ${updaterCommands}
+            fi
+          '')}/bin/update";
+        };
       mkLinuxApps = system: {
         "apply" = mkApp "apply" system;
         "build-switch" = mkApp "build-switch" system;
@@ -352,6 +636,7 @@ EOF
         "home-news" = mkHomeNewsApp system;
         "home-switch" = mkHomeSwitchApp system;
         "search-pkgs" = mkSearchPkgsApp system;
+        "update" = mkUpdateApp system;
       };
       mkDarwinApps = system: {
         "apply" = mkApp "apply" system;
@@ -363,10 +648,12 @@ EOF
         "check-keys" = mkApp "check-keys" system;
         "rollback" = mkApp "rollback" system;
         "search-pkgs" = mkSearchPkgsApp system;
+        "update" = mkUpdateApp system;
       };
     in
     {
       devShells = forAllSystems devShell;
+      packages = forAllSystems mkLocalPackages;
       apps = nixpkgs.lib.genAttrs linuxSystems mkLinuxApps // nixpkgs.lib.genAttrs darwinSystems mkDarwinApps;
       homeConfigurations = {
         "standalone-linux" = mkStandaloneLinuxHome "x86_64-linux";

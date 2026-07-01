@@ -36,9 +36,11 @@ let user = "mei";
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking = {
-    hostName = "%HOST%"; # Define your hostname.
-    useDHCP = false;
-    interfaces."%INTERFACE%".useDHCP = true;
+    hostName =
+      if pkgs.stdenv.hostPlatform.isAarch64
+      then "nixos-aarch64"
+      else "nixos";
+    useDHCP = true;
   };
 
   nix = {

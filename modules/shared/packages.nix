@@ -108,8 +108,8 @@ let
 
     prefix="''${AI_SIDECAR_PREFIX:-$HOME/.local}"
     ${nodejs_24}/bin/npm install --global --prefix "$prefix" \
-      oh-my-codex@0.15.0 \
-      oh-my-claude-sisyphus@4.13.3
+      oh-my-codex@${oh-my-codex-sidecar.version} \
+      oh-my-claude-sisyphus@${oh-my-claude-sisyphus-sidecar.version}
   '';
   nixpkgsSearch = writeShellScriptBin "nixpkgs-search" ''
     set -euo pipefail

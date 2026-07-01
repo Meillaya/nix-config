@@ -5,14 +5,23 @@ let
   xdg_configHome  = "/home/${user}/.config";
   shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib secrets; };
   shared-files = import ../shared/files.nix { inherit config pkgs lib; };
+  replaceTemplateVars =
+    file: replacements:
+    let
+      names = builtins.attrNames replacements;
+    in
+    builtins.replaceStrings
+      (map (name: "@${name}@") names)
+      (map (name: replacements.${name}) names)
+      (builtins.readFile file);
 
-  polybar-user_modules = builtins.readFile (pkgs.replaceVars ./config/polybar/user_modules.ini {
+  polybar-user_modules = replaceTemplateVars ./config/polybar/user_modules.ini {
     packages = "${xdg_configHome}/polybar/bin/check-nixos-updates.sh";
     searchpkgs = "${xdg_configHome}/polybar/bin/search-nixos-updates.sh";
     launcher = "${xdg_configHome}/polybar/bin/launcher.sh";
     powermenu = "${xdg_configHome}/rofi/bin/powermenu.sh";
     calendar = "${xdg_configHome}/polybar/bin/popup-calendar.sh";
-  });
+  };
 
   polybar-config = pkgs.replaceVars ./config/polybar/config.ini {
     font0 = "DejaVu Sans:size=12;3";

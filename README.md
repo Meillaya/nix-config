@@ -38,6 +38,44 @@ Then add the chosen attribute to:
 - `modules/nixos/packages.nix` for NixOS only
 - `modules/standalone-linux/packages.nix` for existing non-NixOS Linux machines
 
+
+## Update packages
+
+Use the repo update app instead of plain `nix flake update` when you want
+flake inputs and supported repo-local fixed-output package pins to move together:
+
+```bash
+nix run .#update
+```
+
+This runs `nix flake update` for flake inputs and then runs explicit updaters
+for package overlays that cannot be represented as flake inputs. Package
+overlays are also exposed under `packages.<system>.<name>` so update tools can
+target them directly:
+
+```bash
+nix build .#raycast
+nix build .#helium
+```
+
+You can pass normal flake-update input names after `--`:
+
+```bash
+nix run .#update -- nixpkgs home-manager
+```
+
+Useful update modes:
+
+```bash
+nix run .#update -- --flake-only
+nix run .#update -- --local-only --package raycast
+nix run .#update -- --local-only --package linux-home-sources
+```
+
+Current repo-local updater coverage includes Raycast, Helium, OmniWM, Stremio,
+Sublime Text, Feather Font, the AI sidecar packages, and the Linux Home Manager
+theme/icon source pins.
+
 ## macOS
 
 Apply the active Darwin config:
