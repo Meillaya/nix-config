@@ -42,6 +42,11 @@ let user = "mei"; in
     agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
   ] ++ (import ../../modules/darwin/packages.nix { inherit pkgs; });
 
+  fonts.packages = with pkgs; [
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
+  ];
+
   system = {
     checks.verifyNixPath = false;
     primaryUser = user;
