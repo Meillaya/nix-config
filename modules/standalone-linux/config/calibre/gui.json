@@ -423,28 +423,28 @@
   },
   "geometry-of-calibre_main_window_geometry": {
     "frame_geometry": {
-      "height": 676,
+      "height": 1358,
       "width": 1691,
       "x": 0,
       "y": 0
     },
     "full_screened": false,
     "geometry": {
-      "height": 676,
+      "height": 1358,
       "width": 1691,
       "x": 0,
       "y": 0
     },
     "maximized": false,
     "normal_geometry": {
-      "height": 676,
+      "height": 1358,
       "width": 1691,
       "x": 0,
       "y": 0
     },
     "qt": {
       "__class__": "bytearray",
-      "__value__": "AdnQywADAAAAAAAAAAAAAAAABpoAAAKjAAAAAAAAAAAAAAaaAAACowAAAAAAAAAADXAAAAAAAAAAAAAABpoAAAKj"
+      "__value__": "AdnQywADAAAAAAAAAAAAAAAABpoAAAVNAAAAAAAAAAAAAAaaAAAFTQAAAAAAAAAADXAAAAAAAAAAAAAABpoAAAVN"
     },
     "screen": {
       "depth": 32,
@@ -1656,11 +1656,11 @@
   },
   "library_usage_stats": {
     "/media/mei3/Calibre/Fantasy - Science Fiction": 3,
-    "/media/mei3/Calibre/General": 107,
+    "/media/mei3/Calibre/General": 109,
     "/media/mei3/Calibre/NYRB": 5,
     "/media/mei3/Calibre/Science and Math": 27,
     "/media/mei3/Calibre/Temp": 9,
-    "/media/mei3/Calibre/Theory": 102
+    "/media/mei3/Calibre/Theory": 104
   },
   "light_palette_name": "",
   "light_palettes": {

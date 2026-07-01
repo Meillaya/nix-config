@@ -116,14 +116,23 @@ in
 
       fastfetch() {
           local arg
+          local fastfetch_config=""
           for arg in "$@"; do
               case "$arg" in
                   -c|--config|--config=*) command fastfetch "$@"; return ;;
               esac
           done
 
-          if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-              command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+          if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+          elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
+          elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
+              fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
+          fi
+
+          if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
+              command fastfetch --config "$fastfetch_config" "$@"
           else
               command fastfetch "$@"
           fi
@@ -133,7 +142,12 @@ in
 
   fish = {
     enable = true;
-    generateCompletions = true;
+    # fish 4.8.0 dropped `share/fish/tools/create_manpage_completions.py`,
+    # which home-manager's auto-generated completion step calls for every
+    # package with a manpage. Disable until upstream lands a 4.8-compatible
+    # generator. Static `share/fish/vendor_completions.d/` files still work;
+    # add hand-rolled entries under `programs.fish.completions` as needed.
+    generateCompletions = false;
     shellAliases = {
       pn = "pnpm";
       px = "pnpx";
@@ -149,6 +163,8 @@ in
         nix-shell '<nixpkgs>' -A $argv[1]
       '';
       fastfetch.body = ''
+        set -l fastfetch_config ""
+
         for arg in $argv
           switch $arg
             case -c --config '--config=*'
@@ -157,8 +173,16 @@ in
           end
         end
 
-        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty; and test -r "$HOME/.config/fastfetch/ghostty.jsonc"
-          command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" $argv
+        if test "$TERM_PROGRAM" = ghostty -o "$TERM" = xterm-ghostty
+          set fastfetch_config "$HOME/.config/fastfetch/ghostty.jsonc"
+        else if test -n "$KITTY_PID" -o -n "$KITTY_WINDOW_ID" -o "$TERM" = xterm-kitty
+          set fastfetch_config "$HOME/.config/fastfetch/kitty.jsonc"
+        else if test -n "$KONSOLE_VERSION"
+          set fastfetch_config "$HOME/.config/fastfetch/konsole.jsonc"
+        end
+
+        if test -n "$fastfetch_config" -a -r "$fastfetch_config"
+          command fastfetch --config "$fastfetch_config" $argv
         else
           command fastfetch $argv
         end
@@ -216,6 +240,9 @@ in
 
   zsh = {
     enable = true;
+    # Adopt the XDG layout: zsh dotfiles live under ~/.config/zsh/.
+    # HM exports $ZDOTDIR for us so zsh reads from there automatically.
+    dotDir = "${config.xdg.configHome}/zsh";
     enableCompletion = true;
     envExtra = ''
       # Home Manager owns zsh startup; skip global zshrc files before
@@ -350,14 +377,23 @@ in
 
         fastfetch() {
             local arg
+            local fastfetch_config=""
             for arg in "$@"; do
                 case "$arg" in
                     -c|--config|--config=*) command fastfetch "$@"; return ;;
                 esac
             done
 
-            if [[ ("''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty) && -r "$HOME/.config/fastfetch/ghostty.jsonc" ]]; then
-                command fastfetch --config "$HOME/.config/fastfetch/ghostty.jsonc" "$@"
+            if [[ "''${TERM_PROGRAM-}" == ghostty || "''${TERM-}" == xterm-ghostty ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/ghostty.jsonc"
+            elif [[ -n "''${KITTY_PID-}" || -n "''${KITTY_WINDOW_ID-}" || "''${TERM-}" == xterm-kitty ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/kitty.jsonc"
+            elif [[ -n "''${KONSOLE_VERSION-}" ]]; then
+                fastfetch_config="$HOME/.config/fastfetch/konsole.jsonc"
+            fi
+
+            if [[ -n "$fastfetch_config" && -r "$fastfetch_config" ]]; then
+                command fastfetch --config "$fastfetch_config" "$@"
             else
                 command fastfetch "$@"
             fi
@@ -451,145 +487,15 @@ in
       ];
     };
 
+    # Use the upstream `noctalia` flavor (yazi v25+ feature) instead of a
+    # hand-rolled theme. The flavor must be present at runtime in
+    # $XDG_CONFIG_HOME/yazi/flavors/ (or yazi's system flavor dir); noctalia
+    # ships it. See <https://yazi-rs.github.io/docs/flavors/overview>.
     theme = {
-      mgr = {
-        cwd = { fg = yaziPalette.blue; bold = true; };
-        find_keyword = { fg = yaziPalette.yellow; bold = true; italic = true; underline = true; };
-        find_position = { fg = yaziPalette.mauve; bold = true; };
-        symlink_target = { fg = yaziPalette.teal; italic = true; };
-        marker_copied = { fg = yaziPalette.green; bg = yaziPalette.green; };
-        marker_cut = { fg = yaziPalette.red; bg = yaziPalette.red; };
-        marker_marked = { fg = yaziPalette.sky; bg = yaziPalette.sky; };
-        marker_selected = { fg = yaziPalette.yellow; bg = yaziPalette.yellow; };
-        marker_symbol = "▌";
-        count_copied = { fg = yaziPalette.base; bg = yaziPalette.green; bold = true; };
-        count_cut = { fg = yaziPalette.base; bg = yaziPalette.red; bold = true; };
-        count_selected = { fg = yaziPalette.base; bg = yaziPalette.yellow; bold = true; };
-        border_symbol = "│";
-        border_style = { fg = yaziPalette.surface2; };
+      flavor = {
+        dark = "noctalia";
+        light = "noctalia";
       };
-
-      tabs = {
-        active = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
-        inactive = { fg = yaziPalette.subtext1; bg = yaziPalette.surface0; };
-        sep_inner = { open = ""; close = ""; };
-        sep_outer = { open = ""; close = ""; };
-      };
-
-      mode = {
-        normal_main = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
-        normal_alt = { fg = yaziPalette.mauve; bg = yaziPalette.surface0; };
-        select_main = { fg = yaziPalette.base; bg = yaziPalette.peach; bold = true; };
-        select_alt = { fg = yaziPalette.peach; bg = yaziPalette.surface0; };
-        unset_main = { fg = yaziPalette.base; bg = yaziPalette.red; bold = true; };
-        unset_alt = { fg = yaziPalette.red; bg = yaziPalette.surface0; };
-      };
-
-      indicator = {
-        parent = { fg = yaziPalette.mauve; reversed = true; };
-        current = { fg = yaziPalette.blue; reversed = true; };
-        preview = { fg = yaziPalette.green; underline = true; };
-        padding = { open = "▐"; close = "▌"; };
-      };
-
-      status = {
-        overall = { fg = yaziPalette.text; bg = yaziPalette.mantle; };
-        sep_left = { open = ""; close = ""; };
-        sep_right = { open = ""; close = ""; };
-        perm_sep = { fg = yaziPalette.overlay1; };
-        perm_type = { fg = yaziPalette.green; };
-        perm_read = { fg = yaziPalette.yellow; };
-        perm_write = { fg = yaziPalette.red; };
-        perm_exec = { fg = yaziPalette.sky; };
-        progress_label = { fg = yaziPalette.text; bold = true; };
-        progress_normal = { fg = yaziPalette.green; bg = yaziPalette.surface0; };
-        progress_error = { fg = yaziPalette.red; bg = yaziPalette.surface0; };
-      };
-
-      which = {
-        cols = 3;
-        mask = { bg = yaziPalette.crust; };
-        cand = { fg = yaziPalette.sky; bold = true; };
-        rest = { fg = yaziPalette.overlay1; };
-        desc = { fg = yaziPalette.mauve; };
-        separator = " 󰁔 ";
-        separator_style = { fg = yaziPalette.surface2; };
-      };
-
-      confirm = {
-        border = { fg = yaziPalette.mauve; };
-        title = { fg = yaziPalette.mauve; bold = true; };
-        body = { fg = yaziPalette.text; };
-        list = { fg = yaziPalette.subtext1; };
-        btn_yes = { fg = yaziPalette.base; bg = yaziPalette.green; bold = true; };
-        btn_no = { fg = yaziPalette.text; bg = yaziPalette.surface1; };
-        btn_labels = [ "  Yes  " "  No  " ];
-      };
-
-      spot = {
-        border = { fg = yaziPalette.blue; };
-        title = { fg = yaziPalette.blue; bold = true; };
-        tbl_col = { fg = yaziPalette.mauve; bold = true; };
-        tbl_cell = { fg = yaziPalette.yellow; };
-      };
-
-      notify = {
-        title_info = { fg = yaziPalette.green; bold = true; };
-        title_warn = { fg = yaziPalette.yellow; bold = true; };
-        title_error = { fg = yaziPalette.red; bold = true; };
-        icon_info = "";
-        icon_warn = "";
-        icon_error = "";
-      };
-
-      pick = {
-        border = { fg = yaziPalette.mauve; };
-        active = { fg = yaziPalette.pink; bold = true; };
-        inactive = { fg = yaziPalette.subtext1; };
-      };
-
-      input = {
-        border = { fg = yaziPalette.blue; };
-        title = { fg = yaziPalette.blue; bold = true; };
-        value = { fg = yaziPalette.text; };
-        selected = { fg = yaziPalette.base; bg = yaziPalette.sky; bold = true; };
-      };
-
-      cmp = {
-        border = { fg = yaziPalette.blue; };
-        active = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
-        inactive = { fg = yaziPalette.subtext1; };
-        icon_file = "";
-        icon_folder = "";
-        icon_command = "";
-      };
-
-      tasks = {
-        border = { fg = yaziPalette.mauve; };
-        title = { fg = yaziPalette.mauve; bold = true; };
-        hovered = { fg = yaziPalette.base; bg = yaziPalette.peach; bold = true; };
-      };
-
-      help = {
-        on = { fg = yaziPalette.sky; bold = true; };
-        run = { fg = yaziPalette.pink; };
-        desc = { fg = yaziPalette.text; };
-        hovered = { fg = yaziPalette.base; bg = yaziPalette.mauve; bold = true; };
-        footer = { fg = yaziPalette.base; bg = yaziPalette.lavender; bold = true; };
-      };
-
-      filetype.rules = [
-        { mime = "image/*"; fg = yaziPalette.yellow; }
-        { mime = "{audio,video}/*"; fg = yaziPalette.mauve; }
-        { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}"; fg = yaziPalette.red; }
-        { mime = "application/{pdf,doc,rtf}"; fg = yaziPalette.sky; }
-        { mime = "application/{json,ndjson}"; fg = yaziPalette.green; }
-        { mime = "vfs/{absent,stale}"; fg = yaziPalette.overlay1; }
-        { url = "*"; is = "orphan"; bg = yaziPalette.red; }
-        { url = "*"; is = "exec"; fg = yaziPalette.green; bold = true; }
-        { url = "*"; is = "link"; fg = yaziPalette.teal; }
-        { url = "*/"; fg = yaziPalette.blue; bold = true; }
-      ];
     };
 
     initLua = ''

@@ -278,8 +278,8 @@ in [
   zed-editor
   
   # Programming languages and runtimes
-  elixir
-  erlang
+  beamPackages.elixir
+  beamPackages.erlang
   go
   iverilog
   gopls

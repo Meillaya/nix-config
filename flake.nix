@@ -22,8 +22,11 @@
       inputs.home-manager.follows = "home-manager";
     };
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs";
+      # v5 alpha (native C++ rewrite, builds from source via Meson).
+      # Replaces the legacy noctalia-shell flake that used to publish
+      # Cachix binaries; that repo is gone, so we now track the
+      # `noctalia-dev/noctalia` `main` branch (the v5 line).
+      url = "github:noctalia-dev/noctalia/main";
     };
   };
   outputs = { self, darwin, home-manager, nixpkgs, disko, agenix, zen-browser, noctalia, emacs-overlay } @inputs:

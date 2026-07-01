@@ -7,11 +7,10 @@
   ".config/calibre/save_to_disk.py.json".source = ./config/calibre/save_to_disk.py.json;
   ".config/calibre/metadata_sources/global.json".source = ./config/calibre-metadata-sources-global.json;
   ".config/calibre/conversion/page_setup.py".source = ./config/calibre/conversion/page_setup.py;
-  ".config/noctalia/settings.json".source = ./config/noctalia/settings.json;
+  ".config/noctalia/config.toml".source = ./config/noctalia/config.toml;
   ".claude/.omc-config.json".source = ./config/claude/omc-config.json;
   ".claude/settings.json".source = ./config/claude/settings.json;
   ".claude/CLAUDE.md".source = ./config/claude/CLAUDE.md;
-  ".config/opencode/opencode.json".source = ./config/opencode/opencode.json;
   ".config/zed/settings.json".source = ./config/zed/settings.json;
   ".config/ghostty/config" = {
     source = ./config/ghostty/config.ghostty;
@@ -19,6 +18,8 @@
   };
   ".config/ghostty/config.ghostty".source = ./config/ghostty/config.ghostty;
   ".config/fastfetch/ghostty.jsonc".source = ./config/fastfetch/ghostty.jsonc;
+  ".config/fastfetch/kitty.jsonc".source = ./config/fastfetch/ghostty.jsonc;
+  ".config/fastfetch/konsole.jsonc".source = ./config/fastfetch/ghostty.jsonc;
   ".config/fastfetch/snoopy-mugiwara.png".source = ./config/fastfetch/snoopy-mugiwara.png;
 
   ".config/waybar/config".source = ./config/waybar/config;

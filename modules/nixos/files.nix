@@ -8,7 +8,7 @@ let
 {
 
   "${xdg_configHome}/niri/config.kdl".source = ../linux/config/niri/config.kdl;
-  "${xdg_configHome}/noctalia/settings.json".source = ../standalone-linux/config/noctalia/settings.json;
+  "${xdg_configHome}/noctalia/config.toml".source = ../standalone-linux/config/noctalia/config.toml;
 
   "${xdg_configHome}/bspwm/bspwmrc" = {
     executable = true;
