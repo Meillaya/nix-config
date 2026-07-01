@@ -94,9 +94,6 @@ in
         . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
       fi
 
-      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
-      export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
-      ''}
       export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/bin:$PATH
@@ -192,9 +189,6 @@ in
         source /usr/share/cachyos-fish-config/cachyos-config.fish
       end
 
-      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
-      fish_add_path --prepend /opt/homebrew/bin /opt/homebrew/sbin
-      ''}
       fish_add_path --prepend $HOME/.pnpm-packages/bin $HOME/.pnpm-packages
       fish_add_path --prepend $HOME/.npm-packages/bin $HOME/bin
       fish_add_path --prepend $HOME/.local/bin
@@ -224,8 +218,8 @@ in
     enable = true;
     enableCompletion = true;
     envExtra = ''
-      # Home Manager owns zsh startup; skip global zshrc files that can run
-      # unmanaged Homebrew completions before Powerlevel10k instant prompt.
+      # Home Manager owns zsh startup; skip global zshrc files before
+      # Powerlevel10k instant prompt.
       unsetopt GLOBAL_RCS
     '';
     autocd = false;
@@ -315,9 +309,6 @@ in
         fi
 
         # Define variables for directories
-        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
-        export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:$PATH
-        ''}
         export PATH=$HOME/.pnpm-packages/bin:$HOME/.pnpm-packages:$PATH
         export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
         export PATH=$HOME/.local/bin:$PATH
