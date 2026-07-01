@@ -690,7 +690,10 @@ in
     lfs = {
       enable = true;
     };
-    signing.format = "openpgp";
+    signing = {
+      format = "openpgp";
+      key = "15E95E5E02E51FBDA521A8FE134771C79E4A74F2";
+    };
     settings = {
       user = {
         name = gitName;
