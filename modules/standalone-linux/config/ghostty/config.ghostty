@@ -1,2 +1,10 @@
-# Follow the desktop/system window theme instead of pinning Ghostty colors.
-window-theme = system
+# Ghostty loads built-in themes with the `theme` key.
+# Verify available theme names with: ghostty +list-themes
+theme = Catppuccin Mocha
+
+# On Linux/GTK, make Ghostty's own window chrome follow the terminal theme
+# instead of staying on the desktop/system theme.
+window-theme = ghostty
+
+# Match Konsole: start an interactive login Fish shell instead of relying on ambient shell detection.
+command = /bin/fish --login

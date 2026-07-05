@@ -86,7 +86,7 @@
     {
       "type": "command",
       "key": "󱛟 Storage Devices",
-      "text": "lsblk -dno NAME,SIZE,MODEL | grep -v '^zram' | sed -E 's/[[:space:]]+/ /g' | sed ':a;N;$!ba;s/\\n/ | /g'",
+      "text": "lsblk -dno NAME,SIZE,MODEL | awk '$1 !~ /^zram/ { model=$0; sub(\"^[^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]*\", \"\", model); printf \"%s%s %-7s %s\", (seen++ ? \"\\n\\033[80G\" : \"\"), $1, $2, model }'",
       "keyColor": "cyan"
     },
     "break",

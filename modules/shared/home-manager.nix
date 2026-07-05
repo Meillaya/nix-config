@@ -90,9 +90,8 @@ in
       }
 
       fastfetch() {
-          # Always route through the rich profile (config.jsonc carries the
-          # Snoopy image + full module set). Pass through --config/-c if the
-          # caller wants a specific config; otherwise append no extra args.
+          # Always route through the rich system profile (Snoopy image + full
+          # module set). Pass through --config/-c when explicitly requested.
           if [[ "$*" == *-c* || "$*" == *--config* ]]; then
               command fastfetch "$@"
           else
@@ -125,9 +124,8 @@ in
         nix-shell '<nixpkgs>' -A $argv[1]
       '';
       fastfetch.body = ''
-        # Always route through the rich profile (config.jsonc carries the
-        # Snoopy image + full module set). Pass through --config/-c if the
-        # caller wants a specific config.
+        # Always route through the rich system profile (Snoopy image + full
+        # module set). Pass through --config/-c when explicitly requested.
         for arg in $argv
           switch $arg
             case -c --config '--config=*'
@@ -180,8 +178,11 @@ in
       set -gx EDITOR "emacsclient -t"
       set -gx VISUAL "emacsclient -c -a emacs"
 
-      if status is-interactive; and test -t 1; and test "$TERM" != dumb; and test "$FASTFETCH_INIT_PID" != "$fish_pid"; and command -q fastfetch
-        set -gx FASTFETCH_INIT_PID $fish_pid
+      if status is-interactive; and test -t 1; and test "$TERM" != dumb; and not set -q __HM_FASTFETCH_INIT_DONE; and command -q fastfetch
+        # Keep this guard shell-local rather than exported. `exec fish` inherits
+        # exported variables from the replaced shell, so an exported guard would
+        # suppress the rich fastfetch banner after a terminal reload.
+        set -g __HM_FASTFETCH_INIT_DONE 1
         fastfetch --config "$HOME/.config/fastfetch/config.jsonc"
         echo
       end
@@ -323,7 +324,6 @@ in
 
         fastfetch() {
             local arg
-            local fastfetch_config=""
             for arg in "$@"; do
                 case "$arg" in
                     -c|--config|--config=*) command fastfetch "$@"; return ;;

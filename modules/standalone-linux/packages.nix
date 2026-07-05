@@ -48,6 +48,7 @@ shared-packages ++ [
   ghostty
   helium
   kdePackages.konsole
+  kitty
   kdePackages.polkit-kde-agent-1
 
   # KDE file manager, document viewer, and Sweet/Dr460nized Qt theming
