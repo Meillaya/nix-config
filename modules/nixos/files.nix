@@ -7,7 +7,7 @@ let
   xdg_stateHome  = "${home}/.local/state"; in
 {
 
-  "${xdg_configHome}/niri/config.kdl".source = ../linux/config/niri/config.kdl;
+  "${xdg_configHome}/niri/config.kdl".text = builtins.readFile ../linux/config/niri/config.kdl;
   "${xdg_configHome}/noctalia/config.toml".source = ../standalone-linux/config/noctalia/config.toml;
 
   "${xdg_configHome}/bspwm/bspwmrc" = {

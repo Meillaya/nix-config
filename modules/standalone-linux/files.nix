@@ -1,6 +1,6 @@
 { pkgs, homeDirectory }:
 {
-  ".config/niri/config.kdl".source = ../linux/config/niri/config.kdl;
+  ".config/niri/config.kdl".text = builtins.readFile ../linux/config/niri/config.kdl;
 
   ".config/calibre/gui.json".source = ./config/calibre/gui.json;
   ".config/calibre/tweaks.json".source = ./config/calibre/tweaks.json;
