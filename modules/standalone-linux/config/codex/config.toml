@@ -168,6 +168,10 @@ args = ["@playwright/mcp@latest"]
 # OMX TUI StatusLine (Codex CLI v0.101.0+)
 startup_timeout_sec = 15
 
+[mcp_servers.nixos]
+command = "@mcp-nixos@"
+startup_timeout_sec = 30
+
 [tui]
 status_line = ["model-with-reasoning", "git-branch", "context-remaining", "total-input-tokens", "total-output-tokens", "five-hour-limit", "weekly-limit"]
 

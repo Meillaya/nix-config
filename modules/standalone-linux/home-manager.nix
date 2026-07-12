@@ -1,5 +1,5 @@
 { inputs, secrets }:
-{ config, pkgs, lib, ... }:
+{ pkgs, lib, ... }:
 
 let
   user =
@@ -13,8 +13,14 @@ let
   standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
   codexConfig =
     builtins.replaceStrings
-      [ "/home/mei/.local/lib/node_modules/oh-my-codex" ]
-      [ "${pkgs.oh-my-codex-sidecar}/lib/node_modules/oh-my-codex" ]
+      [
+        "/home/mei/.local/lib/node_modules/oh-my-codex"
+        "@mcp-nixos@"
+      ]
+      [
+        "${pkgs.oh-my-codex-sidecar}/lib/node_modules/oh-my-codex"
+        "${pkgs.mcp-nixos}/bin/mcp-nixos"
+      ]
       (builtins.readFile ./config/codex/config.toml);
   codexHooks =
     builtins.replaceStrings
@@ -44,7 +50,7 @@ in
   home = {
     enableNixpkgsReleaseCheck = false;
     username = user;
-    homeDirectory = homeDirectory;
+    inherit homeDirectory;
     packages = import ./packages.nix { inherit pkgs inputs; };
     file = standalone-files // secret-files;
     sessionVariables = {
