@@ -1,6 +1,7 @@
 { den, ... }:
 {
   den.aspects.nixos-workstation.includes = [
+    den.batteries.hostname
     den.aspects.nix-core
     den.aspects.nixos-base
     den.aspects.storage

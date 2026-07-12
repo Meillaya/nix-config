@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let user = "mei";
     keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p" ]; in
@@ -25,17 +25,6 @@ let user = "mei";
 
   # Set your time zone.
   time.timeZone = "America/New_York";
-
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking = {
-    hostName =
-      if pkgs.stdenv.hostPlatform.isAarch64
-      then "nixos-aarch64"
-      else "nixos";
-    useDHCP = lib.mkDefault true;
-  };
 
   nix = {
     nixPath = [ "nixos-config=/home/${user}/.local/share/src/nixos-config:/etc/nixos" ];
@@ -265,9 +254,7 @@ let user = "mei";
   # It's me, it's you, it's everyone
   users.users = {
     ${user} = {
-      isNormalUser = true;
       extraGroups = [
-        "wheel" # Enable ‘sudo’ for the user.
         "docker"
         "i2c"
         "video"

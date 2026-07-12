@@ -521,15 +521,15 @@ in
         "/Users/${user}/.ssh/config_external"
       )
     ];
-    matchBlocks = {
+    settings = {
       "*" = {
         # Set the default values we want to keep
-        sendEnv = [ "LANG" "LC_*" ];
-        hashKnownHosts = true;
+        SendEnv = [ "LANG" "LC_*" ];
+        HashKnownHosts = true;
       };
       "github.com" = {
-        identitiesOnly = true;
-        identityFile =
+        IdentitiesOnly = true;
+        IdentityFile =
           if pkgs.stdenv.hostPlatform.isLinux then [
             "/home/${user}/.ssh/id_github"
             "/home/${user}/.ssh/id_ed25519"

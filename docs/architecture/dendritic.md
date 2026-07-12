@@ -32,7 +32,9 @@ Den exclusively creates `nixosConfigurations`, `darwinConfigurations`, and
 
 Entity declarations stay thin: identity, architecture, attached aggregate
 aspect, and user/home membership. Put behavior in an aspect, never in the
-registry.
+registry. The Linux output names remain architecture-oriented for compatibility,
+while `hostName` records the network identity (`nixos` or `nixos-aarch64`). Den's
+`hostname` battery carries that entity value into the OS configuration.
 
 ## Aspects and ownership
 
@@ -52,6 +54,11 @@ Home Manager behavior. Home Manager content must remain on a user aspect or be
 delivered explicitly with `provides.to-users` for a genuinely host-selected
 payload. A host-class module must not request Den's `user` argument; current Den
 silently suppresses that route.
+
+The `mei` aspect includes Den's `define-user` and `primary-user` batteries, so
+account names, home directories, normal/admin membership, NetworkManager access,
+and Darwin's primary user all originate from the user entity rather than being
+redeclared in OS modules.
 
 ## Shell policy
 

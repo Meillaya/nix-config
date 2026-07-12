@@ -1,5 +1,11 @@
+{ den, ... }:
 {
   den.aspects.mei = {
+    includes = [
+      den.batteries.define-user
+      den.batteries.primary-user
+    ];
+
     nixos = { pkgs, ... }: {
       environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
       users.users.mei.shell = pkgs.nushell;
@@ -11,6 +17,7 @@
     };
 
     homeManager = { config, pkgs, lib, ... }: {
+      gtk.gtk4.theme = config.gtk.theme;
       home.file = import ../../shared/files.nix { inherit config pkgs lib; };
       programs = (import ../../shared/home-manager.nix { inherit config pkgs lib; }) // {
         nushell = {

@@ -33,8 +33,7 @@ let user = "mei"; in
   # bundles into /Applications/Nix Apps, where LaunchServices and Spotlight can
   # discover them. Home Manager still installs the same package set for user
   # profile CLI access.
-  environment.systemPackages = with pkgs; [
-  ] ++ (import ./packages.nix { inherit pkgs; });
+  environment.systemPackages = import ./packages.nix { inherit pkgs; };
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -43,7 +42,6 @@ let user = "mei"; in
 
   system = {
     checks.verifyNixPath = false;
-    primaryUser = user;
     stateVersion = 5;
 
     defaults = {
