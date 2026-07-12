@@ -8,7 +8,9 @@ terminal.
 This procedure applies the complete `x86_64-linux` or `aarch64-linux` flake
 configuration during installation. It does not install a generic desktop first:
 the first boot is already this repository's NixOS system, including the `mei`
-account and its per-install login password.
+account and its per-install login password. Those architecture-oriented flake
+output names are stable installation interfaces; Den's host entities set the
+network hostnames to `nixos` and `nixos-aarch64`, respectively.
 
 ## Before starting
 
@@ -59,6 +61,10 @@ real stable disk ID before running `nixos-anywhere`.
 
 Do not commit that temporary disk-specific edit unless you intentionally want to
 pin this repo to one machine's disk.
+
+The repository intentionally has no recursive `apply` template-rewrite app.
+Patch only `modules/nixos/disk-config.nix` as shown below so an installation
+cannot accidentally rewrite Git metadata, secrets, or unrelated configuration.
 
 ## 1. Boot the target laptop into a NixOS ISO
 
@@ -251,6 +257,11 @@ id mei
 sudo nixos-version
 ```
 
+`hostnamectl` should report `nixos` for the `x86_64-linux` output and
+`nixos-aarch64` for the `aarch64-linux` output. These values come from the Den
+host entity through its `hostname` battery, not from architecture checks inside
+the NixOS module.
+
 The bootstrap file should now contain only the consumed sentinel, while the real
 verifier remains protected in `/etc/shadow`:
 
@@ -274,7 +285,7 @@ cd ~/nix-config
 
 Record and apply this machine's disk ID again if you want the checkout to remain
 reinstall-ready. Keep the edit local unless the repository gains a dedicated
-host configuration for this machine:
+disk configuration for this machine:
 
 ```bash
 DISK='/dev/disk/by-id/nvme-THIS_MACHINES_DISK_ID'
