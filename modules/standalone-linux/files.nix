@@ -59,7 +59,7 @@ in
     '';
   };
   ".config/fastfetch/config.jsonc".source = ../shared/config/fastfetch/config.jsonc;
-  ".config/fastfetch/snoopy-mugiwara.png".source = ./config/fastfetch/snoopy-mugiwara.png;
+  ".config/fastfetch/snoopy-mugiwara.png".source = ../shared/config/fastfetch/snoopy-mugiwara.png;
 
   ".config/waybar/config".source = ./config/waybar/config;
   ".config/waybar/modules.json".source = ./config/waybar/modules.json;
