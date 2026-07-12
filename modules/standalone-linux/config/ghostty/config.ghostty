@@ -6,5 +6,5 @@ theme = Catppuccin Mocha
 # instead of staying on the desktop/system theme.
 window-theme = ghostty
 
-# Match Konsole: start an interactive login Fish shell instead of relying on ambient shell detection.
-command = /bin/fish --login
+# Start the declaratively selected login shell instead of ambient shell detection.
+command = @NU_COMMAND@

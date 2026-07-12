@@ -1,4 +1,10 @@
 { pkgs, homeDirectory }:
+let
+  ghosttyConfig = builtins.replaceStrings
+    [ "@NU_COMMAND@" ]
+    [ "${pkgs.nushell}/bin/nu --login" ]
+    (builtins.readFile ./config/ghostty/config.ghostty);
+in
 {
   ".config/niri/config.kdl".text = builtins.readFile ../linux/config/niri/config.kdl;
 
@@ -13,10 +19,10 @@
   ".claude/CLAUDE.md".source = ./config/claude/CLAUDE.md;
   ".config/zed/settings.json".source = ./config/zed/settings.json;
   ".config/ghostty/config" = {
-    source = ./config/ghostty/config.ghostty;
+    text = ghosttyConfig;
     force = true;
   };
-  ".config/ghostty/config.ghostty".source = ./config/ghostty/config.ghostty;
+  ".config/ghostty/config.ghostty".text = ghosttyConfig;
   ".config/kitty/kitty.conf" = {
     text = ''
     # Match Konsole's Garuda.profile + Sweet.colorscheme terminal palette.
@@ -30,6 +36,7 @@
     cursor_blink_interval 0.5
     cursor #ff0000
     cursor_text_color #161925
+    shell ${pkgs.nushell}/bin/nu --login
     background #161925
     foreground #c3c7d1
     selection_foreground #ffffff

@@ -1,4 +1,5 @@
-{ config, pkgs, lib, inputs, secrets, ... }:
+{ inputs, secrets }:
+{ config, pkgs, lib, ... }:
 
 let
   user =
@@ -9,8 +10,6 @@ let
     let configured = builtins.getEnv "NIXOS_CONFIG_HOME";
         ambient = builtins.getEnv "HOME";
     in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
-  shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib; };
-  shared-files = import ../shared/files.nix { inherit config pkgs lib; };
   standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
   codexConfig =
     builtins.replaceStrings
@@ -47,7 +46,7 @@ in
     username = user;
     homeDirectory = homeDirectory;
     packages = import ./packages.nix { inherit pkgs inputs; };
-    file = shared-files // standalone-files // secret-files;
+    file = standalone-files // secret-files;
     sessionVariables = {
       BROWSER = "firefox";
       TERM = "xterm-256color";
@@ -108,7 +107,7 @@ in
     fi
   '';
 
-  programs = shared-programs // {
+  programs = {
     gpg.enable = true;
     home-manager.enable = true;
   };

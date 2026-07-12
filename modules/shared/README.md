@@ -1,16 +1,16 @@
-## Shared
-Much of the code running on MacOS or NixOS is actually found here.
+# Shared user configuration
 
-This configuration gets imported by both modules. Some configuration examples include `git`, `zsh`, `vim`, and `tmux`.
+The `mei` user aspect owns this directory's shared Home Manager programs, files,
+and static configuration on NixOS, Darwin, and standalone Linux. Each platform's
+package module separately consumes the shared package list.
 
-## Layout
+```text
+config/            Static program configuration and assets
+files.nix          Cross-platform Home Manager files
+home-manager.nix   Bash, Fish, Zsh, Nushell-adjacent tools, Git, Vim, tmux, etc.
+packages.nix       Cross-platform package list
 ```
-.
-├── config             # Config files not written in Nix
-├── cachix             # Defines cachix, a global cache for builds
-├── default.nix        # Defines how we import overlays
-├── files.nix          # Non-Nix, static configuration files (now immutable!)
-├── home-manager.nix   # The goods; most all shared config lives here
-├── packages.nix       # List of packages to share
 
-```
+Cross-platform user behavior belongs on `modules/aspects/users/mei.nix`.
+Platform-specific behavior belongs in a feature aspect and may use
+`provides.to-users` only when the host genuinely selects that payload.

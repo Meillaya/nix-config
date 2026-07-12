@@ -1,10 +1,8 @@
-{ config, pkgs, lib, secrets, ... }:
+{ config, pkgs, lib, ... }:
 
 let
   user = "mei";
   xdg_configHome  = "/home/${user}/.config";
-  shared-programs = import ../shared/home-manager.nix { inherit config pkgs lib secrets; };
-  shared-files = import ../shared/files.nix { inherit config pkgs lib; };
   replaceTemplateVars =
     file: replacements:
     let
@@ -41,7 +39,7 @@ in
     username = "${user}";
     homeDirectory = "/home/${user}";
     packages = pkgs.callPackage ./packages.nix {};
-    file = shared-files // import ./files.nix { inherit user; };
+    file = import ./files.nix { inherit user; };
     stateVersion = "21.05";
   };
 
@@ -123,6 +121,6 @@ in
     };
   };
 
-  programs = shared-programs // { gpg.enable = true; };
+  programs.gpg.enable = true;
 
 }

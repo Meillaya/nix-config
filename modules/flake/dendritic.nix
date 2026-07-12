@@ -1,0 +1,8 @@
+{ inputs, ... }:
+{
+  imports = [
+    inputs.den.flakeModule
+    (inputs.import-tree ../entities)
+    (inputs.import-tree ../aspects)
+  ];
+}

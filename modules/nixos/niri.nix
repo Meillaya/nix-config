@@ -1,4 +1,5 @@
-{ pkgs, zen-browser, noctalia, ... }:
+{ inputs }:
+{ pkgs, ... }:
 
 {
   programs = {
@@ -57,8 +58,8 @@
     awww
     kdePackages.polkit-kde-agent-1
     niri
-    noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
     xwayland-satellite
-    zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 }

@@ -1,15 +1,9 @@
-{ config, inputs, pkgs, agenix, lib, ... }:
+{ config, pkgs, lib, ... }:
 
 let user = "mei";
     keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOk8iAnIaa1deoc7jw8YACPNVka1ZFJxhnU4G74TmS+p" ]; in
 {
-  imports = [
-    ../../modules/nixos/secrets.nix
-    ../../modules/nixos/disk-config.nix
-    ../../modules/nixos/niri.nix
-    ../../modules/shared
-    agenix.nixosModules.default
-  ];
+
 
   # Use the systemd-boot EFI boot loader.
   boot = {
@@ -97,7 +91,7 @@ let user = "mei";
       displayManager.lightdm = {
         enable = true;
         greeters.slick.enable = true;
-        background = ../../modules/nixos/config/login-wallpaper.png;
+        background = ./config/login-wallpaper.png;
       };
 
       # Tiling window manager
@@ -278,7 +272,6 @@ let user = "mei";
         "i2c"
         "video"
       ];
-      shell = pkgs.zsh;
       openssh.authorizedKeys.keys = keys;
     };
 
@@ -313,7 +306,6 @@ let user = "mei";
   ];
 
   environment.systemPackages = with pkgs; [
-    agenix.packages."${pkgs.system}".default # "x86_64-linux"
     gitFull
     inetutils
   ];

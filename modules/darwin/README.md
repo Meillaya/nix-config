@@ -1,10 +1,16 @@
+# Darwin implementation modules
 
-## Layout
+These low-level modules are composed by the Darwin capability aspects under
+`modules/aspects/`; Den creates the actual Darwin entities.
+
+```text
+base.nix        macOS defaults, Nix policy, fonts, and system packages
+dock/           Declarative Dock option and activation implementation
+system.nix      User home facts and Dock entries
+user-home.nix   Darwin-specific Home Manager payload
+packages.nix    Darwin package list
+secrets.nix     Darwin agenix settings
 ```
-.
-├── dock               # MacOS dock configuration
-├── default.nix        # Defines module, system-level config
-├── files.nix          # Non-Nix, static configuration files (now immutable!)
-├── home-manager.nix   # Defines user programs
-├── packages.nix       # List of Nix packages to install for MacOS
-```
+
+Add machines in `modules/entities/hosts.nix` and attach a thin aggregate aspect;
+do not add `darwinSystem` calls to `flake.nix`.

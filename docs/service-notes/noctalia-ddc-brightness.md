@@ -34,7 +34,7 @@ The standalone Linux package set includes `ddcutil`:
 
 The NixOS host config also enables I2C access declaratively:
 
-- `hosts/nixos/default.nix`
+- `modules/nixos/system.nix`
   - `hardware.i2c.enable = true`
   - user is in `i2c` and `video`
 

@@ -326,7 +326,7 @@ let
     UseCustomCursorColor=true
 
     [General]
-    Command=${pkgs.fish}/bin/fish --login
+    Command=${pkgs.nushell}/bin/nu --login
     Name=Garuda
     Parent=FALLBACK/
     TerminalColumns=110

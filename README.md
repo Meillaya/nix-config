@@ -8,6 +8,11 @@ Personal Nix config for:
 
 ## Recent changes
 
+- The flake now follows Den's dendritic model: flake-parts owns output
+  composition, Den owns machine/home entities, and capability aspects own
+  configuration. See `docs/architecture/dendritic.md`.
+- Nushell is the primary login and Ghostty shell. Bash, Zsh, and Fish remain
+  installed, configured, and available as secondary shells.
 - `omx` is now launched through a Nix-managed wrapper, with tmux/non-interactive shell fixes.
 - Shell UX is aligned across `zsh`, `bash`, `fish`, and Readline-backed shells.
 - Package lookup now works through `nix run .#search-pkgs -- <query>` and installed `nixpkgs-search`.
@@ -89,6 +94,15 @@ nix --extra-experimental-features 'nix-command flakes' run .#build-switch
 This repo still includes bootstrap placeholders for Linux host values.
 The NixOS host enables Niri and links the shared `~/.config/niri/config.kdl`
 through Home Manager; BSPWM remains present as an alternate X11 session.
+
+The managed user is declared by the `mei` aspect. Both Linux and macOS accounts
+use Nushell by default, while the other managed shells can be launched directly:
+
+```nu
+bash
+zsh
+fish
+```
 
 To materialize them on a Linux machine:
 

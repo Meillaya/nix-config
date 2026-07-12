@@ -1,15 +1,10 @@
-{ agenix, config, pkgs, ... }:
+{ pkgs, ... }:
 
 let user = "mei"; in
 
 {
 
-  imports = [
-    ../../modules/darwin/secrets.nix
-    ../../modules/darwin/home-manager.nix
-    ../../modules/shared
-     agenix.darwinModules.default
-  ];
+
 
   # Setup user, packages, programs
   nix = {
@@ -39,8 +34,7 @@ let user = "mei"; in
   # discover them. Home Manager still installs the same package set for user
   # profile CLI access.
   environment.systemPackages = with pkgs; [
-    agenix.packages."${pkgs.stdenv.hostPlatform.system}".default
-  ] ++ (import ../../modules/darwin/packages.nix { inherit pkgs; });
+  ] ++ (import ./packages.nix { inherit pkgs; });
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
