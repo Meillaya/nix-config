@@ -72,7 +72,6 @@ shared-packages ++ [
   pavucontrol
   playerctl
   qbittorrent
-  inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default
   swaybg
   waybar
   wl-clipboard

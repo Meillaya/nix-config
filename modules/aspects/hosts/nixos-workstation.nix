@@ -7,6 +7,7 @@
     den.aspects.bootstrap-password
     den.aspects.secrets
     den.aspects.niri
+    den.aspects.noctalia
     den.aspects.linux-desktop
   ];
 }

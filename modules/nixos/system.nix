@@ -71,7 +71,7 @@ let user = "mei";
   };
 
   services = {
-    displayManager.defaultSession = "none+bspwm";
+    displayManager.defaultSession = "niri";
     xserver = {
       enable = true;
 

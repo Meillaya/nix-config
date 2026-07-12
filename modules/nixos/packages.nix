@@ -48,6 +48,15 @@ shared-packages ++ [
   xwayland-satellite
 
   # Productivity tools
+  calibre
+  gimp
+  ghostty
+  helium
+  kitty
+  obsidian
+  ollama
+  qbittorrent
+  swaybg
 
   # Audio tools
   pavucontrol # Pulse audio controls

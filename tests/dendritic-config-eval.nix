@@ -15,6 +15,14 @@ let
   ];
   hasShell = name: shells: builtins.any (shell: shellName shell == name) shells;
   hasInfix = flake.inputs.nixpkgs.lib.hasInfix;
+  packageName = package: package.pname or package.name or (builtins.baseNameOf (toString package));
+  hasPackages = names: packages:
+    let present = map packageName packages;
+    in builtins.all (name: builtins.elem name present) names;
+  requiredLinuxApplications = [
+    "calibre" "gimp" "ghostty" "helium" "kitty" "obsidian" "ollama"
+    "qbittorrent" "noctalia" "swaybg" "zen-beta"
+  ];
   assertHm = hm:
     assert hm.programs.nushell.enable;
     assert hm.programs.nushell.settings.show_hints;
@@ -37,6 +45,16 @@ assert nixos.networking.hostName == "nixos";
 assert nixos.system.stateVersion == "21.05";
 assert nixos.programs.niri.enable;
 assert nixos.xdg.portal.enable;
+assert nixos.services.displayManager.defaultSession == "niri";
+assert hasPackages [ "noctalia" ] nixos.environment.systemPackages;
+assert hasPackages requiredLinuxApplications (
+  nixos.home-manager.users.mei.home.packages ++ nixos.environment.systemPackages
+);
+assert nixos.systemd.user.services.noctalia.wantedBy == [ "graphical-session.target" ];
+assert nixos.systemd.user.services.noctalia.serviceConfig.Restart == "on-failure";
+assert hasInfix "/bin/noctalia" nixos.systemd.user.services.noctalia.serviceConfig.ExecStart;
+assert !hasInfix ''spawn-at-startup "noctalia"''
+  nixos.home-manager.users.mei.home.file."/home/mei/.config/niri/config.kdl".text;
 assert nixos.users.users.mei.hashedPasswordFile == "/var/lib/nixos-bootstrap/mei-password.hash";
 assert shellName nixos.users.users.mei.shell == "nushell";
 assert hasShell "nushell" nixos.environment.shells;
@@ -57,6 +75,11 @@ assert assertHm darwin.home-manager.users.mei;
 assert standalone.home.username == "mei";
 assert standalone.home.homeDirectory == "/home/mei";
 assert standalone.home.stateVersion == "25.11";
+assert hasPackages requiredLinuxApplications standalone.home.packages;
+assert standalone.systemd.user.services.noctalia.Install.WantedBy == [ "graphical-session.target" ];
+assert standalone.systemd.user.services.noctalia.Service.Restart == "on-failure";
+assert builtins.any (hasInfix "/bin/noctalia")
+  standalone.systemd.user.services.noctalia.Service.ExecStart;
 assert assertHm standalone;
 assert hasInfix "/bin/nu --login" standalone.home.file.".config/ghostty/config".text;
 assert hasInfix "/bin/nu --login" standalone.home.file.".config/kitty/kitty.conf".text;

@@ -68,6 +68,35 @@ OS-level `programs.nushell` option.
 - OMX's internal wrapper deliberately keeps its Zsh/Bash compatibility path;
   interpreter-specific scripts and `/bin/sh` shebangs are not rewritten.
 
+## Linux desktop policy
+
+Niri is the default display-manager session on NixOS. Noctalia is enabled through
+its upstream NixOS module on NixOS hosts and its upstream Home Manager module on
+standalone Linux hosts. Both modules start Noctalia as a systemd user service
+wanted by `graphical-session.target`; do not add a second
+`spawn-at-startup "noctalia"` entry to the shared Niri configuration.
+
+The cross-host evaluation test keeps the primary graphical application set in
+sync between NixOS and standalone Linux. Add generally useful Linux desktop apps
+to both package surfaces, or intentionally document why a package is host-only.
+
+After pulling this configuration on an existing NixOS machine, apply it with:
+
+```bash
+cd ~/nix-config
+git pull --ff-only
+sudo nixos-rebuild switch --flake .#x86_64-linux
+```
+
+Log out and back in after changing the default graphical session. In the login
+manager, choose Niri once if an older saved BSPWM session overrides the new
+default. Verify Noctalia with:
+
+```bash
+systemctl --user status noctalia.service --no-pager
+journalctl --user -u noctalia.service -b --no-pager
+```
+
 ## Adding configuration
 
 1. Add a leaf aspect when the behavior is a reusable capability.
