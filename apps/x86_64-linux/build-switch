@@ -1,59 +1,64 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-VERSION=1.0
+red='\033[1;31m'
+green='\033[1;32m'
+yellow='\033[1;33m'
+reset='\033[0m'
 
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+host=""
+rebuild_args=()
 
-# Parse arguments for --host parameter
-HOST=""
-OTHER_ARGS=""
-
-while [ $# -gt 0 ]; do
+while (( $# > 0 )); do
   case "$1" in
     --host=*)
-      HOST="${1#*=}"
+      host=${1#*=}
       shift
       ;;
     --host)
-      HOST="$2"
+      if (( $# < 2 )); then
+        printf '%b\n' "${red}--host requires a value${reset}" >&2
+        exit 2
+      fi
+      host=$2
       shift 2
       ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: build-switch [--host HOST] [nixos-rebuild arguments...]
+
+Defaults to x86_64-linux or aarch64-linux based on the current architecture.
+EOF
+      exit 0
+      ;;
     *)
-      OTHER_ARGS="$OTHER_ARGS $1"
+      rebuild_args+=("$1")
       shift
       ;;
   esac
 done
 
-# If host is specified, use it directly
-if [ -n "$HOST" ]; then
-  FLAKE_TARGET="$HOST"
-  echo -e "${YELLOW}Building for named host: $HOST${NC}"
+if [[ -n "$host" ]]; then
+  flake_target=$host
+  printf '%b\n' "${yellow}Building named host: ${host}${reset}"
 else
-  # Default behavior: detect system architecture
-  SYSTEM=$(uname -m)
-  
-  case "$SYSTEM" in
-    x86_64)
-      FLAKE_TARGET="x86_64-linux"
-      ;;
-    aarch64)
-      FLAKE_TARGET="aarch64-linux"
-      ;;
+  case "$(uname -m)" in
+    x86_64) flake_target="x86_64-linux" ;;
+    aarch64) flake_target="aarch64-linux" ;;
     *)
-      echo -e "${RED}Unsupported architecture: $SYSTEM${NC}"
+      printf '%b\n' "${red}Unsupported architecture: $(uname -m)${reset}" >&2
       exit 1
       ;;
   esac
-  echo -e "${YELLOW}Building for platform: $FLAKE_TARGET${NC}"
+  printf '%b\n' "${yellow}Building platform: ${flake_target}${reset}"
 fi
 
-echo -e "${YELLOW}Starting...${NC}"
+printf '%b\n' "${yellow}Starting...${reset}"
 
-# We pass SSH from user to root so root can download secrets from our private Github
-sudo SSH_AUTH_SOCK=$SSH_AUTH_SOCK /run/current-system/sw/bin/nixos-rebuild switch --flake .#$FLAKE_TARGET $OTHER_ARGS
+# Pass the user's agent socket to root so private flake inputs remain available.
+sudo env SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-}" \
+  /run/current-system/sw/bin/nixos-rebuild switch \
+  --flake ".#${flake_target}" \
+  "${rebuild_args[@]}"
 
-echo -e "${GREEN}Switch to new generation complete!${NC}"
+printf '%b\n' "${green}Switch complete.${reset}"

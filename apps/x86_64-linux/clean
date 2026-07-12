@@ -1,20 +1,41 @@
-#!/bin/sh -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+green='\033[1;32m'
+yellow='\033[1;33m'
+red='\033[1;31m'
+reset='\033[0m'
 
-echo -e "${YELLOW}Cleaning up old system generations and boot files...${NC}"
+if [[ ${1:-} == "--help" || ${1:-} == "-h" ]]; then
+  cat <<'EOF'
+Usage: clean
 
-# Clean up old generations (older than 7 days)
-echo -e "${YELLOW}Removing old system generations...${NC}"
+Deletes system generations older than seven days, then refreshes the current
+architecture's bootloader configuration.
+EOF
+  exit 0
+fi
+
+if (( $# > 0 )); then
+  printf '%b\n' "${red}Unexpected argument: $1${reset}" >&2
+  exit 2
+fi
+
+case "$(uname -m)" in
+  x86_64) flake_target="x86_64-linux" ;;
+  aarch64) flake_target="aarch64-linux" ;;
+  *)
+    printf '%b\n' "${red}Unsupported architecture: $(uname -m)${reset}" >&2
+    exit 1
+    ;;
+esac
+
+printf '%b\n' "${yellow}Removing system generations older than seven days...${reset}"
 sudo nix-collect-garbage --delete-older-than 7d
 
-# Clean up boot partition by reinstalling bootloader
-echo -e "${YELLOW}Cleaning up boot partition...${NC}"
-sudo nixos-rebuild boot --flake .#aarch64-linux --install-bootloader
+printf '%b\n' "${yellow}Refreshing the ${flake_target} bootloader configuration...${reset}"
+sudo nixos-rebuild boot --flake ".#${flake_target}" --install-bootloader
 
-echo -e "${GREEN}Cleanup complete!${NC}"
-echo -e "${YELLOW}Boot partition status:${NC}"
+printf '%b\n' "${green}Cleanup complete.${reset}"
+printf '%b\n' "${yellow}Boot partition status:${reset}"
 df -h /boot

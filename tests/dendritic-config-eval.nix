@@ -5,13 +5,12 @@ let
   standalone = flake.homeConfigurations."standalone-linux".config;
   shellName = shell: shell.pname or shell.name or (builtins.baseNameOf (toString shell));
   expectedLinuxApps = [
-    "apply" "build-switch" "check-keys" "clean" "copy-keys" "create-keys"
-    "home-news" "home-switch" "install" "install-with-secrets" "search-pkgs"
-    "sync-secrets" "update"
+    "build-switch" "clean" "home-news" "home-switch" "search-pkgs" "sync-secrets"
+    "update"
   ];
   expectedDarwinApps = [
-    "apply" "build" "build-switch" "check-keys" "clean" "copy-keys"
-    "create-keys" "rollback" "search-pkgs" "update"
+    "build" "build-switch" "check-keys" "clean" "copy-keys" "create-keys"
+    "search-pkgs" "update"
   ];
   hasShell = name: shells: builtins.any (shell: shellName shell == name) shells;
   hasInfix = flake.inputs.nixpkgs.lib.hasInfix;
@@ -56,6 +55,15 @@ assert hasInfix "/bin/noctalia" nixos.systemd.user.services.noctalia.serviceConf
 assert !hasInfix ''spawn-at-startup "noctalia"''
   nixos.home-manager.users.mei.home.file."/home/mei/.config/niri/config.kdl".text;
 assert nixos.users.users.mei.hashedPasswordFile == "/var/lib/nixos-bootstrap/mei-password.hash";
+assert nixos.users.users.mei.isNormalUser;
+assert nixos.users.users.mei.home == "/home/mei";
+assert builtins.all (group: builtins.elem group nixos.users.users.mei.extraGroups) [
+  "wheel"
+  "networkmanager"
+  "docker"
+  "i2c"
+  "video"
+];
 assert shellName nixos.users.users.mei.shell == "nushell";
 assert hasShell "nushell" nixos.environment.shells;
 assert hasShell "bash" nixos.environment.shells;
