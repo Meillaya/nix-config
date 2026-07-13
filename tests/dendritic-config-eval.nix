@@ -1,9 +1,11 @@
 let
   flake = builtins.getFlake ("path:" + toString ../.);
   nixos = flake.nixosConfigurations."x86_64-linux".config;
+  nixosArm = flake.nixosConfigurations."aarch64-linux".config;
   darwin = flake.darwinConfigurations."aarch64-darwin".config;
   darwinIntel = flake.darwinConfigurations."x86_64-darwin".config;
   standalone = flake.homeConfigurations."standalone-linux".config;
+  standaloneArm = flake.homeConfigurations."standalone-linux-aarch64".config;
   shellName = shell: shell.pname or shell.name or (builtins.baseNameOf (toString shell));
   expectedLinuxApps = [
     "build-switch" "clean" "home-news" "home-switch" "search-pkgs" "sync-secrets"
@@ -53,6 +55,12 @@ let
     assert hasInfix "/run/current-system/sw/bin" hm.programs.nushell.extraEnv;
     assert hasInfix "fastfetch" hm.programs.nushell.extraConfig;
     assert hasInfix "which fastfetch" hm.programs.nushell.extraConfig;
+    assert hm.programs.kitty.enable;
+    assert hm.programs.kitty.settings.background == "#161925";
+    assert hm.programs.kitty.settings.foreground == "#c3c7d1";
+    assert hm.programs.kitty.settings.color1 == "#ed254e";
+    assert hm.programs.kitty.settings.color2 == "#71f79f";
+    assert hasInfix "/bin/nu --login" hm.programs.kitty.settings.shell;
     assert hm.programs.bash.enable;
     assert hm.programs.zsh.enable;
     assert hm.programs.fish.enable;
@@ -97,6 +105,7 @@ assert hasShell "bash" nixos.environment.shells;
 assert hasShell "zsh" nixos.environment.shells;
 assert hasShell "fish" nixos.environment.shells;
 assert assertHm nixos.home-manager.users.mei;
+assert assertHm nixosArm.home-manager.users.mei;
 assert hasInfix "/bin/nu --login"
   nixos.home-manager.users.mei.home.file."/home/mei/.local/share/konsole/Garuda.profile".text;
 assert darwin.system.stateVersion == 5;
@@ -111,6 +120,7 @@ assert hasPackages [ "kitty" ] darwinIntel.environment.systemPackages;
 assert flake.inputs.nixpkgs.lib.hasSuffix expectedDarwinShellActivation
   darwin.system.activationScripts.postActivation.text;
 assert assertHm darwin.home-manager.users.mei;
+assert assertHm darwinIntel.home-manager.users.mei;
 assert standalone.home.username == "mei";
 assert standalone.home.homeDirectory == "/home/mei";
 assert standalone.home.stateVersion == "25.11";
@@ -120,6 +130,6 @@ assert standalone.systemd.user.services.noctalia.Service.Restart == "on-failure"
 assert builtins.any (hasInfix "/bin/noctalia")
   standalone.systemd.user.services.noctalia.Service.ExecStart;
 assert assertHm standalone;
+assert assertHm standaloneArm;
 assert hasInfix "/bin/nu --login" standalone.home.file.".config/ghostty/config".text;
-assert hasInfix "/bin/nu --login" standalone.home.file.".config/kitty/kitty.conf".text;
 "dendritic-config-eval=PASS"

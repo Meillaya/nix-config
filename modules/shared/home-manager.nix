@@ -399,6 +399,44 @@ in
     enable = true;
   };
 
+  kitty = {
+    enable = true;
+    # Keep Kitty aligned with the Sweet terminal palette on every host.
+    settings = {
+      font_family = "FiraCode Nerd Font Mono";
+      font_size = 12.0;
+      initial_window_width = "110c";
+      initial_window_height = "30c";
+      background_opacity = 0.65;
+      copy_on_select = "yes";
+      cursor_shape = "underline";
+      cursor_blink_interval = 0.5;
+      cursor = "#ff0000";
+      cursor_text_color = "#161925";
+      shell = "${pkgs.nushell}/bin/nu --login";
+      background = "#161925";
+      foreground = "#c3c7d1";
+      selection_foreground = "#ffffff";
+      selection_background = "#1e92ff";
+      color0 = "#697388";
+      color1 = "#ed254e";
+      color2 = "#71f79f";
+      color3 = "#f9dc5c";
+      color4 = "#7cb7ff";
+      color5 = "#c74ded";
+      color6 = "#00c1e4";
+      color7 = "#dcdfe4";
+      color8 = "#697388";
+      color9 = "#ed254e";
+      color10 = "#71f79f";
+      color11 = "#f9dc5c";
+      color12 = "#7cb7ff";
+      color13 = "#c74ded";
+      color14 = "#00c1e4";
+      color15 = "#dcdfe4";
+    };
+  };
+
   vim = {
     enable = true;
     plugins = with pkgs.vimPlugins; [ vim-airline vim-airline-themes vim-startify vim-tmux-navigator ];
