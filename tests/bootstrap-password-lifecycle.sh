@@ -20,6 +20,16 @@ mount --bind "$1" /var/lib
 mount --bind "$2" /etc/shadow
 bash "$3"
 EOF
+cat > "$tmp/run-validator-empty-nss.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+mount --bind "$1" /var/lib
+mount --bind "$2" /etc/shadow
+mount --bind "$3" /etc/passwd
+mount --bind "$4" /etc/group
+mount --bind "$5" /etc/nsswitch.conf
+bash "$6"
+EOF
 cat > "$tmp/run-consumer.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -44,6 +54,28 @@ run_case() {
 
   if { { [[ $expected == pass && $rc -eq 0 ]]; } \
       || { [[ $expected == fail && $rc -ne 0 ]]; }; } \
+    && { [[ $expected != pass ]] || [[ -z $output ]]; } \
+    && { [[ -z $expected_output ]] || [[ $output == *"$expected_output"* ]]; }; then
+    verdict=PASS
+  fi
+  printf '%s expected=%s rc=%s verdict=%s output=%q\n' \
+    "$name" "$expected" "$rc" "$verdict" "$output"
+  [[ $verdict == PASS ]]
+}
+
+run_empty_nss_case() {
+  local name=$1 expected=$2 root=$3 shadow=$4 expected_output=${5:-}
+  local output rc verdict=FAIL
+  set +e
+  output=$(unshare -Ur -m bash "$tmp/run-validator-empty-nss.sh" \
+    "$root" "$shadow" "$tmp/empty-passwd" "$tmp/empty-group" \
+    "$tmp/files-only-nsswitch.conf" "$tmp/validator.sh" 2>&1)
+  rc=$?
+  set -e
+
+  if { { [[ $expected == pass && $rc -eq 0 ]]; } \
+      || { [[ $expected == fail && $rc -ne 0 ]]; }; } \
+    && { [[ $expected != pass ]] || [[ -z $output ]]; } \
     && { [[ -z $expected_output ]] || [[ $output == *"$expected_output"* ]]; }; then
     verdict=PASS
   fi
@@ -128,6 +160,7 @@ mkdir -p "$tmp/parent-dangling-symlink"
 ln -s "$tmp/no-parent-target" "$tmp/parent-dangling-symlink/nixos-bootstrap"
 
 mkdir -p "$tmp/missing-existing"
+mkdir -p "$tmp/missing-existing-empty-nss"
 mkdir -p "$tmp/consumer-mismatch/nixos-bootstrap"
 printf '%s\n' "$valid" > "$tmp/consumer-mismatch/nixos-bootstrap/mei-password.hash"
 chmod 600 "$tmp/consumer-mismatch/nixos-bootstrap/mei-password.hash"
@@ -141,8 +174,14 @@ printf 'root:*:1:0:99999:7:::\nmei:%s:1:0:99999:7:::\n' "$valid" \
 printf 'root:*:1:0:99999:7:::\nmei:%s:1:0:99999:7:::\n' "$other_valid" \
   > "$tmp/shadow-other-unlocked"
 printf 'root:*:1:0:99999:7:::\nmei:!:1:0:99999:7:::\n' > "$tmp/shadow-locked"
+: > "$tmp/empty-passwd"
+: > "$tmp/empty-group"
+printf 'passwd: files\ngroup: files\nshadow: files\n' \
+  > "$tmp/files-only-nsswitch.conf"
 
 run_case valid pass "$tmp/valid" "$tmp/shadow-fresh"
+run_empty_nss_case valid-empty-target-nss pass \
+  "$tmp/valid" "$tmp/shadow-fresh"
 run_case sentinel-existing-unlocked pass "$tmp/sentinel" "$tmp/shadow-unlocked"
 run_case sentinel-fresh fail "$tmp/sentinel" "$tmp/shadow-fresh"
 run_case sentinel-locked fail "$tmp/sentinel" "$tmp/shadow-locked"
@@ -153,6 +192,13 @@ cmp "$tmp/expected-migrated-sentinel" \
 [[ $(stat -c %a "$tmp/missing-existing/nixos-bootstrap") == 700 ]]
 [[ $(stat -c %a "$tmp/missing-existing/nixos-bootstrap/mei-password.hash") == 600 ]]
 printf 'missing-existing-unlocked-migrated=PASS\n'
+run_empty_nss_case missing-existing-unlocked-empty-target-nss pass \
+  "$tmp/missing-existing-empty-nss" "$tmp/shadow-unlocked"
+cmp "$tmp/expected-migrated-sentinel" \
+  "$tmp/missing-existing-empty-nss/nixos-bootstrap/mei-password.hash"
+[[ $(stat -c %a "$tmp/missing-existing-empty-nss/nixos-bootstrap") == 700 ]]
+[[ $(stat -c %a "$tmp/missing-existing-empty-nss/nixos-bootstrap/mei-password.hash") == 600 ]]
+printf 'missing-existing-unlocked-empty-target-nss-migrated=PASS\n'
 run_case missing fail "$tmp/missing" "$tmp/shadow-fresh"
 run_case missing-locked fail "$tmp/missing" "$tmp/shadow-locked"
 run_case empty fail "$tmp/empty" "$tmp/shadow-fresh"

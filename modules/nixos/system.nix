@@ -21,7 +21,10 @@ let user = "mei";
     kernelModules = [ "uinput" ];
   };
 
-  hardware.i2c.enable = true;
+  hardware = {
+    enableRedistributableFirmware = true;
+    i2c.enable = true;
+  };
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -81,11 +84,6 @@ let user = "mei";
         enable = true;
         greeters.slick.enable = true;
         background = ./config/login-wallpaper.png;
-      };
-
-      # Tiling window manager
-      windowManager.bspwm = {
-        enable = true;
       };
 
       xkb = {
@@ -254,6 +252,7 @@ let user = "mei";
   # It's me, it's you, it's everyone
   users.users = {
     ${user} = {
+      uid = 1000;
       extraGroups = [
         "docker"
         "i2c"

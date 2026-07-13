@@ -33,7 +33,7 @@ in
           || fail "could not create sentinel temporary file"
         trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
         ${pkgs.coreutils}/bin/printf '!\n' > "$tmp"
-        ${pkgs.coreutils}/bin/chown root:root "$tmp"
+        ${pkgs.coreutils}/bin/chown 0:0 "$tmp"
         ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
         ${pkgs.coreutils}/bin/mv -f "$tmp" "$hash_file"
         trap - EXIT
@@ -42,12 +42,14 @@ in
       test ! -L "$hash_dir" || fail "expected a real directory at $hash_dir"
       if ! test -e "$hash_dir"; then
         has_unlocked_password || fail "missing $hash_file"
-        ${pkgs.coreutils}/bin/install -d -o root -g root -m 0700 "$hash_dir" \
+        ${pkgs.coreutils}/bin/install -d -o 0 -g 0 -m 0700 "$hash_dir" \
           || fail "could not create $hash_dir"
       fi
       test -d "$hash_dir" || fail "expected a directory at $hash_dir"
-      test "$(${pkgs.coreutils}/bin/stat -c '%U:%G:%a' "$hash_dir")" = "root:root:700" \
-        || fail "expected root:root mode 0700 on $hash_dir"
+      hash_dir_meta="$(${pkgs.coreutils}/bin/stat -c '%u:%g:%a' "$hash_dir")" \
+        || fail "could not inspect $hash_dir"
+      test "$hash_dir_meta" = "0:0:700" \
+        || fail "expected numeric owner 0:0 mode 0700 on $hash_dir; got $hash_dir_meta"
 
       test ! -L "$hash_file" || fail "expected a regular file at $hash_file"
       if ! test -e "$hash_file"; then
@@ -56,8 +58,10 @@ in
       fi
 
       test -f "$hash_file" || fail "missing $hash_file"
-      test "$(${pkgs.coreutils}/bin/stat -c '%U:%G:%a' "$hash_file")" = "root:root:600" \
-        || fail "expected root:root mode 0600"
+      hash_file_meta="$(${pkgs.coreutils}/bin/stat -c '%u:%g:%a' "$hash_file")" \
+        || fail "could not inspect $hash_file"
+      test "$hash_file_meta" = "0:0:600" \
+        || fail "expected numeric owner 0:0 mode 0600 on $hash_file; got $hash_file_meta"
       test -s "$hash_file" || fail "expected non-empty file"
 
       last_byte="$(${pkgs.coreutils}/bin/tail -c 1 "$hash_file" \
@@ -100,11 +104,18 @@ in
           exit 1
         }
         test ! -L "$hash_dir"
-        test "$(${pkgs.coreutils}/bin/stat -c '%U:%G:%a' "$hash_dir")" = "root:root:700"
+        hash_dir_meta="$(${pkgs.coreutils}/bin/stat -c '%u:%g:%a' "$hash_dir")" || {
+          echo "bootstrap password hash consumption failed: could not inspect $hash_dir" >&2
+          exit 1
+        }
+        test "$hash_dir_meta" = "0:0:700" || {
+          echo "bootstrap password hash consumption failed: expected numeric owner 0:0 mode 0700 on $hash_dir; got $hash_dir_meta" >&2
+          exit 1
+        }
         tmp="$(${pkgs.coreutils}/bin/mktemp "$hash_dir/.mei-password.hash.XXXXXX")"
         trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
         ${pkgs.coreutils}/bin/printf '!\n' > "$tmp"
-        ${pkgs.coreutils}/bin/chown root:root "$tmp"
+        ${pkgs.coreutils}/bin/chown 0:0 "$tmp"
         ${pkgs.coreutils}/bin/chmod 0600 "$tmp"
         ${pkgs.coreutils}/bin/mv -f "$tmp" "$hash_file"
         trap - EXIT

@@ -24,6 +24,11 @@ You need:
 - Internet access from the working computer and installer environment.
 - A backup of anything valuable on the target disk.
 
+Run this workflow only on an isolated, trusted network. The pinned
+`nixos-anywhere` release disables strict SSH host-key checking for its internal
+connections, so the initial SSH host-key prompt below does not protect later
+installation traffic from an active network attacker.
+
 Shell-sensitive commands in this guide are provided in separate **Bash** and
 **Nushell** blocks. Commands shown only once work unchanged in either shell or
 run on the NixOS installer, whose root terminal uses Bash. The password helper
@@ -39,14 +44,26 @@ For each installation, the helper:
 
 1. Prompts locally for a new password and generates a yescrypt verifier.
 2. Stores only that verifier in a mode-0600 file under private runtime tmpfs.
-3. Transfers the temporary file using `nixos-anywhere --extra-files`.
-4. Makes NixOS validate the file before creating or updating `mei`.
-5. Confirms that the verifier reached `/etc/shadow` after user creation.
-6. Replaces the staged copy with the exact locked sentinel `!\n`.
+3. Stages `$HOME/Pictures/Wallpapers` in the same private directory.
+4. Transfers the verifier and wallpapers using `nixos-anywhere --extra-files`.
+5. Makes NixOS validate the verifier before creating or updating `mei`.
+6. Confirms that the verifier reached `/etc/shadow` after user creation.
+7. Replaces the staged verifier with the exact locked sentinel `!\n`.
 
 The plaintext password and reusable verifier are not committed to Git or copied
 into the Nix store. Later rebuilds accept the sentinel only when `mei` already
 has an unlocked password in `/etc/shadow`.
+
+The wallpaper source defaults to `$HOME/Pictures/Wallpapers` on the computer
+running the installer. Set `NIXOS_ANYWHERE_WALLPAPERS` to an alternate source
+directory when needed. Use only a locally trusted, non-secret wallpaper tree.
+The helper fails before prompting for a password if the
+directory is missing, is a symlink, contains symlinks or special files, exceeds
+4 GiB apparent size, or cannot fit in runtime tmpfs with a 64 MiB reserve.
+Wallpaper files are copied to
+`/home/mei/Pictures/Wallpapers`; the complete `Pictures` tree is assigned
+ownership `1000:100`. The NixOS profile pins `mei` to UID 1000 so ownership is
+deterministic on a fresh install.
 
 ## Why this needs a temporary local clone
 
@@ -319,10 +336,48 @@ computer:
 ```
 
 The helper prompts interactively for a unique password, generates a yescrypt verifier in
-private runtime tmpfs, and transfers it with `nixos-anywhere --extra-files`. The
+private runtime tmpfs, stages `$HOME/Pictures/Wallpapers`, and transfers both
+with `nixos-anywhere --extra-files`. The
 plaintext password is never placed in Git, the Nix store, an argument, or an
 environment variable. Do not enable shell tracing, terminal recording, or
 `nixos-anywhere --debug` while running it.
+
+If the wallpapers are stored elsewhere, select the source explicitly:
+
+**Bash:**
+
+```bash
+NIXOS_ANYWHERE_WALLPAPERS="$HOME/path/to/Wallpapers" \
+  ./bin/nixos-anywhere-bootstrap-password.fish \
+  "root@$TARGET" \
+  ".#x86_64-linux"
+```
+
+**Nushell:**
+
+```nu
+with-env { NIXOS_ANYWHERE_WALLPAPERS: ($nu.home-path | path join "path/to/Wallpapers") } {
+  ./bin/nixos-anywhere-bootstrap-password.fish $"root@($target)" ".#x86_64-linux"
+}
+```
+
+After entering the new `mei` password, OpenSSH may also prompt for the temporary
+root password set on the installer ISO. The helper keeps that prompt attached to
+the terminal and disables local SSH-agent identities for the installer so
+unrelated loaded keys cannot exhaust the target's authentication limit. It does
+not modify the agent or persist the ISO root password.
+
+Because the system is built locally, the helper uploads the complete closure
+instead of asking the installer environment to substitute it again. It also
+explicitly sets the transferred bootstrap directory to numeric ownership `0:0`
+before activation; the NixOS validator still rejects loose modes, symlinks, and
+malformed verifiers.
+
+This deliberately disables destination substitution and propagation of the
+configured machine substituters. Uploading may take longer when the installer
+could have used a faster binary cache, but failed destination cache lookups
+cannot obscure the local closure transfer and the installer does not inherit
+additional substituter trust settings.
 
 `mkpasswd` prompts once and does not ask for confirmation, so type the password
 carefully. Do not reuse it on another installation.
@@ -332,9 +387,9 @@ Update those revisions deliberately in
 `bin/nixos-anywhere-bootstrap-password.sh` when refreshing installer tooling.
 
 The install will wipe the selected disk, run Disko, install the flake, and reboot
-the target. The verifier is applied to `mei` on first boot and the extra copy is
-then replaced with a locked `!` sentinel. The real password remains in
-`/etc/shadow` because this config uses mutable users.
+the target. Installation activation applies the verifier to `mei` before first
+boot and replaces the extra copy with a locked `!` sentinel. The real password
+remains in `/etc/shadow` because this config uses mutable users.
 
 For ARM hardware, use the ARM configuration below. Because the helper builds on
 the working computer, that computer must be ARM too or have a working AArch64
@@ -359,6 +414,102 @@ run finishes the install and normally reboots the machine. If it fails, read the
 reported error before retrying; do not switch to a different disk path merely to
 make the command proceed.
 
+### Diagnose an activation failure before retrying
+
+If activation fails after Disko has mounted the target, keep the installer ISO
+running and inspect the failure before retrying. Run this in the target's root
+console or root SSH session. It reports metadata and verifier shape without
+printing the verifier:
+
+```bash
+root=/mnt
+dir=$root/var/lib/nixos-bootstrap
+hash=$dir/mei-password.hash
+
+findmnt -R -o TARGET,SOURCE,FSTYPE,OPTIONS --target "$root" || true
+stat -c 'path=%n type=%F mode=%a uid=%u gid=%g owner=%U group=%G' \
+  "$dir" "$hash" || true
+
+system=$(chroot "$root" /nix/var/nix/profiles/system/sw/bin/readlink -e \
+  /nix/var/nix/profiles/system) || system=
+printf 'target-system=%s\n' "$system"
+case "$system" in
+  /nix/store/*-nixos-system-*)
+    grep -nE '^#### Activation script snippet (bootstrapPasswordHash|users|consumeBootstrapPassword):' \
+      "$root$system/activate" || true
+    chroot "$root" "$system/sw/bin/stat" -c \
+      'path=%n type=%F mode=%a uid=%u gid=%g owner=%U group=%G' \
+      /var/lib/nixos-bootstrap \
+      /var/lib/nixos-bootstrap/mei-password.hash || true
+    ;;
+  *) echo 'target system profile is missing or unexpected' >&2 ;;
+esac
+
+if [ -f "$hash" ] && [ ! -L "$hash" ] \
+  && grep -Eqx '^\$y\$[./A-Za-z0-9]+\$[./A-Za-z0-9]{1,86}\$[./A-Za-z0-9]{43}$' "$hash"; then
+  echo 'bootstrap verifier shape=yescrypt'
+else
+  echo 'bootstrap verifier shape=missing-or-invalid'
+fi
+```
+
+Do not substitute `nixos-enter` for the direct `chroot` command:
+`nixos-enter` runs activation before executing its requested command. Expected
+metadata is numeric owner `0:0`, mode `700` for the real directory, and mode
+`600` for the real regular file. During the first activation, numeric `0:0` may
+display as `UNKNOWN:UNKNOWN` inside the target because its passwd and group
+databases have not been created yet. Repeating `chown 0:0` cannot change that
+name-resolution result.
+
+If `/mnt` is still correctly mounted and the existing verifier is valid, the
+corrected checkout can reuse both without running Disko again. Run only the
+install phase from the patched checkout on the working computer.
+
+**Bash:**
+
+```bash
+NIXOS_ANYWHERE_REV=4dfb813db065afb0aba1f61658ef77993d382db1
+env -u SSH_AUTH_SOCK \
+  nix run "github:nix-community/nixos-anywhere/$NIXOS_ANYWHERE_REV" -- \
+  --flake '.#x86_64-linux' \
+  --target-host "root@$TARGET" \
+  --ssh-option IdentityAgent=none \
+  --build-on local \
+  --phases install \
+  --chown var/lib/nixos-bootstrap 0:0 \
+  --no-substitute-on-destination \
+  --option max-jobs 1 \
+  --option cores 1
+```
+
+**Nushell:**
+
+```nu
+let target = "192.168.1.123"
+let nixos_anywhere_rev = "4dfb813db065afb0aba1f61658ef77993d382db1"
+let recovery_args = [
+  "--flake" ".#x86_64-linux"
+  "--target-host" $"root@($target)"
+  "--ssh-option" "IdentityAgent=none"
+  "--build-on" "local"
+  "--phases" "install"
+  "--chown" "var/lib/nixos-bootstrap" "0:0"
+  "--no-substitute-on-destination"
+  "--option" "max-jobs" "1"
+  "--option" "cores" "1"
+]
+^env -u SSH_AUTH_SOCK nix run $"github:nix-community/nixos-anywhere/($nixos_anywhere_rev)" -- ...$recovery_args
+```
+
+Use `.#aarch64-linux` for ARM. The install-only command deliberately omits
+`--extra-files`: it reuses the already-staged verifier and does not reboot. If
+`/mnt` is no longer mounted, replace the `--phases install` pair with
+`--disko-mode mount`; do not combine them. This pinned nixos-anywhere
+[recovery mode](https://github.com/nix-community/nixos-anywhere/blob/4dfb813db065afb0aba1f61658ef77993d382db1/docs/howtos/disko-modes.md)
+mounts existing filesystems without formatting, installs, and reboots. Do not
+rerun the password helper unchanged as recovery: its normal invocation includes
+the destructive Disko format phase.
+
 ## 6. First boot and login
 
 Log in locally as `mei` with the unique password entered in step 5. SSH key access
@@ -381,12 +532,34 @@ The bootstrap file should now contain only the consumed sentinel, while the real
 verifier remains protected in `/etc/shadow`:
 
 ```bash
-sudo stat -c '%U:%G %a %n' /var/lib/nixos-bootstrap/mei-password.hash
-sudo od -An -tx1 /var/lib/nixos-bootstrap/mei-password.hash
+sudo stat -c '%u:%g %U:%G %a %n' /var/lib/nixos-bootstrap/mei-password.hash
+printf '!\n' | sudo cmp -s - /var/lib/nixos-bootstrap/mei-password.hash
 ```
 
-Expected ownership/mode is `root:root 600`; expected bytes are `21 0a`, which are
-`!\n`. Do not print or copy the `mei` entry from `/etc/shadow`.
+Expected ownership/mode is `0:0 root:root 600`; `cmp` should succeed without
+printing the sentinel. Do not print the bootstrap file or copy the `mei` entry
+from `/etc/shadow`.
+
+Confirm that the wallpaper transfer and Wi-Fi stack are available:
+
+```bash
+find "$HOME/Pictures/Wallpapers" -mindepth 1 -maxdepth 1 -type f -print -quit
+nmcli radio wifi on
+nmcli device status
+nmcli --fields IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan yes
+```
+
+The first command should print one transferred wallpaper, and `nmcli` should
+show a Wi-Fi device and nearby networks. This profile enables NetworkManager,
+the wireless regulatory database, and redistributable device firmware. If no
+Wi-Fi device appears after applying this configuration and rebooting, capture
+the hardware and driver state without changing it:
+
+```bash
+rfkill list
+lspci -nnk | grep -A3 -Ei 'network|wireless'
+sudo journalctl -b -k --no-pager | grep -Ei 'firmware|wifi|wireless|wlan|iwl|ath|rtw|brcm'
+```
 
 ## 7. Create the machine's working checkout
 

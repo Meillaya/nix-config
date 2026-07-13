@@ -80,6 +80,11 @@ assert nixos.system.stateVersion == "21.05";
 assert nixos.programs.niri.enable;
 assert nixos.xdg.portal.enable;
 assert nixos.services.displayManager.defaultSession == "niri";
+assert nixos.services.displayManager.sessionData.sessionNames == [ "niri" ];
+assert !nixos.services.xserver.windowManager.bspwm.enable;
+assert nixos.networking.networkmanager.enable;
+assert nixos.hardware.enableRedistributableFirmware;
+assert nixos.hardware.wirelessRegulatoryDatabase;
 assert hasPackages [ "noctalia" ] nixos.environment.systemPackages;
 assert hasPackages requiredLinuxApplications (
   nixos.home-manager.users.mei.home.packages ++ nixos.environment.systemPackages
@@ -91,6 +96,8 @@ assert !hasInfix ''spawn-at-startup "noctalia"''
   nixos.home-manager.users.mei.home.file."/home/mei/.config/niri/config.kdl".text;
 assert nixos.users.users.mei.hashedPasswordFile == "/var/lib/nixos-bootstrap/mei-password.hash";
 assert nixos.users.users.mei.isNormalUser;
+assert nixos.users.users.mei.uid == 1000;
+assert nixos.users.groups.users.gid == 100;
 assert nixos.users.users.mei.home == "/home/mei";
 assert builtins.all (group: builtins.elem group nixos.users.users.mei.extraGroups) [
   "wheel"

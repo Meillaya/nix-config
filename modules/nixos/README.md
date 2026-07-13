@@ -61,9 +61,4 @@ bootstrap-password.nix  First-install external password verifier
 
 See `docs/architecture/dendritic.md` for ownership and routing rules.
 
-## Essential BSPWM hotkeys
-
-BSPWM remains available as the alternate X11 session. Its principal shortcuts
-are generated in `~/.config/sxhkd/sxhkdrc`: Super+Space opens the launcher,
-Super+Enter opens a terminal, Alt+F4 closes a window, and Super+1-6 selects a
-workspace. Niri bindings live in `modules/linux/config/niri/config.kdl`.
+Niri bindings live in `modules/linux/config/niri/config.kdl`.

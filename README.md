@@ -93,7 +93,7 @@ nix --extra-experimental-features 'nix-command flakes' run .#build-switch
 
 This repo still includes bootstrap placeholders for Linux host values.
 The NixOS host enables Niri and links the shared `~/.config/niri/config.kdl`
-through Home Manager; BSPWM remains present as an alternate X11 session.
+through Home Manager. Niri is the only graphical login session.
 
 The managed user is declared by the `mei` aspect. Both Linux and macOS accounts
 use Nushell by default, while the other managed shells can be launched directly:

@@ -95,9 +95,8 @@ git pull --ff-only
 sudo nixos-rebuild switch --flake .#x86_64-linux
 ```
 
-Log out and back in after changing the default graphical session. In the login
-manager, choose Niri once if an older saved BSPWM session overrides the new
-default. Verify Noctalia with:
+Log out and back in after changing the graphical session configuration. Niri is
+the only generated login session. Verify Noctalia with:
 
 ```bash
 systemctl --user status noctalia.service --no-pager

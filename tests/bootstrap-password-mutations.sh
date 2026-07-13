@@ -2,9 +2,15 @@
 set -euo pipefail
 
 repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-tree=$(git -C "$repo" write-tree)
+index=$(mktemp -t nix-bootstrap-mutation-index.XXXXXX)
 tmp=$(mktemp -d -t nix-bootstrap-mutations.XXXXXX)
-trap 'rm -rf "$tmp"' EXIT
+trap 'rm -rf "$tmp"; rm -f "$index"' EXIT
+
+# Snapshot tracked working-tree edits without changing the user's real index.
+rm -f "$index"
+GIT_INDEX_FILE=$index git -C "$repo" read-tree HEAD
+GIT_INDEX_FILE=$index git -C "$repo" add -u
+tree=$(GIT_INDEX_FILE=$index git -C "$repo" write-tree)
 
 materialize() {
   local name=$1 root="$tmp/$1"
@@ -39,22 +45,86 @@ expect_failure() {
   printf 'mutant-%s=KILLED rc=%s reason=%q\n' "$name" "$rc" "$expected"
 }
 
-ordering_check() {
-  local root=$1 expr
+deps_check() {
+  local root=$1 filter=$2 expr
   expr="let f = builtins.getFlake (toString $root); in import $root/tests/bootstrap-password-config-eval.nix { config = f.nixosConfigurations.x86_64-linux.config; }"
   nix eval --json --impure --expr "$expr" \
-    | jq -e '(.userDeps | index("bootstrapPasswordHash")) != null'
+    | jq -e "$filter"
 }
 
 root=$(materialize ordering)
 sed -i 's/system.activationScripts.users.deps = \[ "bootstrapPasswordHash" \];/system.activationScripts.users.deps = [ ];/' \
   "$root/modules/nixos/bootstrap-password.nix"
-expect_failure ordering "$root" false ordering_check "$root"
+expect_failure ordering "$root" false deps_check "$root" \
+  '(.userDeps | index("bootstrapPasswordHash")) != null'
+
+root=$(materialize consumer-ordering)
+sed -i '0,/deps = \[ "users" \];/s//deps = [ ];/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure consumer-ordering "$root" false deps_check "$root" \
+  '(.consumerDeps | index("users")) != null'
 
 root=$(materialize shadow-comparison)
 sed -i 's/END { exit !installed }/END { exit 0 }/' \
   "$root/modules/nixos/bootstrap-password.nix"
 expect_failure shadow-comparison "$root" 'consumer mismatch was accepted' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize directory-owner-name-lookup)
+sed -i "0,/stat -c '%u:%g:%a'/s//stat -c '%U:%g:%a'/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+sed -i '0,/"0:0:700"/s//"root:0:700"/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure directory-owner-name-lookup "$root" \
+  'valid-empty-target-nss expected=pass rc=1 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize directory-group-name-lookup)
+sed -i "0,/stat -c '%u:%g:%a'/s//stat -c '%u:%G:%a'/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+sed -i '0,/"0:0:700"/s//"0:root:700"/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure directory-group-name-lookup "$root" \
+  'valid-empty-target-nss expected=pass rc=1 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize file-owner-name-lookup)
+sed -i "/hash_file_meta=/s/'%u:%g:%a'/'%U:%g:%a'/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+sed -i "/test \"\$hash_file_meta\"/s/\"0:0:600\"/\"root:0:600\"/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure file-owner-name-lookup "$root" \
+  'valid-empty-target-nss expected=pass rc=1 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize file-group-name-lookup)
+sed -i "/hash_file_meta=/s/'%u:%g:%a'/'%u:%G:%a'/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+sed -i "/test \"\$hash_file_meta\"/s/\"0:0:600\"/\"0:root:600\"/" \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure file-group-name-lookup "$root" \
+  'valid-empty-target-nss expected=pass rc=1 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize pre-users-sentinel-owner-name)
+sed -i '0,/chown 0:0/s//chown root:root/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure pre-users-sentinel-owner-name "$root" \
+  'missing-existing-unlocked-empty-target-nss expected=pass rc=0 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize pre-users-install-owner-name)
+sed -i '0,/install -d -o 0/s//install -d -o root/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure pre-users-install-owner-name "$root" \
+  'missing-existing-unlocked-empty-target-nss expected=pass rc=1 verdict=FAIL' \
+  bash "$root/tests/bootstrap-password-lifecycle.sh"
+
+root=$(materialize pre-users-install-group-name)
+sed -i '0,/install -d -o 0 -g 0/s//install -d -o 0 -g root/' \
+  "$root/modules/nixos/bootstrap-password.nix"
+expect_failure pre-users-install-group-name "$root" \
+  'missing-existing-unlocked-empty-target-nss expected=pass rc=1 verdict=FAIL' \
   bash "$root/tests/bootstrap-password-lifecycle.sh"
 
 root=$(materialize sentinel-newline)
@@ -103,6 +173,20 @@ sed -i "/--extra-files \"\\\$stage\"/d" \
 expect_failure extra-files "$root" 'missing extra-files evidence' \
   bash "$root/tests/bootstrap-password-install-helper.sh"
 
+root=$(materialize extra-files-ownership)
+sed -i '/--chown var\/lib\/nixos-bootstrap 0:0/d' \
+  "$root/bin/nixos-anywhere-bootstrap-password.sh"
+expect_failure extra-files-ownership "$root" \
+  'installer did not enforce root ownership for the bootstrap secret' \
+  bash "$root/tests/bootstrap-password-install-helper.sh"
+
+root=$(materialize destination-substitution)
+sed -i '/--no-substitute-on-destination/d' \
+  "$root/bin/nixos-anywhere-bootstrap-password.sh"
+expect_failure destination-substitution "$root" \
+  'installer did not enforce local-only closure transfer' \
+  bash "$root/tests/bootstrap-password-install-helper.sh"
+
 root=$(materialize tool-pins)
 sed -i \
   -e 's/^nixpkgs_rev=.*/nixpkgs_rev=nixos-unstable/' \
@@ -115,6 +199,25 @@ root=$(materialize cleanup)
 sed -i "s/rm -rf -- \"\\\$stage\"/:/" \
   "$root/bin/nixos-anywhere-bootstrap-password.sh"
 expect_failure cleanup "$root" 'runtime cleanup failed' \
+  bash "$root/tests/bootstrap-password-install-helper.sh"
+
+root=$(materialize installer-tty)
+sed -i 's/^env -u SSH_AUTH_SOCK \\/setsid env -u SSH_AUTH_SOCK \\/' \
+  "$root/bin/nixos-anywhere-bootstrap-password.sh"
+expect_failure installer-tty "$root" 'installer detached from caller session' \
+  bash "$root/tests/bootstrap-password-install-helper.sh"
+
+root=$(materialize installer-agent)
+sed -i 's/^env -u SSH_AUTH_SOCK \\/env \\/' \
+  "$root/bin/nixos-anywhere-bootstrap-password.sh"
+expect_failure installer-agent "$root" 'installer inherited SSH agent' \
+  bash "$root/tests/bootstrap-password-install-helper.sh"
+
+root=$(materialize installer-agent-option)
+sed -i '/--ssh-option IdentityAgent=none/d' \
+  "$root/bin/nixos-anywhere-bootstrap-password.sh"
+expect_failure installer-agent-option "$root" \
+  'installer did not disable configured SSH agents' \
   bash "$root/tests/bootstrap-password-install-helper.sh"
 
 root=$(materialize secret-detection)

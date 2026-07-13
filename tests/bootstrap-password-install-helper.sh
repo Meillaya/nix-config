@@ -9,7 +9,8 @@ trap 'rm -rf "$tmp"' EXIT
 [[ -x $helper ]]
 fish --no-execute "$helper"
 
-mkdir -p "$tmp/bin" "$tmp/runtime"
+mkdir -p "$tmp/bin" "$tmp/runtime" "$tmp/wallpapers"
+printf '%s\n' fixture-wallpaper > "$tmp/wallpapers/fixture.jpg"
 cat > "$tmp/bin/findmnt" <<'EOF'
 #!/usr/bin/env sh
 printf '%s\n' "${MOCK_FSTYPE:-tmpfs}"
@@ -39,6 +40,12 @@ case "$1" in
     ;;
   run)
     printf 'nixos_anywhere_ref=%s\n' "$2" >> "$MOCK_CAPTURE"
+    printf 'installer_sid=%s\n' "$(ps -o sid= -p $$ | tr -d ' ')" >> "$MOCK_CAPTURE"
+    if [ "${SSH_AUTH_SOCK+x}" = x ]; then
+      printf 'ssh_auth_sock=present\n' >> "$MOCK_CAPTURE"
+    else
+      printf 'ssh_auth_sock=unset\n' >> "$MOCK_CAPTURE"
+    fi
     shift
     while [ "$#" -gt 0 ]; do
       case "$1" in
@@ -50,19 +57,43 @@ case "$1" in
           printf 'flake=%s\n' "$2" >> "$MOCK_CAPTURE"
           shift 2
           ;;
+        --ssh-option)
+          printf 'ssh_option=%s\n' "$2" >> "$MOCK_CAPTURE"
+          shift 2
+          ;;
         --extra-files)
           stage=$2
           hash="$stage/var/lib/nixos-bootstrap/mei-password.hash"
+          wallpaper="$stage/home/mei/Pictures/Wallpapers/fixture.jpg"
           printf 'extra_files=%s\n' "$stage" >> "$MOCK_CAPTURE"
           printf 'stage_mode=%s\n' "$(stat -c %a "$stage")" >> "$MOCK_CAPTURE"
           printf 'hash_mode=%s\n' "$(stat -c %a "$hash")" >> "$MOCK_CAPTURE"
           printf 'dir_mode=%s\n' "$(stat -c %a "$stage/var/lib/nixos-bootstrap")" >> "$MOCK_CAPTURE"
+          printf 'wallpaper=%s\n' "$(cat "$wallpaper")" >> "$MOCK_CAPTURE"
           grep -Eqx '^\$y\$[./A-Za-z0-9]+\$[./A-Za-z0-9]{1,86}\$[./A-Za-z0-9]{43}$' "$hash"
           shift 2
+          ;;
+        --chown)
+          printf 'chown=%s:%s\n' "$2" "$3" >> "$MOCK_CAPTURE"
+          shift 3
+          ;;
+        --no-substitute-on-destination)
+          printf 'substitute_on_destination=disabled\n' >> "$MOCK_CAPTURE"
+          shift
           ;;
         *) shift ;;
       esac
     done
+    if [ "${MOCK_INTERACTIVE:-0}" = 1 ]; then
+      [ -t 0 ]
+      printf 'installer_tty=present\n' >> "$MOCK_CAPTURE"
+      if [ "$(ps -o pgid= -p $$ | tr -d ' ')" \
+        = "$(ps -o tpgid= -p $$ | tr -d ' ')" ]; then
+        printf 'installer_foreground=present\n' >> "$MOCK_CAPTURE"
+      fi
+      read -r password
+      [ "$password" = iso-fixture-password ]
+    fi
     if [ "${MOCK_INSTALLER_SLEEP:-0}" = 1 ]; then
       printf 'installer_started=1\n' >> "$MOCK_CAPTURE"
       sleep 300 &
@@ -80,7 +111,9 @@ chmod +x "$tmp/bin/findmnt" "$tmp/bin/nix"
 run_env=(env \
   PATH="$tmp/bin:$PATH" \
   XDG_RUNTIME_DIR="$tmp/runtime" \
-  MOCK_CAPTURE="$tmp/capture")
+  NIXOS_ANYWHERE_WALLPAPERS="$tmp/wallpapers" \
+  MOCK_CAPTURE="$tmp/capture" \
+  SSH_AUTH_SOCK="$tmp/fake-agent.sock")
 
 assert_runtime_empty() {
   if find "$tmp/runtime" -mindepth 1 -maxdepth 1 -print -quit \
@@ -93,6 +126,18 @@ assert_runtime_empty() {
 "${run_env[@]}" "$helper" root@mock-target .#x86_64-linux
 grep -qx 'target=root@mock-target' "$tmp/capture"
 grep -qx 'flake=.#x86_64-linux' "$tmp/capture"
+if ! grep -qx 'ssh_option=IdentityAgent=none' "$tmp/capture"; then
+  printf 'installer did not disable configured SSH agents\n' >&2
+  exit 1
+fi
+if ! grep -qx "installer_sid=$(ps -o sid= -p $$ | tr -d ' ')" "$tmp/capture"; then
+  printf 'installer detached from caller session\n' >&2
+  exit 1
+fi
+if ! grep -qx 'ssh_auth_sock=unset' "$tmp/capture"; then
+  printf 'installer inherited SSH agent\n' >&2
+  exit 1
+fi
 if ! grep -Eq \
   '^mkpasswd_ref=github:NixOS/nixpkgs/[0-9a-f]{40}#mkpasswd$' \
   "$tmp/capture" \
@@ -112,8 +157,36 @@ grep -qx 'hash_mode=600' "$tmp/capture" || {
   exit 1
 }
 grep -qx 'dir_mode=700' "$tmp/capture"
+grep -qx 'wallpaper=fixture-wallpaper' "$tmp/capture" || {
+  printf 'wallpaper directory was not staged for installation\n' >&2
+  exit 1
+}
+grep -qx 'chown=var/lib/nixos-bootstrap:0:0' "$tmp/capture" || {
+  printf 'installer did not enforce root ownership for the bootstrap secret\n' >&2
+  exit 1
+}
+grep -qx 'chown=home/mei/Pictures:1000:100' "$tmp/capture" || {
+  printf 'installer did not set picture-directory ownership for mei\n' >&2
+  exit 1
+}
+grep -qx 'substitute_on_destination=disabled' "$tmp/capture" || {
+  printf 'installer did not enforce local-only closure transfer\n' >&2
+  exit 1
+}
 assert_runtime_empty
 printf 'success-and-cleanup=PASS\n'
+
+: > "$tmp/capture"
+printf 'iso-fixture-password\n' \
+  | script -qefc \
+    "MOCK_INTERACTIVE=1 ${run_env[*]} '$helper' root@mock-target .#x86_64-linux" \
+    /dev/null >/dev/null
+grep -qx 'installer_tty=present' "$tmp/capture"
+grep -qx 'installer_foreground=present' "$tmp/capture"
+grep -qx 'ssh_auth_sock=unset' "$tmp/capture"
+grep -qx 'ssh_option=IdentityAgent=none' "$tmp/capture"
+assert_runtime_empty
+printf 'interactive-tty-agent-and-cleanup=PASS\n'
 
 : > "$tmp/capture"
 "${run_env[@]}" "$helper" root@mock-target
@@ -151,6 +224,64 @@ set -e
 [[ $rc -eq 1 ]]
 assert_runtime_empty
 printf 'non-tmpfs-runtime=PASS rc=%s\n' "$rc"
+
+set +e
+env \
+  PATH="$tmp/bin:$PATH" \
+  XDG_RUNTIME_DIR="$tmp/runtime" \
+  NIXOS_ANYWHERE_WALLPAPERS="$tmp/missing-wallpapers" \
+  MOCK_CAPTURE="$tmp/capture" \
+  "$helper" root@mock-target
+rc=$?
+set -e
+[[ $rc -eq 1 ]]
+assert_runtime_empty
+printf 'missing-wallpapers=PASS rc=%s\n' "$rc"
+
+ln -s "$tmp/wallpapers" "$tmp/wallpapers-link"
+set +e
+env \
+  PATH="$tmp/bin:$PATH" \
+  XDG_RUNTIME_DIR="$tmp/runtime" \
+  NIXOS_ANYWHERE_WALLPAPERS="$tmp/wallpapers-link" \
+  MOCK_CAPTURE="$tmp/capture" \
+  "$helper" root@mock-target
+rc=$?
+set -e
+[[ $rc -eq 1 ]]
+assert_runtime_empty
+printf 'wallpaper-source-symlink=PASS rc=%s\n' "$rc"
+
+mkdir "$tmp/wallpapers-with-link"
+ln -s "$tmp/wallpapers/fixture.jpg" "$tmp/wallpapers-with-link/fixture.jpg"
+set +e
+env \
+  PATH="$tmp/bin:$PATH" \
+  XDG_RUNTIME_DIR="$tmp/runtime" \
+  NIXOS_ANYWHERE_WALLPAPERS="$tmp/wallpapers-with-link" \
+  MOCK_CAPTURE="$tmp/capture" \
+  "$helper" root@mock-target
+rc=$?
+set -e
+[[ $rc -eq 1 ]]
+assert_runtime_empty
+printf 'wallpaper-entry-symlink=PASS rc=%s\n' "$rc"
+
+mkdir "$tmp/oversized-wallpapers"
+truncate -s $((4 * 1024 * 1024 * 1024 + 1)) \
+  "$tmp/oversized-wallpapers/sparse.jpg"
+set +e
+env \
+  PATH="$tmp/bin:$PATH" \
+  XDG_RUNTIME_DIR="$tmp/runtime" \
+  NIXOS_ANYWHERE_WALLPAPERS="$tmp/oversized-wallpapers" \
+  MOCK_CAPTURE="$tmp/capture" \
+  "$helper" root@mock-target
+rc=$?
+set -e
+[[ $rc -eq 1 ]]
+assert_runtime_empty
+printf 'oversized-sparse-wallpaper=PASS rc=%s\n' "$rc"
 
 for mode in GENERATOR_FAIL MULTILINE NO_FINAL_NEWLINE UNTERMINATED_TRAILING EMPTY_SALT; do
   set +e
