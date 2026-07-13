@@ -49,7 +49,10 @@ let
     assert hm.programs.nushell.settings.history.sync_on_enter;
     assert hm.programs.nushell.settings.completions.algorithm == "fuzzy";
     assert hm.programs.nushell.settings.color_config.hints == "light_cyan";
+    assert hasInfix ".nix-profile/bin" hm.programs.nushell.extraEnv;
+    assert hasInfix "/run/current-system/sw/bin" hm.programs.nushell.extraEnv;
     assert hasInfix "fastfetch" hm.programs.nushell.extraConfig;
+    assert hasInfix "which fastfetch" hm.programs.nushell.extraConfig;
     assert hm.programs.bash.enable;
     assert hm.programs.zsh.enable;
     assert hm.programs.fish.enable;

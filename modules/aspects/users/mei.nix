@@ -52,8 +52,15 @@
             completions.algorithm = "fuzzy";
             color_config.hints = "light_cyan";
           };
+          extraEnv = ''
+            $env.PATH = ([
+              ($env.HOME | path join ".nix-profile/bin")
+              "/run/current-system/sw/bin"
+              "/nix/var/nix/profiles/default/bin"
+            ] | append $env.PATH | uniq)
+          '';
           extraConfig = ''
-            if $nu.is-interactive and (($env.TERM? | default "") != "dumb") {
+            if $nu.is-interactive and (($env.TERM? | default "") != "dumb") and (which fastfetch | is-not-empty) {
               fastfetch --config ($env.HOME | path join ".config/fastfetch/config.jsonc")
               print ""
             }
