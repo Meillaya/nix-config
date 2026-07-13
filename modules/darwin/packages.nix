@@ -7,6 +7,7 @@ shared-packages ++ [
   ghostty-bin
   helium
   iterm2
+  kitty
   obsidian
   omniwm
   postman

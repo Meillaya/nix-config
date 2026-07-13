@@ -2,6 +2,7 @@ let
   flake = builtins.getFlake ("path:" + toString ../.);
   nixos = flake.nixosConfigurations."x86_64-linux".config;
   darwin = flake.darwinConfigurations."aarch64-darwin".config;
+  darwinIntel = flake.darwinConfigurations."x86_64-darwin".config;
   standalone = flake.homeConfigurations."standalone-linux".config;
   shellName = shell: shell.pname or shell.name or (builtins.baseNameOf (toString shell));
   expectedLinuxApps = [
@@ -14,6 +15,12 @@ let
   ];
   hasShell = name: shells: builtins.any (shell: shellName shell == name) shells;
   hasInfix = flake.inputs.nixpkgs.lib.hasInfix;
+  countExactLine = expected: text:
+    builtins.length (
+      builtins.filter
+        (line: line == expected)
+        (flake.inputs.nixpkgs.lib.splitString "\n" text)
+    );
   packageName = package: package.pname or package.name or (builtins.baseNameOf (toString package));
   hasPackages = names: packages:
     let present = map packageName packages;
@@ -22,6 +29,19 @@ let
     "calibre" "gimp" "ghostty" "helium" "kitty" "obsidian" "ollama"
     "qbittorrent" "noctalia" "swaybg" "zen-beta"
   ];
+  expectedDarwinShellActivation = ''
+    desired_shell=/run/current-system/sw/bin/nu
+    if [[ ! -x "$systemConfig/sw/bin/nu" ]]; then
+      printf >&2 'error: configured Nushell is not executable: %s\n' "$systemConfig/sw/bin/nu"
+      exit 1
+    fi
+
+    current_shell=$(/usr/bin/dscl . -read /Users/mei UserShell)
+    current_shell="''${current_shell#UserShell: }"
+    if [[ "$current_shell" != "$desired_shell" ]]; then
+      /usr/bin/dscl . -create /Users/mei UserShell "$desired_shell"
+    fi
+  '';
   assertHm = hm:
     assert hm.programs.nushell.enable;
     assert hm.programs.nushell.settings.show_hints;
@@ -33,6 +53,10 @@ let
     assert hm.programs.bash.enable;
     assert hm.programs.zsh.enable;
     assert hm.programs.fish.enable;
+    assert countExactLine "set -g allow-passthrough on"
+      hm.programs.tmux.extraConfig == 1;
+    assert countExactLine "set -g allow-passthrough on"
+      hm.xdg.configFile."tmux/tmux.conf".text == 1;
     true;
 in
 assert builtins.attrNames flake.nixosConfigurations == [ "aarch64-linux" "x86_64-linux" ];
@@ -79,6 +103,10 @@ assert hasShell "nu" darwin.environment.shells;
 assert hasShell "bash" darwin.environment.shells;
 assert hasShell "zsh" darwin.environment.shells;
 assert hasShell "fish" darwin.environment.shells;
+assert hasPackages [ "kitty" ] darwin.environment.systemPackages;
+assert hasPackages [ "kitty" ] darwinIntel.environment.systemPackages;
+assert flake.inputs.nixpkgs.lib.hasSuffix expectedDarwinShellActivation
+  darwin.system.activationScripts.postActivation.text;
 assert assertHm darwin.home-manager.users.mei;
 assert standalone.home.username == "mei";
 assert standalone.home.homeDirectory == "/home/mei";

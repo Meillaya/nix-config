@@ -578,6 +578,8 @@ in
     escapeTime = 10;
     historyLimit = 50000;
     extraConfig = ''
+      set -g allow-passthrough on
+
       # Remove Vim mode delays
       set -g focus-events on
 

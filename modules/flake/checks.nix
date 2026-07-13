@@ -3,7 +3,7 @@
   perSystem = { pkgs, ... }: {
     checks = {
       dendritic-architecture = pkgs.runCommand "dendritic-architecture" {
-        nativeBuildInputs = [ pkgs.bash pkgs.gnugrep ];
+        nativeBuildInputs = [ pkgs.bash pkgs.fastfetch pkgs.gnugrep ];
         src = inputs.self;
       } ''
         cp -R "$src" source

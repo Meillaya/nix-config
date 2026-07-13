@@ -11,9 +11,27 @@
       users.users.mei.shell = pkgs.nushell;
     };
 
-    darwin = { pkgs, ... }: {
+    darwin = { pkgs, lib, ... }: {
       environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
       users.users.mei.shell = pkgs.nushell;
+
+      # The primary admin is intentionally not a nix-darwin managed user, so
+      # users.users.mei.shell alone does not update its Directory Service
+      # record. Reconcile only the login shell without taking ownership of the
+      # existing account's UID, groups, or lifecycle.
+      system.activationScripts.postActivation.text = lib.mkAfter ''
+        desired_shell=/run/current-system/sw/bin/nu
+        if [[ ! -x "$systemConfig/sw/bin/nu" ]]; then
+          printf >&2 'error: configured Nushell is not executable: %s\n' "$systemConfig/sw/bin/nu"
+          exit 1
+        fi
+
+        current_shell=$(/usr/bin/dscl . -read /Users/mei UserShell)
+        current_shell="''${current_shell#UserShell: }"
+        if [[ "$current_shell" != "$desired_shell" ]]; then
+          /usr/bin/dscl . -create /Users/mei UserShell "$desired_shell"
+        fi
+      '';
     };
 
     homeManager = { config, pkgs, lib, ... }: {

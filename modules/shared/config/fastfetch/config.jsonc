@@ -1,9 +1,10 @@
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": {
-    "type": "kitty",
+    "type": "kitty-direct",
     "source": "~/.config/fastfetch/snoopy-mugiwara.png",
     "width": 40,
+    "height": 30,
     "padding": {
       "top": 2,
       "left": 2
