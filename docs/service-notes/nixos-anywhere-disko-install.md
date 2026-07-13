@@ -19,13 +19,15 @@ You need:
 - A NixOS installer USB for the target machine. The minimal ISO is sufficient.
 - A second Linux computer on the same network. The helper currently relies on
   Linux `findmnt` and a tmpfs-backed `XDG_RUNTIME_DIR`.
-- `nix`, `git`, `ssh`, `fish`, and `python3` on the working computer.
+- `nix`, `git`, `ssh`, `fish`, `python3`, and either Bash or Nushell on the
+  working computer.
 - Internet access from the working computer and installer environment.
 - A backup of anything valuable on the target disk.
 
-Commands in this guide use Bash syntax unless a code block says otherwise. Do
-not copy Bash assignments such as `TARGET=...` into Fish; in Fish, use
-`set TARGET ...` instead.
+Shell-sensitive commands in this guide are provided in separate **Bash** and
+**Nushell** blocks. Commands shown only once work unchanged in either shell or
+run on the NixOS installer, whose root terminal uses Bash. The password helper
+is a Fish script, but it can be launched from either Bash or Nushell.
 
 The Disko step is destructive. It erases the disk selected in step 3. Repeat the
 disk-identification and patching steps independently for every new PC or laptop;
@@ -98,9 +100,18 @@ and exists only for this live installer session.
 
 On the working computer:
 
+**Bash:**
+
 ```bash
 TARGET=192.168.1.123
-ssh root@$TARGET
+ssh "root@$TARGET"
+```
+
+**Nushell:**
+
+```nu
+let target = "192.168.1.123"
+ssh $"root@($target)"
 ```
 
 If login works, exit back to the working computer:
@@ -113,26 +124,59 @@ If SSH reports a changed host key because the address was previously used by
 another installer session, verify that the IP is correct and remove only that
 old entry:
 
+**Bash:**
+
 ```bash
 ssh-keygen -R "$TARGET"
+```
+
+**Nushell:**
+
+```nu
+ssh-keygen -R $target
 ```
 
 ## 3. Identify the target disk over SSH
 
 Run this from the working computer:
 
+**Bash:**
+
 ```bash
-ssh root@$TARGET '
+ssh "root@$TARGET" 'bash -s' <<'REMOTE_BASH'
 for d in /sys/block/*; do
   name=${d##*/}
   case "$name" in loop*|ram*|zram*) continue ;; esac
   [ -e "$d/device" ] || continue
   printf "\nDEVICE: /dev/%s\n" "$name"
   lsblk -dn -o NAME,MODEL,SERIAL,SIZE,TRAN,TYPE "/dev/$name"
-  find /dev/disk/by-id -maxdepth 1 -type l ! -name "*-part*" \
-    -exec sh -c '\''for x; do [ "$(readlink -f "$x")" = "/dev/'"$name"'" ] && echo "  ID: $x"; done'\'' sh {} +
+  for id in /dev/disk/by-id/*; do
+    [ -L "$id" ] || continue
+    case "$id" in *-part*) continue ;; esac
+    [ "$(readlink -f -- "$id")" = "/dev/$name" ] && printf "  ID: %s\n" "$id"
+  done
 done
-'
+REMOTE_BASH
+```
+
+**Nushell:**
+
+```nu
+let disk_probe = r#'
+for d in /sys/block/*; do
+  name=${d##*/}
+  case "$name" in loop*|ram*|zram*) continue ;; esac
+  [ -e "$d/device" ] || continue
+  printf "\nDEVICE: /dev/%s\n" "$name"
+  lsblk -dn -o NAME,MODEL,SERIAL,SIZE,TRAN,TYPE "/dev/$name"
+  for id in /dev/disk/by-id/*; do
+    [ -L "$id" ] || continue
+    case "$id" in *-part*) continue ;; esac
+    [ "$(readlink -f -- "$id")" = "/dev/$name" ] && printf "  ID: %s\n" "$id"
+  done
+done
+'#
+$disk_probe | ssh $"root@($target)" "bash -s"
 ```
 
 Pick the internal disk, not the installer USB.
@@ -145,19 +189,37 @@ Typical signs:
 
 Set the chosen disk on the working computer:
 
+**Bash:**
+
 ```bash
 DISK='/dev/disk/by-id/nvme-YOUR_INTERNAL_DISK_ID'
 ```
 
+**Nushell:**
+
+```nu
+let disk = "/dev/disk/by-id/nvme-YOUR_INTERNAL_DISK_ID"
+```
+
 Verify it against the target:
 
+**Bash:**
+
 ```bash
-ssh root@$TARGET "lsblk '$DISK'"
+ssh "root@$TARGET" "lsblk '$DISK'"
+```
+
+**Nushell:**
+
+```nu
+ssh $"root@($target)" lsblk $disk
 ```
 
 ## 4. Create a temporary patched clone
 
 On the working computer:
+
+**Bash:**
 
 ```bash
 WORK=$(mktemp -d)
@@ -165,7 +227,18 @@ git clone https://github.com/Meillaya/nix-config.git "$WORK/nix-config"
 cd "$WORK/nix-config"
 ```
 
+**Nushell:**
+
+```nu
+let work = (mktemp -d | str trim)
+let repo = ($work | path join "nix-config")
+git clone https://github.com/Meillaya/nix-config.git $repo
+cd $repo
+```
+
 Replace the placeholder with the target disk ID:
+
+**Bash:**
 
 ```bash
 export DISK
@@ -182,6 +255,24 @@ path.write_text(text.replace(needle, os.environ["DISK"]))
 PY
 ```
 
+**Nushell:**
+
+In the next block, replace only the value assigned to `disk_id`. Keep the
+`literal_placeholder` value exactly as `/dev/%DISK%`; it describes the text
+currently in the repository, not the selected disk. Nushell variable names are
+case-sensitive.
+
+```nu
+let disk_id = "/dev/disk/by-id/nvme-YOUR_INTERNAL_DISK_ID"
+let path = "modules/nixos/disk-config.nix"
+let literal_placeholder = "/dev/%DISK%"
+let text = (open --raw $path)
+if not ($text | str contains $literal_placeholder) {
+  error make {msg: $"missing placeholder: ($literal_placeholder)"}
+}
+$text | str replace $literal_placeholder $disk_id | save --force $path
+```
+
 Confirm the patched device:
 
 ```bash
@@ -196,8 +287,16 @@ device. This temporary checkout is intentionally dirty and machine-specific.
 
 First confirm the helper's runtime staging directory is backed by tmpfs:
 
+**Bash:**
+
 ```bash
 findmnt -no TARGET,FSTYPE --target "$XDG_RUNTIME_DIR"
+```
+
+**Nushell:**
+
+```nu
+findmnt -no TARGET,FSTYPE --target $env.XDG_RUNTIME_DIR
 ```
 
 The filesystem type must be `tmpfs`. The helper refuses to continue otherwise.
@@ -205,10 +304,18 @@ The filesystem type must be `tmpfs`. The helper refuses to continue otherwise.
 For a normal Intel/AMD laptop, run this from the patched checkout on the working
 computer:
 
+**Bash:**
+
 ```bash
 ./bin/nixos-anywhere-bootstrap-password.fish \
   "root@$TARGET" \
   ".#x86_64-linux"
+```
+
+**Nushell:**
+
+```nu
+./bin/nixos-anywhere-bootstrap-password.fish $"root@($target)" ".#x86_64-linux"
 ```
 
 The helper prompts interactively for a unique password, generates a yescrypt verifier in
@@ -233,10 +340,18 @@ For ARM hardware, use the ARM configuration below. Because the helper builds on
 the working computer, that computer must be ARM too or have a working AArch64
 builder/emulation setup:
 
+**Bash:**
+
 ```bash
 ./bin/nixos-anywhere-bootstrap-password.fish \
   "root@$TARGET" \
   ".#aarch64-linux"
+```
+
+**Nushell:**
+
+```nu
+./bin/nixos-anywhere-bootstrap-password.fish $"root@($target)" ".#aarch64-linux"
 ```
 
 Do not interrupt the command while Disko is partitioning the target. A successful
@@ -287,6 +402,8 @@ Record and apply this machine's disk ID again if you want the checkout to remain
 reinstall-ready. Keep the edit local unless the repository gains a dedicated
 disk configuration for this machine:
 
+**Bash:**
+
 ```bash
 DISK='/dev/disk/by-id/nvme-THIS_MACHINES_DISK_ID'
 export DISK
@@ -303,6 +420,22 @@ path.write_text(text.replace(needle, os.environ["DISK"]))
 PY
 ```
 
+**Nushell:**
+
+Replace only the value assigned to `disk_id`; leave `literal_placeholder`
+unchanged.
+
+```nu
+let disk_id = "/dev/disk/by-id/nvme-THIS_MACHINES_DISK_ID"
+let path = "modules/nixos/disk-config.nix"
+let literal_placeholder = "/dev/%DISK%"
+let text = (open --raw $path)
+if not ($text | str contains $literal_placeholder) {
+  error make {msg: $"missing placeholder: ($literal_placeholder)"}
+}
+$text | str replace $literal_placeholder $disk_id | save --force $path
+```
+
 For routine configuration changes, build and switch from this checkout:
 
 ```bash
@@ -316,8 +449,16 @@ a destructive reinstall.
 
 Remove the temporary working-computer checkout when it is no longer needed:
 
+**Bash:**
+
 ```bash
 rm -rf -- "$WORK"
+```
+
+**Nushell:**
+
+```nu
+rm -rf $work
 ```
 
 ## 8. Recovery if first login fails
