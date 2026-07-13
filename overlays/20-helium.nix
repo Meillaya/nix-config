@@ -2,15 +2,15 @@ self: super:
 let
   inherit (super) lib;
 
-  linuxVersion = "0.11.3.2";
+  linuxVersion = "0.14.3.1";
   linuxSources = {
     x86_64-linux = {
       url = "https://github.com/imputnet/helium-linux/releases/download/${linuxVersion}/helium-${linuxVersion}-x86_64.AppImage";
-      sha256 = "0w1q106i1cvgi0dxmw69dywv0xi6m3kjy4gxlnhmsrbn1lm741z6";
+      sha256 = "sha256-umRDXcHlDRDWpdP4wxr81q+cUXkjiIxyg2AcJRFQaMA=";
     };
     aarch64-linux = {
       url = "https://github.com/imputnet/helium-linux/releases/download/${linuxVersion}/helium-${linuxVersion}-arm64.AppImage";
-      sha256 = "1w5yi80p5djnsbwisb47q44i5yzchql7iffvyy9gi6l5nh3i7mlk";
+      sha256 = "sha256-1E2R+UvdLVQmDZeWW/MK5Tc3bVvxTtfb/4sBNq5okg4=";
     };
   };
   system = super.stdenv.hostPlatform.system;
@@ -310,11 +310,11 @@ PY
   darwinAttrs = lib.optionalAttrs super.stdenv.hostPlatform.isDarwin rec {
     helium = mkDarwinApp rec {
       pname = "helium";
-      version = "0.11.5.1";
+      version = "0.14.3.1";
       url = "https://github.com/imputnet/helium-macos/releases/download/${version}/helium_${version}_${if super.stdenv.hostPlatform.isAarch64 then "arm64" else "x86_64"}-macos.dmg";
       hash = if super.stdenv.hostPlatform.isAarch64
-        then "sha256-P5iXtXS05uu5Qy9jPheXAbjewn6jKTcqc5uF2yZoz/k="
-        else "sha256-YI0c5DDtPizr/muDCi8bWu3wU96WDxw6y8bmCOb6sw0=";
+        then "sha256-Lf95koI966ykq/ufvgq8VVvsyo4nDVgY64JlPyXFGww="
+        else "sha256-KZZTh4ajlx2TI2KSDAJj+HAraIvRi+aznDNeXEY2AVI=";
       appName = "Helium";
       description = "Chromium-based web browser";
       homepage = "https://helium.computer/";
@@ -326,9 +326,9 @@ PY
 
     omniwm = mkDarwinApp rec {
       pname = "omniwm";
-      version = "0.5.2.1";
+      version = "0.5.3.2";
       url = "https://github.com/BarutSRB/OmniWM/releases/download/v${version}/OmniWM-v${version}.zip";
-      hash = "sha256-V0Zj6P94iAou3rYpA+CCz1Vq8Ko3cETuzFtveGD4idc=";
+      hash = "sha256-FkLDBT25Yu/PRyj82aM8eXs2unUIFmU9YaEyxm+IkZI=";
       appName = "OmniWM";
       description = "Tiling window manager for macOS with a Niri-inspired column layout";
       homepage = "https://github.com/BarutSRB/OmniWM";
@@ -342,11 +342,11 @@ PY
 
     stremio = mkDarwinApp rec {
       pname = "stremio";
-      version = "5.1.21";
+      version = "5.1.24";
       url = "https://dl.strem.io/stremio-shell-macos/v${version}/Stremio_${if super.stdenv.hostPlatform.isAarch64 then "arm64" else "x64"}.dmg";
       hash = if super.stdenv.hostPlatform.isAarch64
-        then "sha256-gG4eJRBkm04PK1ecMEoYTuc0JHIN4N795plUgXL9ySk="
-        else "sha256-0lx/XV/ya3NcaQEU9oCcr/79S7Qrq4vylawVqJn0cMY=";
+        then "sha256-a/TP2rUsNz8mEGNsEOwZBZweFll2TOLTwqB+Hzzc5IM="
+        else "sha256-YB/KqINGXOybw01bc2Mbj0QQD6/TD9ypEF1PgXtTkK8=";
       appName = "Stremio";
       description = "Open-source media center";
       homepage = "https://www.strem.io/";

@@ -1,0 +1,174 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1781544056801,
+  "projectRoot": "/Users/mei/nixos-config",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "apps": {
+      "path": "apps",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1781544056794,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1781544056795,
+      "keyFiles": []
+    },
+    "hosts": {
+      "path": "hosts",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1781544056795,
+      "keyFiles": []
+    },
+    "modules": {
+      "path": "modules",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1781544056796,
+      "keyFiles": []
+    },
+    "overlays": {
+      "path": "overlays",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1781544056796,
+      "keyFiles": [
+        "10-feather-font.nix",
+        "20-helium.nix",
+        "30-ai-sidecars.nix",
+        "README.md"
+      ]
+    },
+    "secrets": {
+      "path": "secrets",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1781544056796,
+      "keyFiles": [
+        "README.md"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1781545427525,
+      "type": "directory"
+    },
+    {
+      "path": "modules/darwin/casks.nix",
+      "accessCount": 2,
+      "lastAccessed": 1781545442960,
+      "type": "file"
+    },
+    {
+      "path": "hosts/darwin/default.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544607083,
+      "type": "file"
+    },
+    {
+      "path": "modules/darwin/home-manager.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544607488,
+      "type": "file"
+    },
+    {
+      "path": "modules/shared/files.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544633639,
+      "type": "file"
+    },
+    {
+      "path": "modules/darwin/files.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544797708,
+      "type": "file"
+    },
+    {
+      "path": "modules/darwin/packages.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544797864,
+      "type": "file"
+    },
+    {
+      "path": "modules/shared/packages.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544801496,
+      "type": "file"
+    },
+    {
+      "path": "modules/shared/home-manager.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544801781,
+      "type": "file"
+    },
+    {
+      "path": "flake.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544809302,
+      "type": "file"
+    },
+    {
+      "path": "modules/shared/default.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544823105,
+      "type": "file"
+    },
+    {
+      "path": "overlays/20-helium.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544829822,
+      "type": "file"
+    },
+    {
+      "path": "overlays/30-ai-sidecars.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544830739,
+      "type": "file"
+    },
+    {
+      "path": "overlays/10-feather-font.nix",
+      "accessCount": 1,
+      "lastAccessed": 1781544830794,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

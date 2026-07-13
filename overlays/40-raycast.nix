@@ -1,16 +1,16 @@
 self: super:
 let
-  version = "1.104.20";
+  version = "1.104.21";
   sources = {
     aarch64-darwin = super.fetchurl {
       name = "Raycast.dmg";
       url = "https://releases.raycast.com/releases/${version}/download?build=arm";
-      hash = "sha256-KUCRNCxCoAetEDXIPBsDcMBnurpBH3GnS0MZ+4rKCfA=";
+      hash = "sha256-iePq963nxLO7RBsqy9zrPzZz6U3VCbt9+QmFT1eFODc=";
     };
     x86_64-darwin = super.fetchurl {
       name = "Raycast.dmg";
       url = "https://releases.raycast.com/releases/${version}/download?build=x86_64";
-      hash = "sha256-B+VpuvCFLf1nZT4SY3a8XMi8wTyLOeqkM4vd8cSrbEI=";
+      hash = "sha256-ejgx+yZU9B9jfqAHte6vQ18wE3V6UMkzSgfcTuSQ2gA=";
     };
   };
 

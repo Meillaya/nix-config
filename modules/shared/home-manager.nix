@@ -300,7 +300,7 @@ in
 
         # Start from a deterministic function search path so nested shells do
         # not inherit stale oh-my-zsh plugin completion paths.
-        fpath=("${pkgs.zsh}/share/zsh/$ZSH_VERSION/functions")
+        fpath=("${pkgs.zsh}/share/zsh/${pkgs.zsh.version}/functions")
 
         # Remove history data we don't want to see
         export HISTIGNORE="pwd:ls:cd"

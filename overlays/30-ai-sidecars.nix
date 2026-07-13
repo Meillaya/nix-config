@@ -54,21 +54,21 @@ in
 {
   oh-my-codex-sidecar = mkNodeSidecar {
     pname = "oh-my-codex";
-    version = "0.15.0";
+    version = "0.19.0";
     owner = "Yeachan-Heo";
     repo = "oh-my-codex";
-    sha256 = "sha256-jtyHUtV7N6uKNtvBoqYJU2VYJra6PpcB6hvZhl1ChRE=";
-    npmDepsHash = "sha256-LqGRFLAT45mm927PoWnD+q5jroM1/cYod7rG9cFLlqU=";
+    sha256 = "sha256-7vSmPghxQS4NCwDKSpo8PZk77euhZTo/yLb9LAdBd7w=";
+    npmDepsHash = "sha256-QqqhCdhVdluHuwnTOoBFOdE+2ys/1pILVGe+v4XHRoA=";
     updateAttr = "oh-my-codex-sidecar";
   };
 
   oh-my-claude-sisyphus-sidecar = mkNodeSidecar {
     pname = "oh-my-claude-sisyphus";
-    version = "4.13.3";
+    version = "4.15.2";
     owner = "Yeachan-Heo";
     repo = "oh-my-claudecode";
-    sha256 = "0i5kib94p1n57v5295prnaf33c508mssakxv3qylq581q9sf85bs";
-    npmDepsHash = "sha256-gWXDHewhZ+53yZnqcpmQWh88UKieVsFgzAcdLIwzfdo=";
+    sha256 = "sha256-YzMJSok+B1zKeKeDiBaiJLgEIrrCkzZHs06fXIcRGOw=";
+    npmDepsHash = "sha256-k+IgUj10X5XoFt8nvKe1aI/9Z5+F+Ycu9Mg7CXejkNk=";
     updateAttr = "oh-my-claude-sisyphus-sidecar";
   };
 }
