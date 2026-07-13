@@ -2,15 +2,15 @@ self: super:
 let
   inherit (super) lib;
 
-  linuxVersion = "0.14.3.1";
+  linuxVersion = "0.14.5.1";
   linuxSources = {
     x86_64-linux = {
       url = "https://github.com/imputnet/helium-linux/releases/download/${linuxVersion}/helium-${linuxVersion}-x86_64.AppImage";
-      sha256 = "sha256-umRDXcHlDRDWpdP4wxr81q+cUXkjiIxyg2AcJRFQaMA=";
+      sha256 = "sha256-JM4Tm4Le9Xcfq3fFMEu/DIK6817FEgBQ2rSwY093F04=";
     };
     aarch64-linux = {
       url = "https://github.com/imputnet/helium-linux/releases/download/${linuxVersion}/helium-${linuxVersion}-arm64.AppImage";
-      sha256 = "sha256-1E2R+UvdLVQmDZeWW/MK5Tc3bVvxTtfb/4sBNq5okg4=";
+      sha256 = "sha256-NStk0HDMTXOBgDTzvGkUcErGDu5WXrTjkxlytQ5jOBE=";
     };
   };
   system = super.stdenv.hostPlatform.system;
@@ -310,11 +310,11 @@ PY
   darwinAttrs = lib.optionalAttrs super.stdenv.hostPlatform.isDarwin rec {
     helium = mkDarwinApp rec {
       pname = "helium";
-      version = "0.14.3.1";
+      version = "0.14.5.1";
       url = "https://github.com/imputnet/helium-macos/releases/download/${version}/helium_${version}_${if super.stdenv.hostPlatform.isAarch64 then "arm64" else "x86_64"}-macos.dmg";
       hash = if super.stdenv.hostPlatform.isAarch64
-        then "sha256-Lf95koI966ykq/ufvgq8VVvsyo4nDVgY64JlPyXFGww="
-        else "sha256-KZZTh4ajlx2TI2KSDAJj+HAraIvRi+aznDNeXEY2AVI=";
+        then "sha256-bcGrKKY32xVSfe7YNPMeEmVn3LyOThOGmdaQkNocmXw="
+        else "sha256-q7LNJOtSD8WGWP8WdIcq0yldWtDOu4RJKll0Ok1Ujy0=";
       appName = "Helium";
       description = "Chromium-based web browser";
       homepage = "https://helium.computer/";
