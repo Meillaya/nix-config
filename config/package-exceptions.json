@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    { "pname": "claude-code", "owner": "maintainer", "reason": "managed AI CLI", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "aarch64-linux", "x86_64-linux"] },
+    { "pname": "google-chrome", "owner": "maintainer", "reason": "managed browser application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["x86_64-linux"] },
+    { "pname": "helium", "owner": "maintainer", "reason": "managed browser application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin"] },
+    { "pname": "idea", "owner": "maintainer", "reason": "requested development workstation application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-linux", "x86_64-linux"] },
+    { "pname": "obsidian", "owner": "maintainer", "reason": "managed knowledge-base application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "aarch64-linux", "x86_64-linux"] },
+    { "pname": "omniwm", "owner": "maintainer", "reason": "managed macOS window manager", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin"] },
+    { "pname": "postman", "owner": "maintainer", "reason": "managed API development application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "x86_64-linux"] },
+    { "pname": "pycharm", "owner": "maintainer", "reason": "requested development workstation application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-linux", "x86_64-linux"] },
+    { "pname": "raycast", "owner": "maintainer", "reason": "managed macOS launcher", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin"] },
+    { "pname": "stremio", "owner": "maintainer", "reason": "managed media application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin"] },
+    { "pname": "sublime-text", "owner": "maintainer", "reason": "managed editor application", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "x86_64-linux"] },
+    { "pname": "terraform", "owner": "maintainer", "reason": "managed infrastructure development CLI", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "aarch64-linux", "x86_64-linux"] },
+    { "pname": "unrar", "owner": "maintainer", "reason": "managed archive compatibility utility", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["aarch64-darwin", "aarch64-linux", "x86_64-linux"] },
+    { "pname": "vagrant", "owner": "maintainer", "reason": "requested virtualization development CLI", "reviewedAt": "2026-07-16", "expiresAt": "2026-10-14", "maxTtlDays": 90, "systems": ["x86_64-linux"] }
+  ]
+}

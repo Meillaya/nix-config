@@ -2,7 +2,9 @@
 
 with pkgs;
 let shared-packages = import ../shared/packages.nix { inherit pkgs; includeDocker = false; }; in
-shared-packages ++ [
+pkgs.lib.unique (shared-packages
+  ++ (import ../shared/application-packages.nix { inherit pkgs; profile = "darwin"; })
+  ++ [
   # App replacements formerly installed as casks
   ghostty-bin
   helium
@@ -24,4 +26,4 @@ shared-packages ++ [
   neovim
   omniorb
   uv
-]
+])

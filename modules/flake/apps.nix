@@ -1,7 +1,7 @@
 { inputs, lib, ... }:
 let
   inherit (inputs) self home-manager nixpkgs;
-  darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
+  darwinSystems = [ "aarch64-darwin" ];
   mkConfiguredPkgs = (import ../../lib/nixpkgs.nix { inherit inputs; }).mkPkgs;
   localUpdaterNamesFor = system:
     [
@@ -228,6 +228,27 @@ EOF
           ''${hm_args[@]}
       '')}/bin/home-news";
     };
+  mkWslSwitchApp = system:
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      target = if system == "x86_64-linux" then "standalone-linux" else "standalone-linux-aarch64";
+    in {
+      type = "app";
+      program = "${(pkgs.writeShellScriptBin "wsl-switch" ''
+        set -euo pipefail
+
+        if ! grep -qi microsoft /proc/sys/kernel/osrelease 2>/dev/null; then
+          echo "wsl-switch: this profile may only be activated inside WSL" >&2
+          exit 1
+        fi
+
+        export NIX_CONFIG_PROFILE=wsl
+        backup_ext="wsl-hm-backup-$(${pkgs.coreutils}/bin/date +%Y%m%d%H%M%S)"
+        exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
+          --extra-experimental-features "nix-command flakes" \
+          --impure switch -b "$backup_ext" --flake ${self}#${target} "$@"
+      '')}/bin/wsl-switch";
+    };
   mkSyncSecretsApp = system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
@@ -252,8 +273,8 @@ EOF
 Usage: nix run .#sync-secrets -- [--repo GIT_URL]
 
 Examples:
-  NIX_SECRETS_REPO=git@github.com:Meillaya/nix-screts.git nix run .#sync-secrets
-  nix run .#sync-secrets -- --repo git@github.com:Meillaya/nix-screts.git
+  NIX_SECRETS_REPO=git@github.com:OWNER/nix-secrets.git nix run .#sync-secrets
+  nix run .#sync-secrets -- --repo git@github.com:OWNER/nix-secrets.git
 EOF
               exit 0
               ;;
@@ -525,13 +546,15 @@ EOF
       '')}/bin/update";
   };
   mkLinuxApps = system: {
-    "build-switch" = mkApp "build-switch" system;
     "clean" = mkApp "clean" system;
     "sync-secrets" = mkSyncSecretsApp system;
     "home-news" = mkHomeNewsApp system;
     "home-switch" = mkHomeSwitchApp system;
     "search-pkgs" = mkSearchPkgsApp system;
     "update" = mkUpdateApp system;
+    "wsl-switch" = mkWslSwitchApp system;
+  } // lib.optionalAttrs (system == "x86_64-linux") {
+    "build-switch" = mkApp "build-switch" system;
   };
   mkDarwinApps = system: {
     "build" = mkApp "build" system;

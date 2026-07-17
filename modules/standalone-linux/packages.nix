@@ -1,8 +1,11 @@
-{ pkgs, inputs }:
+{ pkgs, inputs, profile ? "linux-desktop" }:
 
 with pkgs;
 let
-  shared-packages = import ../shared/packages.nix { inherit pkgs; };
+  shared-packages = import ../shared/packages.nix {
+    inherit pkgs;
+    includeGui = profile != "wsl";
+  };
   setup-ddc-brightness = writeShellScriptBin "setup-ddc-brightness" ''
     set -euo pipefail
 
@@ -36,7 +39,9 @@ let
     ${ddcutil}/bin/ddcutil detect || true
   '';
 in
-shared-packages ++ [
+pkgs.lib.unique (shared-packages
+  ++ (import ../shared/application-packages.nix { inherit pkgs profile; })
+  ++ pkgs.lib.optionals (profile == "linux-desktop") [
   awww
   brightnessctl
   calibre
@@ -82,4 +87,4 @@ shared-packages ++ [
   zathura
   setup-ddc-brightness
   inputs.zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
-]
+])

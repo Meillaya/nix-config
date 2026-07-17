@@ -1,34 +1,59 @@
-_: {
-  # This formats the disk with the ext4 filesystem
-  # Other examples found here: https://github.com/nix-community/disko/tree/master/example
-  disko.devices = {
-    disk = {
-      vdb = {
-        device = "/dev/%DISK%";
-        type = "disk";
-        content = {
-          type = "gpt";
-          partitions = {
-            ESP = {
-              type = "EF00";
-              size = "100M";
-              content = {
-                type = "filesystem";
-                format = "vfat";
-                mountpoint = "/boot";
-              };
+{ config, lib, ... }:
+
+let
+  host = config.nixConfig.host;
+  storage = host.storage;
+  enrolled = host.installable && storage.state == "enrolled";
+  commonMountOptions = [ "compress=zstd:3" "noatime" ];
+in
+{
+  assertions = [
+    {
+      assertion = !enrolled || lib.hasPrefix "/dev/disk/by-id/" storage.diskById;
+      message = "${host.hostId}: Disko refuses non-persistent disk names";
+    }
+  ];
+
+  disko.devices = lib.mkIf enrolled {
+    disk.main = {
+      device = storage.diskById;
+      type = "disk";
+      content = {
+        type = "gpt";
+        partitions = {
+          ESP = {
+            priority = 1;
+            size = "1G";
+            type = "EF00";
+            content = {
+              type = "filesystem";
+              format = "vfat";
+              extraArgs = [ "-F" "32" ];
+              mountpoint = "/boot";
+              mountOptions = [ "umask=0077" ];
             };
-            root = {
-              size = "100%";
-              content = {
-                type = "filesystem";
-                format = "ext4";
-                mountpoint = "/";
+          };
+          root = {
+            size = "100%";
+            content = {
+              type = "btrfs";
+              extraArgs = [ "-f" ];
+              subvolumes = {
+                "@root" = { mountpoint = "/"; mountOptions = commonMountOptions; };
+                "@home" = { mountpoint = "/home"; mountOptions = commonMountOptions; };
+                "@nix" = { mountpoint = "/nix"; mountOptions = commonMountOptions; };
+                "@log" = { mountpoint = "/var/log"; mountOptions = commonMountOptions; };
               };
             };
           };
         };
       };
     };
+  };
+
+  services.btrfs.autoScrub = lib.mkIf enrolled {
+    enable = true;
+    interval = "monthly";
+    fileSystems = [ "/" ];
   };
 }

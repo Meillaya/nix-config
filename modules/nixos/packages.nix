@@ -2,7 +2,9 @@
 
 with pkgs;
 let shared-packages = import ../shared/packages.nix { inherit pkgs; }; in
-shared-packages ++ [
+pkgs.lib.unique (shared-packages
+  ++ (import ../shared/application-packages.nix { inherit pkgs; profile = "linux-desktop"; })
+  ++ [
 
   # Security and authentication
   yubikey-agent
@@ -94,4 +96,4 @@ shared-packages ++ [
   firefox
 
   # Music and entertainment
-]
+])

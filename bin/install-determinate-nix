@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "$(uname -m)" in
+  x86_64)
+    system=x86_64-linux
+    expected_size=73263312
+    expected_sha256=b9911496659f0c35c642353d592926c024c205b597e8094bf73a42908a75e462
+    ;;
+  aarch64)
+    system=aarch64-linux
+    expected_size=67790424
+    expected_sha256=d2ede080a0a7b34119362f4a8a6fb5e49a4d16b302ce54c96cd05514bdea6c7c
+    ;;
+  *)
+    echo "unsupported architecture: $(uname -m)" >&2
+    exit 1
+    ;;
+esac
+
+url="https://install.determinate.systems/nix/tag/v3.21.0/nix-installer-${system}"
+workdir=$(mktemp -d)
+trap 'rm -rf "$workdir"' EXIT
+installer="$workdir/nix-installer"
+
+curl --fail --location --proto '=https' --tlsv1.2 --retry 3 \
+  --output "$installer" "$url"
+
+actual_size=$(wc -c < "$installer" | tr -d '[:space:]')
+actual_sha256=$(sha256sum "$installer" | awk '{print $1}')
+
+if [[ "$actual_size" != "$expected_size" ]]; then
+  echo "installer size mismatch: expected $expected_size, got $actual_size" >&2
+  exit 1
+fi
+if [[ "$actual_sha256" != "$expected_sha256" ]]; then
+  echo "installer SHA-256 mismatch" >&2
+  exit 1
+fi
+
+chmod 0700 "$installer"
+exec "$installer" install --no-confirm

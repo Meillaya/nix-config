@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "release": [
+    "darwinConfigurations.aarch64-darwin",
+    "homeConfigurations.standalone-linux",
+    "homeConfigurations.standalone-linux-aarch64",
+    "nixosConfigurations.aarch64-linux",
+    "nixosConfigurations.x86_64-linux"
+  ],
+  "qualificationOnly": [
+    "nixosConfigurations.nixos-x86-qualifier"
+  ]
+}

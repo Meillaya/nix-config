@@ -1,7 +1,7 @@
 { inputs, ... }:
 let
   inherit (inputs) nixpkgs;
-  darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
+  darwinSystems = [ "aarch64-darwin" ];
   nixpkgsPolicy = import ../../lib/nixpkgs.nix { inherit inputs; };
   mkConfiguredPkgs = nixpkgsPolicy.mkPkgs;
   localPackageNamesFor = system:

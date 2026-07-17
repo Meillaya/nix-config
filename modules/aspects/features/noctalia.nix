@@ -1,4 +1,7 @@
 { inputs, ... }:
+let
+  standaloneProfile = builtins.getEnv "NIX_CONFIG_PROFILE";
+in
 {
   den.aspects.noctalia.nixos = {
     imports = [ inputs.noctalia.nixosModules.default ];

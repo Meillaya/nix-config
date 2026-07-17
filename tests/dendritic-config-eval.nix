@@ -1,15 +1,21 @@
 let
   flake = builtins.getFlake ("path:" + toString ../.);
   nixos = flake.nixosConfigurations."x86_64-linux".config;
+  qualifier = flake.nixosConfigurations."nixos-x86-qualifier".config;
   nixosArm = flake.nixosConfigurations."aarch64-linux".config;
   darwin = flake.darwinConfigurations."aarch64-darwin".config;
-  darwinIntel = flake.darwinConfigurations."x86_64-darwin".config;
   standalone = flake.homeConfigurations."standalone-linux".config;
   standaloneArm = flake.homeConfigurations."standalone-linux-aarch64".config;
+  nixosUserName = builtins.head (builtins.attrNames nixos.home-manager.users);
+  nixosHm = nixos.home-manager.users.${nixosUserName};
+  nixosUser = nixos.users.users.${nixosUserName};
+  darwinUserName = darwin.system.primaryUser;
+  darwinHm = darwin.home-manager.users.${darwinUserName};
+  darwinUser = darwin.users.users.${darwinUserName};
   shellName = shell: shell.pname or shell.name or (builtins.baseNameOf (toString shell));
   expectedLinuxApps = [
     "build-switch" "clean" "home-news" "home-switch" "search-pkgs" "sync-secrets"
-    "update"
+    "update" "wsl-switch"
   ];
   expectedDarwinApps = [
     "build" "build-switch" "check-keys" "clean" "copy-keys" "create-keys"
@@ -31,19 +37,6 @@ let
     "calibre" "gimp" "ghostty" "helium" "kitty" "obsidian" "ollama"
     "qbittorrent" "noctalia" "swaybg" "zen-beta"
   ];
-  expectedDarwinShellActivation = ''
-    desired_shell=/run/current-system/sw/bin/nu
-    if [[ ! -x "$systemConfig/sw/bin/nu" ]]; then
-      printf >&2 'error: configured Nushell is not executable: %s\n' "$systemConfig/sw/bin/nu"
-      exit 1
-    fi
-
-    current_shell=$(/usr/bin/dscl . -read /Users/mei UserShell)
-    current_shell="''${current_shell#UserShell: }"
-    if [[ "$current_shell" != "$desired_shell" ]]; then
-      /usr/bin/dscl . -create /Users/mei UserShell "$desired_shell"
-    fi
-  '';
   assertHm = hm:
     assert hm.programs.nushell.enable;
     assert hm.programs.nushell.settings.show_hints;
@@ -70,59 +63,60 @@ let
       hm.xdg.configFile."tmux/tmux.conf".text == 1;
     true;
 in
-assert builtins.attrNames flake.nixosConfigurations == [ "aarch64-linux" "x86_64-linux" ];
-assert builtins.attrNames flake.darwinConfigurations == [ "aarch64-darwin" "x86_64-darwin" ];
+assert builtins.attrNames flake.nixosConfigurations == [ "aarch64-linux" "nixos-x86-qualifier" "x86_64-linux" ];
+assert builtins.attrNames flake.darwinConfigurations == [ "aarch64-darwin" ];
 assert builtins.attrNames flake.homeConfigurations == [ "standalone-linux" "standalone-linux-aarch64" ];
 assert builtins.attrNames flake.apps.x86_64-linux == expectedLinuxApps;
 assert builtins.attrNames flake.apps.aarch64-darwin == expectedDarwinApps;
 assert nixos.networking.hostName == "nixos";
+assert qualifier.networking.hostName == "nixos-x86-qualifier";
+assert nixosArm.networking.hostName == "nixos-aarch64-evaluation";
+assert !nixosArm.networking.networkmanager.enable;
 assert nixos.system.stateVersion == "21.05";
 assert nixos.programs.niri.enable;
 assert nixos.xdg.portal.enable;
 assert nixos.services.displayManager.defaultSession == "niri";
 assert hasPackages [ "noctalia" ] nixos.environment.systemPackages;
 assert hasPackages requiredLinuxApplications (
-  nixos.home-manager.users.mei.home.packages ++ nixos.environment.systemPackages
+  nixosHm.home.packages ++ nixos.environment.systemPackages
 );
 assert nixos.systemd.user.services.noctalia.wantedBy == [ "graphical-session.target" ];
 assert nixos.systemd.user.services.noctalia.serviceConfig.Restart == "on-failure";
 assert hasInfix "/bin/noctalia" nixos.systemd.user.services.noctalia.serviceConfig.ExecStart;
 assert !hasInfix ''spawn-at-startup "noctalia"''
-  nixos.home-manager.users.mei.home.file."/home/mei/.config/niri/config.kdl".text;
-assert nixos.users.users.mei.hashedPasswordFile == "/var/lib/nixos-bootstrap/mei-password.hash";
-assert nixos.users.users.mei.isNormalUser;
-assert nixos.users.users.mei.home == "/home/mei";
-assert builtins.all (group: builtins.elem group nixos.users.users.mei.extraGroups) [
+  nixosHm.home.file."${nixosUser.home}/.config/niri/config.kdl".text;
+assert nixosUser.hashedPasswordFile == "/var/lib/nixos-bootstrap/${nixosUserName}-password.hash";
+assert nixosUser.isNormalUser;
+assert nixosUser.home == "/home/${nixosUserName}";
+assert builtins.all (group: builtins.elem group nixosUser.extraGroups) [
   "wheel"
   "networkmanager"
   "docker"
   "i2c"
   "video"
 ];
-assert shellName nixos.users.users.mei.shell == "nushell";
+assert shellName nixosUser.shell == "nushell";
 assert hasShell "nushell" nixos.environment.shells;
 assert hasShell "bash" nixos.environment.shells;
 assert hasShell "zsh" nixos.environment.shells;
 assert hasShell "fish" nixos.environment.shells;
-assert assertHm nixos.home-manager.users.mei;
-assert assertHm nixosArm.home-manager.users.mei;
+assert assertHm nixosHm;
 assert hasInfix "/bin/nu --login"
-  nixos.home-manager.users.mei.home.file."/home/mei/.local/share/konsole/Garuda.profile".text;
+  nixosHm.home.file."${nixosUser.home}/.local/share/konsole/Garuda.profile".text;
 assert darwin.system.stateVersion == 5;
-assert darwin.system.primaryUser == "mei";
-assert shellName darwin.users.users.mei.shell == "nushell";
+assert darwinUserName != "";
+assert shellName darwinUser.shell == "nushell";
 assert hasShell "nu" darwin.environment.shells;
 assert hasShell "bash" darwin.environment.shells;
 assert hasShell "zsh" darwin.environment.shells;
 assert hasShell "fish" darwin.environment.shells;
 assert hasPackages [ "kitty" ] darwin.environment.systemPackages;
-assert hasPackages [ "kitty" ] darwinIntel.environment.systemPackages;
-assert flake.inputs.nixpkgs.lib.hasSuffix expectedDarwinShellActivation
-  darwin.system.activationScripts.postActivation.text;
-assert assertHm darwin.home-manager.users.mei;
-assert assertHm darwinIntel.home-manager.users.mei;
-assert standalone.home.username == "mei";
-assert standalone.home.homeDirectory == "/home/mei";
+assert hasInfix "/usr/bin/dscl" darwin.system.activationScripts.postActivation.text;
+assert hasInfix "/Users/${darwinUserName}" darwin.system.activationScripts.postActivation.text;
+assert hasInfix "UserShell" darwin.system.activationScripts.postActivation.text;
+assert assertHm darwinHm;
+assert standalone.home.username != "";
+assert standalone.home.homeDirectory != "";
 assert standalone.home.stateVersion == "25.11";
 assert hasPackages requiredLinuxApplications standalone.home.packages;
 assert standalone.systemd.user.services.noctalia.Install.WantedBy == [ "graphical-session.target" ];

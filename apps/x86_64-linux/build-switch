@@ -27,7 +27,7 @@ while (( $# > 0 )); do
       cat <<'EOF'
 Usage: build-switch [--host HOST] [nixos-rebuild arguments...]
 
-Defaults to x86_64-linux or aarch64-linux based on the current architecture.
+Defaults to the enrolled x86 workstation output, x86_64-linux.
 EOF
       exit 0
       ;;
@@ -44,14 +44,21 @@ if [[ -n "$host" ]]; then
 else
   case "$(uname -m)" in
     x86_64) flake_target="x86_64-linux" ;;
-    aarch64) flake_target="aarch64-linux" ;;
     *)
-      printf '%b\n' "${red}Unsupported architecture: $(uname -m)${reset}" >&2
+      printf '%b\n' "${red}Deployment is supported only for enrolled x86_64 hosts${reset}" >&2
       exit 1
       ;;
   esac
   printf '%b\n' "${yellow}Building platform: ${flake_target}${reset}"
 fi
+
+case "$flake_target" in
+  x86_64-linux) ;;
+  *)
+    printf '%b\n' "${red}Deployment denied for non-release or evaluation host: ${flake_target}${reset}" >&2
+    exit 1
+    ;;
+esac
 
 printf '%b\n' "${yellow}Starting...${reset}"
 

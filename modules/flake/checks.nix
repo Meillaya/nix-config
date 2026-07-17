@@ -31,6 +31,16 @@
         bash source/tests/dendritic-apps.sh
         touch "$out"
       '';
+
+      machine-readiness-foundation = pkgs.runCommand "machine-readiness-foundation" {
+        nativeBuildInputs = [ pkgs.bash pkgs.gnugrep pkgs.python3 ];
+        src = inputs.self;
+      } ''
+        cp -R "$src" source
+        chmod -R u+w source
+        bash source/tests/machine-readiness-foundation.sh
+        touch "$out"
+      '';
     };
   };
 }

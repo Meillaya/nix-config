@@ -25,16 +25,25 @@ Den exclusively creates `nixosConfigurations`, `darwinConfigurations`, and
 
 `modules/entities/hosts.nix` is the inventory. It declares:
 
-- `x86_64-linux` and `aarch64-linux` NixOS machines;
-- `x86_64-darwin` and `aarch64-darwin` macOS machines;
+- `x86_64-linux`, the distinct x86 qualifier, and evaluation-only
+  `aarch64-linux` NixOS machines;
+- one `aarch64-darwin` macOS machine;
 - `standalone-linux` and `standalone-linux-aarch64` Home Manager outputs; and
 - the `mei` user on each managed host.
 
 Entity declarations stay thin: identity, architecture, attached aggregate
 aspect, and user/home membership. Put behavior in an aspect, never in the
 registry. The Linux output names remain architecture-oriented for compatibility,
-while `hostName` records the network identity (`nixos` or `nixos-aarch64`). Den's
+while `hostName` records the network identity (`nixos` or
+`nixos-aarch64-evaluation`). Den's
 `hostname` battery carries that entity value into the OS configuration.
+
+`config/hosts.nix` is the sanitized named machine-routing authority. Host
+profile aspects project only generic architecture, role, and enrollment state;
+public source does not contain account IDs, home paths, location, or hardware
+identifiers. Both x86 records are deliberately pending until private physical
+intake supplies distinct stable disk and hardware facts. The ARM Linux record
+is evaluation-only, and Apple Silicon is the only Darwin target.
 
 ## Aspects and ownership
 
@@ -96,8 +105,8 @@ sudo nixos-rebuild switch --flake .#x86_64-linux
 ```
 
 Log out and back in after changing the default graphical session. In the login
-manager, choose Niri once if an older saved BSPWM session overrides the new
-default. Verify Noctalia with:
+manager, choose Niri once if an older saved session overrides the new default.
+Verify Noctalia with:
 
 ```bash
 systemctl --user status noctalia.service --no-pager

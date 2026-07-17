@@ -2,19 +2,25 @@
 { pkgs, lib, ... }:
 
 let
+  requestedProfile = builtins.getEnv "NIX_CONFIG_PROFILE";
+  profile = if requestedProfile == "wsl" then "wsl" else "linux-desktop";
   user =
-    let configured = builtins.getEnv "NIXOS_CONFIG_USER";
-        ambient = builtins.getEnv "USER";
-    in if configured != "" then configured else if ambient != "" then ambient else "mei";
+    let
+      configured = builtins.getEnv "NIXOS_CONFIG_USER";
+      ambient = builtins.getEnv "USER";
+    in
+    if configured != "" then configured else if ambient != "" then ambient else "user";
   homeDirectory =
-    let configured = builtins.getEnv "NIXOS_CONFIG_HOME";
-        ambient = builtins.getEnv "HOME";
-    in if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
+    let
+      configured = builtins.getEnv "NIXOS_CONFIG_HOME";
+      ambient = builtins.getEnv "HOME";
+    in
+    if configured != "" then configured else if ambient != "" then ambient else "/home/${user}";
   standalone-files = import ./files.nix { inherit pkgs homeDirectory; };
   codexConfig =
     builtins.replaceStrings
       [
-        "/home/mei/.local/lib/node_modules/oh-my-codex"
+        "@OMX_ROOT@"
         "@mcp-nixos@"
       ]
       [
@@ -24,7 +30,7 @@ let
       (builtins.readFile ./config/codex/config.toml);
   codexHooks =
     builtins.replaceStrings
-      [ "/home/mei/.local/lib/node_modules/oh-my-codex" ]
+      [ "@OMX_ROOT@" ]
       [ "${pkgs.oh-my-codex-sidecar}/lib/node_modules/oh-my-codex" ]
       (builtins.readFile ./config/codex/hooks.json);
   codexConfigFile = pkgs.writeText "codex-config.toml" codexConfig;
@@ -51,7 +57,7 @@ in
     enableNixpkgsReleaseCheck = false;
     username = user;
     inherit homeDirectory;
-    packages = import ./packages.nix { inherit pkgs inputs; };
+    packages = import ./packages.nix { inherit pkgs inputs profile; };
     file = standalone-files // secret-files;
     sessionVariables = {
       BROWSER = "firefox";
@@ -70,6 +76,13 @@ in
 
   targets.genericLinux.enable = true;
   fonts.fontconfig.enable = true;
+
+  assertions = [
+    {
+      assertion = requestedProfile == "" || builtins.elem requestedProfile [ "desktop" "wsl" ];
+      message = "NIX_CONFIG_PROFILE must be either desktop or wsl";
+    }
+  ];
 
   home.activation.installWritableCodexConfig = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     target="${homeDirectory}/.codex/config.toml"

@@ -5,6 +5,7 @@ Personal Nix config for:
 - macOS via `nix-darwin`
 - Linux via `NixOS`
 - Existing Linux installs via Determinate Nix + standalone Home Manager
+- WSL via pinned Determinate Nix + the explicit standalone WSL profile
 
 ## Recent changes
 
@@ -38,7 +39,10 @@ nixpkgs-search ghostty
 
 Then add the chosen attribute to:
 
-- `modules/shared/packages.nix` for all machines
+- `modules/shared/application-packages.nix` for the portable, Linux desktop,
+  WSL, or Darwin application projection
+- `modules/shared/packages.nix` for cross-platform tools that also define a
+  managed wrapper
 - `modules/darwin/packages.nix` for macOS only
 - `modules/nixos/packages.nix` for NixOS only
 - `modules/standalone-linux/packages.nix` for existing non-NixOS Linux machines
@@ -93,7 +97,7 @@ nix --extra-experimental-features 'nix-command flakes' run .#build-switch
 
 This repo still includes bootstrap placeholders for Linux host values.
 The NixOS host enables Niri and links the shared `~/.config/niri/config.kdl`
-through Home Manager; BSPWM remains present as an alternate X11 session.
+through Home Manager; Niri is the sole managed login session.
 
 The managed user is declared by the `mei` aspect. Both Linux and macOS accounts
 use Nushell by default, while the other managed shells can be launched directly:
@@ -114,10 +118,10 @@ nix --extra-experimental-features 'nix-command flakes' run .#apply
 
 For an existing Linux machine such as Arch Linux with Niri, this repo now exposes a standalone Home Manager config built for Determinate Nix.
 
-Install Determinate Nix first using the official installer:
+Install the pinned Determinate Nix release after cloning this repository:
 
 ```bash
-curl -fsSL https://install.determinate.systems/nix | sh -s -- install
+./bin/install-determinate-nix
 ```
 
 Then switch the standalone home config:
@@ -126,7 +130,8 @@ Then switch the standalone home config:
 nix run .#home-switch
 ```
 
-That defaults to the generic `standalone-linux` Home Manager configuration on `x86_64-linux`, using your current `USER` and `HOME`.
+That selects the generic `standalone-linux` Home Manager configuration on
+`x86_64-linux`, using the current `USER` and `HOME`.
 The wrapper also passes `-b hm-backup` by default so any pre-existing dotfiles
 that Home Manager needs to take over are backed up on first switch.
 
@@ -145,13 +150,23 @@ nix run .#home-news
 To sync ignored local secrets from a private repo into `./secrets`, use:
 
 ```bash
-NIX_SECRETS_REPO=git@github.com:Meillaya/nix-screts.git nix run .#sync-secrets
+NIX_SECRETS_REPO=git@github.com:OWNER/nix-secrets.git nix run .#sync-secrets
 ```
 
-If you need to override the detected user or home directory on a machine:
+To override the standalone identity explicitly:
 
 ```bash
-NIXOS_CONFIG_USER=mei NIXOS_CONFIG_HOME=/home/mei nix run .#home-switch
+NIXOS_CONFIG_USER=myuser NIXOS_CONFIG_HOME=/home/myuser nix run .#home-switch
+```
+
+## WSL
+
+WSL uses Determinate Nix and the CLI-focused package projection. See
+`docs/service-notes/wsl.md`:
+
+```bash
+./bin/install-determinate-nix
+nix run .#wsl-switch
 ```
 
 ## Secrets

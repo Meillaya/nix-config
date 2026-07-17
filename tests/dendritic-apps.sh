@@ -22,7 +22,7 @@ do
   test -x "$root/apps/x86_64-linux/$app"
 done
 
-for system in aarch64-darwin x86_64-darwin; do
+for system in aarch64-darwin; do
   for app in build build-switch check-keys clean copy-keys create-keys; do
     test -x "$root/apps/$system/$app"
   done

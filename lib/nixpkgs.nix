@@ -1,5 +1,6 @@
 { inputs }:
 let
+  packagePolicy = builtins.fromJSON (builtins.readFile ../config/package-exceptions.json);
   nixosRenderDocsCompatOverlay = self: super: {
     # nix-darwin still passes the removed --toc-depth option when building its
     # HTML manual. Translate it until nix-darwin uses --sidebar-depth itself.
@@ -39,14 +40,20 @@ let
     ++ map (name: import (localOverlayDirectory + "/${name}")) localOverlayFiles
     ++ [ (import inputs.emacs-overlay) ];
   config = {
-    allowUnfree = true;
-    allowBroken = true;
+    allowUnfree = false;
+    allowUnfreePredicate = package:
+      builtins.any
+        (row:
+          row.pname == inputs.nixpkgs.lib.getName package
+          && builtins.elem package.system row.systems)
+        packagePolicy.exceptions;
+    allowBroken = false;
     allowInsecure = false;
-    permittedInsecurePackages = [ "pnpm-10.29.2" ];
-    allowUnsupportedSystem = true;
+    permittedInsecurePackages = [ ];
+    allowUnsupportedSystem = false;
   };
 in
 {
-  inherit config overlays;
+  inherit config overlays packagePolicy;
   mkPkgs = system: import inputs.nixpkgs { inherit system config overlays; };
 }

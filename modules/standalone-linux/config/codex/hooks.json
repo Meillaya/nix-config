@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/codex-native-hook.js\""
+            "command": "node \"@OMX_ROOT@/dist/scripts/codex-native-hook.js\""
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/codex-native-hook.js\"",
+            "command": "node \"@OMX_ROOT@/dist/scripts/codex-native-hook.js\"",
             "statusMessage": "Running OMX Bash preflight"
           }
         ]
@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/codex-native-hook.js\"",
+            "command": "node \"@OMX_ROOT@/dist/scripts/codex-native-hook.js\"",
             "statusMessage": "Running OMX tool review"
           }
         ]
@@ -39,7 +39,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/codex-native-hook.js\"",
+            "command": "node \"@OMX_ROOT@/dist/scripts/codex-native-hook.js\"",
             "statusMessage": "Applying OMX prompt routing"
           }
         ]
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/home/mei/.local/lib/node_modules/oh-my-codex/dist/scripts/codex-native-hook.js\"",
+            "command": "node \"@OMX_ROOT@/dist/scripts/codex-native-hook.js\"",
             "timeout": 30
           }
         ]

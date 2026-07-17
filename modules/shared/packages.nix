@@ -1,4 +1,4 @@
-{ pkgs, includeDocker ? true }:
+{ pkgs, includeDocker ? true, includeGui ? true }:
 
 with pkgs;
 let
@@ -21,95 +21,19 @@ let
     }
 
     cli="${oh-my-codex-sidecar}/lib/node_modules/oh-my-codex/dist/cli/omx.js"
-    if [ -f "$cli" ]; then
-      select_omx_shell
-      export OMX_ENTRY_PATH="$cli"
-      export OMX_STARTUP_CWD="$PWD"
-      exec ${nodejs_24}/bin/node "$cli" "$@"
-    fi
-
-    candidates=()
-    npm_root="$(${nodejs_24}/bin/npm root -g 2>/dev/null || true)"
-
-    if [ -n "$npm_root" ]; then
-      candidates+=("$npm_root/oh-my-codex")
-    fi
-
-    for dir in \
-      "$HOME/.nix-profile/lib/node_modules/oh-my-codex" \
-      "$HOME/.npm-packages/lib/node_modules/oh-my-codex" \
-      "$HOME/.local/lib/node_modules/oh-my-codex" \
-      "$HOME/.local/share/pnpm/global/5/node_modules/oh-my-codex"
-    do
-      if [ -d "$dir" ]; then
-        candidates+=("$dir")
-      fi
-    done
-
-    for dir in /opt/zerobrew/Cellar/node/*/lib/node_modules/oh-my-codex; do
-      if [ -d "$dir" ]; then
-        candidates+=("$dir")
-      fi
-    done
-
-    for dir in "''${candidates[@]}"; do
-      cli="$dir/dist/cli/omx.js"
-      if [ -x "$cli" ]; then
-        select_omx_shell
-        export OMX_ENTRY_PATH="$cli"
-        export OMX_STARTUP_CWD="$PWD"
-        exec ${nodejs_24}/bin/node "$cli" "$@"
-      fi
-    done
-
-    echo "omx is not installed in a known global node location." >&2
-    echo "Expected oh-my-codex under npm global packages or /opt/zerobrew." >&2
-    exit 127
+    test -f "$cli"
+    select_omx_shell
+    export OMX_AUTO_UPDATE=0
+    export OMX_ENTRY_PATH="$cli"
+    export OMX_STARTUP_CWD="$PWD"
+    exec ${nodejs_24}/bin/node "$cli" "$@"
   '';
   omcLauncher = writeShellScriptBin "omc" ''
     set -euo pipefail
 
     cli="${oh-my-claude-sisyphus-sidecar}/lib/node_modules/oh-my-claude-sisyphus/bridge/cli.cjs"
-    if [ -f "$cli" ]; then
-      exec ${nodejs_24}/bin/node "$cli" "$@"
-    fi
-
-    candidates=()
-    npm_root="$(${nodejs_24}/bin/npm root -g 2>/dev/null || true)"
-
-    if [ -n "$npm_root" ]; then
-      candidates+=("$npm_root/oh-my-claude-sisyphus")
-    fi
-
-    for dir in \
-      "$HOME/.nix-profile/lib/node_modules/oh-my-claude-sisyphus" \
-      "$HOME/.local/lib/node_modules/oh-my-claude-sisyphus" \
-      "$HOME/.npm-packages/lib/node_modules/oh-my-claude-sisyphus" \
-      "$HOME/.local/share/pnpm/global/5/node_modules/oh-my-claude-sisyphus"
-    do
-      if [ -d "$dir" ]; then
-        candidates+=("$dir")
-      fi
-    done
-
-    for dir in "''${candidates[@]}"; do
-      cli="$dir/bridge/cli.cjs"
-      if [ -f "$cli" ]; then
-        exec ${nodejs_24}/bin/node "$cli" "$@"
-      fi
-    done
-
-    echo "omc is not installed in a known global node location." >&2
-    echo "Expected oh-my-claude-sisyphus under npm global packages or ~/.local/lib/node_modules." >&2
-    exit 127
-  '';
-  syncAiSidecars = writeShellScriptBin "sync-ai-sidecars" ''
-    set -euo pipefail
-
-    prefix="''${AI_SIDECAR_PREFIX:-$HOME/.local}"
-    ${nodejs_24}/bin/npm install --global --prefix "$prefix" \
-      oh-my-codex@${oh-my-codex-sidecar.version} \
-      oh-my-claude-sisyphus@${oh-my-claude-sisyphus-sidecar.version}
+    test -f "$cli"
+    exec ${nodejs_24}/bin/node "$cli" "$@"
   '';
   nixpkgsSearch = writeShellScriptBin "nixpkgs-search" ''
     set -euo pipefail
@@ -275,7 +199,6 @@ in [
   direnv
   flyctl
   podman
-  zed-editor
   
   # Programming languages and runtimes
   beamPackages.elixir
@@ -305,9 +228,10 @@ in [
   zig
   omcLauncher
   omxLauncher
-  syncAiSidecars
   nixpkgsSearch
-] ++ pkgs.lib.optionals includeDocker [
+] ++ (import ./application-packages.nix { inherit pkgs; profile = "portable"; })
+  ++ pkgs.lib.optionals includeGui [ zed-editor ]
+  ++ pkgs.lib.optionals includeDocker [
   # Cloud-related tools and SDKs
   docker
   docker-compose
