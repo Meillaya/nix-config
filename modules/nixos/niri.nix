@@ -55,7 +55,6 @@
   };
 
   environment.systemPackages = with pkgs; [
-    awww
     kdePackages.polkit-kde-agent-1
     niri
     xwayland-satellite

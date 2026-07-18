@@ -5,8 +5,9 @@
 # ~/.local/state/noctalia/settings.toml and override this declarative file.
 
 [shell]
-avatar_path = "/home/mei/.face"
+avatar_path = "@HOME@/.face"
 font_family = "Sans Serif"
+launch_apps_as_systemd_services = true
 telemetry_enabled = false
 ui_scale = 1.0
 
@@ -45,7 +46,7 @@ show_running = true
 
 [wallpaper]
 enabled = true
-directory = "/home/mei/Pictures/Wallpapers"
+directory = "@HOME@/Pictures/Wallpapers"
 fill_mode = "crop"
 fill_color = "#000000"
 transition = ["fade", "disc", "stripes", "wipe", "honeycomb"]
@@ -54,7 +55,7 @@ edge_smoothness = 0.05
 per_monitor_directories = false
 
 [wallpaper.default]
-path = "/home/mei/Pictures/Wallpapers/wallhaven_e89l8k.jpg"
+path = "@HOME@/Pictures/Wallpapers/wallhaven_e89l8k.jpg"
 
 [wallpaper.automation]
 enabled = false
