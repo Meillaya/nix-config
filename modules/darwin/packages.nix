@@ -4,16 +4,13 @@ with pkgs;
 let shared-packages = import ../shared/packages.nix { inherit pkgs; includeDocker = false; }; in
 shared-packages ++ [
   # App replacements formerly installed as casks
+  bruno
+  dbeaver-bin
   ghostty-bin
-  helium
   iterm2
+  jetbrains.idea
   kitty
-  obsidian
-  omniwm
   postman
-  raycast
-  stremio
-  sublimeText
   vesktop
 
   # Development tools
@@ -23,5 +20,6 @@ shared-packages ++ [
   micro
   neovim
   omniorb
+  jetbrains.pycharm
   uv
 ]
