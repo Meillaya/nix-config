@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target="${NIX_CONFIG_DEFAULT_HOME_TARGET:-standalone-linux-aarch64}"
+backup_ext="hm-backup-$(date +%Y%m%d%H%M%S)"
+hm_args=()
+flake_ref="${NIX_CONFIG_FLAKE_REF:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      target="$2"
+      shift 2
+      ;;
+    -b|--backup-ext)
+      backup_ext="$2"
+      shift 2
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: home-switch [--target HOME] [home-manager args...]
+
+Defaults:
+  aarch64-linux -> standalone-linux-aarch64
+  backup extension -> hm-backup-<timestamp>
+
+Examples:
+  nix run .#home-switch
+  nix run .#home-switch -- --dry-run
+  nix run .#home-switch -- --target standalone-linux --dry-run
+  nix run .#home-switch -- --backup-ext my-backup --dry-run
+EOF
+      exit 0
+      ;;
+    *)
+      hm_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+nix profile list >/dev/null 2>&1 || true
+
+exec home-manager \
+  --extra-experimental-features "nix-command flakes" \
+  switch \
+  -b "$backup_ext" \
+  --flake "$flake_ref#$target" \
+  "${hm_args[@]}"

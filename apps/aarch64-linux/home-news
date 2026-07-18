@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target="${NIX_CONFIG_DEFAULT_HOME_TARGET:-standalone-linux-aarch64}"
+hm_args=()
+flake_ref="${NIX_CONFIG_FLAKE_REF:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      target="$2"
+      shift 2
+      ;;
+    --help|-h)
+      cat <<'EOF'
+Usage: home-news [--target HOME] [extra home-manager news args...]
+
+Defaults:
+  aarch64-linux -> standalone-linux-aarch64
+
+Examples:
+  nix run .#home-news
+  nix run .#home-news -- --show-trace
+EOF
+      exit 0
+      ;;
+    *)
+      hm_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+exec home-manager \
+  --extra-experimental-features "nix-command flakes" \
+  --flake "$flake_ref#$target" \
+  news \
+  "${hm_args[@]}"

@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
+run_flake_update=1
+run_local_updates=1
+selected_packages=()
+flake_args=()
+valid_updaters=()
+valid_updaters_text="${NIX_CONFIG_VALID_UPDATERS_TEXT:-linux-home-sources}"
+
+if [[ -n "${NIX_CONFIG_VALID_UPDATERS:-}" ]]; then
+  # shellcheck disable=SC2206
+  valid_updaters=(${NIX_CONFIG_VALID_UPDATERS})
+fi
+
+declare -A local_updaters=()
+if [[ -n "${NIX_CONFIG_LOCAL_UPDATER_MAP:-}" ]]; then
+  while IFS=$'\t' read -r name script; do
+    [[ -n "$name" && -n "$script" ]] || continue
+    local_updaters["$name"]="$script"
+  done <<<"${NIX_CONFIG_LOCAL_UPDATER_MAP}"
+fi
+
+usage() {
+  cat <<'EOF'
+Usage: nix run .#update -- [options] [flake-input...]
+
+Updates flake inputs and repo-local fixed-output package pins.
+
+Options:
+  --flake-only       Run only nix flake update
+  --local-only       Run only local package updaters
+  --skip-flake       Do not run nix flake update
+  --skip-local       Do not run local package updaters
+  --package NAME     Run only the named local package updater; repeatable
+  -h, --help         Show this help
+
+Examples:
+  nix run .#update
+  nix run .#update -- nixpkgs home-manager
+  nix run .#update -- --local-only --package linux-home-sources
+EOF
+}
+
+valid_updater() {
+  local name="$1"
+  local valid
+  for valid in "${valid_updaters[@]}"; do
+    if [ "$valid" = "$name" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --flake-only)
+      run_local_updates=0
+      shift
+      ;;
+    --local-only)
+      run_flake_update=0
+      shift
+      ;;
+    --skip-flake)
+      run_flake_update=0
+      shift
+      ;;
+    --skip-local)
+      run_local_updates=0
+      shift
+      ;;
+    --package)
+      if [ "$#" -lt 2 ] || [[ "$2" == --* ]]; then
+        echo "update: --package requires a local updater name" >&2
+        usage >&2
+        exit 2
+      fi
+      selected_packages+=("$2")
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      flake_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+for selected in "${selected_packages[@]}"; do
+  if ! valid_updater "$selected"; then
+    echo "update: unknown local updater: $selected" >&2
+    echo "valid local updaters: $valid_updaters_text" >&2
+    exit 2
+  fi
+done
+
+if [ "$run_flake_update" -eq 1 ]; then
+  nix flake update "${flake_args[@]}"
+fi
+
+package_selected() {
+  local name="$1"
+  if [ "${#selected_packages[@]}" -eq 0 ]; then
+    return 0
+  fi
+  local selected
+  for selected in "${selected_packages[@]}"; do
+    if [ "$selected" = "$name" ]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+run_linux_home_sources() {
+  local source_file garuda_sha beautyline_sha candy_sha
+  local garuda_url beautyline_url candy_url garuda_hash beautyline_hash candy_hash
+
+  source_file="${LINUX_HOME_MANAGER_FILE:-modules/linux/home-manager.nix}"
+
+  garuda_sha="$(curl -fsSL 'https://gitlab.com/api/v4/projects/garuda-linux%2Fthemes-and-settings%2Fsettings%2Fgaruda-dr460nized/repository/commits?per_page=1' | jq -r '.[0].id')"
+  beautyline_sha="$(curl -fsSL 'https://gitlab.com/api/v4/projects/garuda-linux%2Fthemes-and-settings%2Fartwork%2Fbeautyline/repository/commits?per_page=1' | jq -r '.[0].id')"
+  candy_sha="$(curl -fsSL 'https://api.github.com/repos/EliverLara/candy-icons/commits?per_page=1' | jq -r '.[0].sha')"
+
+  if [[ -z "$garuda_sha" || "$garuda_sha" == "null" ]]; then
+    echo "Could not determine latest garuda-dr460nized commit" >&2
+    exit 1
+  fi
+  if [[ -z "$beautyline_sha" || "$beautyline_sha" == "null" ]]; then
+    echo "Could not determine latest beautyline commit" >&2
+    exit 1
+  fi
+  if [[ -z "$candy_sha" || "$candy_sha" == "null" ]]; then
+    echo "Could not determine latest candy-icons commit" >&2
+    exit 1
+  fi
+
+  garuda_url="https://gitlab.com/garuda-linux/themes-and-settings/settings/garuda-dr460nized/-/archive/$garuda_sha/garuda-dr460nized-$garuda_sha.tar.gz"
+  beautyline_url="https://gitlab.com/garuda-linux/themes-and-settings/artwork/beautyline/-/archive/$beautyline_sha/beautyline-$beautyline_sha.tar.gz"
+  candy_url="https://github.com/EliverLara/candy-icons/archive/$candy_sha.tar.gz"
+
+  prefetch_unpack() {
+    local url="$1"
+    local base32_hash
+    base32_hash="$(nix-prefetch-url --unpack "$url")"
+    nix hash convert --hash-algo sha256 --to sri "$base32_hash"
+  }
+
+  garuda_hash="$(prefetch_unpack "$garuda_url")"
+  beautyline_hash="$(prefetch_unpack "$beautyline_url")"
+  candy_hash="$(prefetch_unpack "$candy_url")"
+
+  python3 - "$source_file" \
+    "$garuda_url" "$garuda_hash" \
+    "$beautyline_url" "$beautyline_hash" \
+    "$candy_url" "$candy_hash" <<'PY'
+import os
+import re
+import sys
+import tempfile
+from pathlib import Path
+
+path = Path(sys.argv[1])
+garuda_url, garuda_hash, beautyline_url, beautyline_hash, candy_url, candy_hash = sys.argv[2:8]
+text = path.read_text()
+
+def replace_once(pattern, replacement, label, flags=re.S):
+    global text
+    text, count = re.subn(pattern, replacement, text, count=1, flags=flags)
+    if count != 1:
+        raise SystemExit(f"Could not update {label}; expected exactly one match, got {count}")
+
+replace_once(
+    r'(garudaDr460nized = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{garuda_url}";\g<2>"{garuda_hash}";',
+    "garudaDr460nized source",
+)
+replace_once(
+    r'(beautylineSrc = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{beautyline_url}";\g<2>"{beautyline_hash}";',
+    "beautyline source",
+)
+replace_once(
+    r'(candyIconsSrc = pkgs\.fetchzip \{\s*url = )"[^"]+";(\s*hash = )"sha256-[^"]+";',
+    rf'\g<1>"{candy_url}";\g<2>"{candy_hash}";',
+    "candy-icons source",
+)
+
+with tempfile.NamedTemporaryFile("w", dir=path.parent, delete=False) as tmp:
+    tmp.write(text)
+    tmp_path = Path(tmp.name)
+os.replace(tmp_path, path)
+PY
+
+  echo "Linux Home Manager source pins are updated"
+}
+
+run_local_updater() {
+  local name="$1"
+  if ! package_selected "$name"; then
+    return 0
+  fi
+
+  printf '\n== Updating local package: %s ==\n' "$name"
+
+  if [ "$name" = "linux-home-sources" ]; then
+    run_linux_home_sources
+    return 0
+  fi
+
+  "${local_updaters[$name]}"
+}
+
+if [ "$run_local_updates" -eq 1 ]; then
+  local_updater_name=""
+  for local_updater_name in "${valid_updaters[@]}"; do
+    run_local_updater "$local_updater_name"
+  done
+fi

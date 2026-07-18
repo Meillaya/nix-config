@@ -15,4 +15,4 @@ nix --extra-experimental-features 'nix-command flakes' build ".#$FLAKE_SYSTEM" "
 echo "${YELLOW}Cleaning up...${NC}"
 unlink ./result
 
-echo "${GREEN}Switch to new generation complete!${NC}"
+echo "${GREEN}Darwin configuration build complete; no activation was performed.${NC}"
