@@ -6,9 +6,13 @@ index=$(mktemp -t nix-bootstrap-mutation-index.XXXXXX)
 tmp=$(mktemp -d -t nix-bootstrap-mutations.XXXXXX)
 trap 'rm -rf "$tmp"; rm -f "$index"' EXIT
 
-# Snapshot tracked working-tree edits without changing the user's real index.
+# Snapshot the real index plus tracked working-tree edits without changing it.
 rm -f "$index"
-GIT_INDEX_FILE=$index git -C "$repo" read-tree HEAD
+real_index=$(git -C "$repo" rev-parse --git-path index)
+if [[ $real_index != /* ]]; then
+  real_index=$repo/$real_index
+fi
+cp -- "$real_index" "$index"
 GIT_INDEX_FILE=$index git -C "$repo" add -u
 tree=$(GIT_INDEX_FILE=$index git -C "$repo" write-tree)
 

@@ -1,11 +1,13 @@
+{ identity }:
 { config, lib, pkgs, ... }:
 let
-  user = "mei";
-  bootstrapHashFile = "/var/lib/nixos-bootstrap/mei-password.hash";
+  username = identity.name;
+  bootstrapFileName = "${username}-password.hash";
+  bootstrapHashFile = "/var/lib/nixos-bootstrap/${bootstrapFileName}";
 in
 {
   users.mutableUsers = true;
-  users.users.${user}.hashedPasswordFile = bootstrapHashFile;
+  users.users.${username}.hashedPasswordFile = bootstrapHashFile;
 
   system.activationScripts.bootstrapPasswordHash = {
     deps = [ ];
@@ -19,7 +21,7 @@ in
 
       has_unlocked_password() {
         test -r /etc/shadow && ${pkgs.gawk}/bin/awk \
-          -F: -v target_user=${lib.escapeShellArg user} '
+          -F: -v target_user=${lib.escapeShellArg username} '
             $1 == target_user {
               found = 1
               if ($2 != "" && $2 !~ /^[!*]/) unlocked = 1
@@ -29,7 +31,7 @@ in
       }
 
       write_sentinel() {
-        tmp="$(${pkgs.coreutils}/bin/mktemp "$hash_dir/.mei-password.hash.XXXXXX")" \
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$hash_dir/.${bootstrapFileName}.XXXXXX")" \
           || fail "could not create sentinel temporary file"
         trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
         ${pkgs.coreutils}/bin/printf '!\n' > "$tmp"
@@ -95,12 +97,12 @@ in
       hash_file=${lib.escapeShellArg bootstrapHashFile}
       hash_dir=${lib.escapeShellArg (builtins.dirOf bootstrapHashFile)}
       if ! ${pkgs.gnugrep}/bin/grep -qx '!' "$hash_file"; then
-        ${pkgs.gawk}/bin/awk -F: -v target_user=${lib.escapeShellArg user} '
+        ${pkgs.gawk}/bin/awk -F: -v target_user=${lib.escapeShellArg username} '
           NR == FNR { expected = $0; next }
           $1 == target_user && $2 == expected { installed = 1 }
           END { exit !installed }
         ' "$hash_file" /etc/shadow || {
-          echo "bootstrap password hash was not installed for ${user}; preserving verifier" >&2
+          echo "bootstrap password hash was not installed for ${username}; preserving verifier" >&2
           exit 1
         }
         test ! -L "$hash_dir"
@@ -112,7 +114,7 @@ in
           echo "bootstrap password hash consumption failed: expected numeric owner 0:0 mode 0700 on $hash_dir; got $hash_dir_meta" >&2
           exit 1
         }
-        tmp="$(${pkgs.coreutils}/bin/mktemp "$hash_dir/.mei-password.hash.XXXXXX")"
+        tmp="$(${pkgs.coreutils}/bin/mktemp "$hash_dir/.${bootstrapFileName}.XXXXXX")"
         trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
         ${pkgs.coreutils}/bin/printf '!\n' > "$tmp"
         ${pkgs.coreutils}/bin/chown 0:0 "$tmp"
