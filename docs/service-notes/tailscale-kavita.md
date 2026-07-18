@@ -40,11 +40,14 @@ Suggested bootstrap flow:
 
 1. Copy `modules/standalone-linux/templates/kavita-appsettings.example.json`
 2. Fill in `TokenKey` and any other secret values locally
-3. Sync it into this repo's ignored `./secrets` tree (for example with `nix run .#sync-secrets`)
-4. Run `nix run .#home-switch`
+3. Sync it into this repo's ignored `./secrets` tree with an explicit writable
+   checkout: `nix run .#sync-secrets -- --repo-root "$PWD"`
+4. Install it outside Nix evaluation:
+   `install -Dm0600 secrets/kavita/appsettings.json "$HOME/Documents/Kavita/config/appsettings.json"`
+5. Run `nix run .#home-switch` for non-secret declarative configuration only.
 
-When `secrets/kavita/appsettings.json` exists locally, standalone Home Manager
-will now manage the live file at:
+Standalone Home Manager intentionally does not inspect or manage this plaintext
+file. The manual runtime destination is:
 
 - `~/Documents/Kavita/config/appsettings.json`
 

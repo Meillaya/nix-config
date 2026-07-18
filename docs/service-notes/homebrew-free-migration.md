@@ -45,11 +45,13 @@ at an old app location.
 No former app cask is deferred. The remaining apps have explicit non-Homebrew
 management decisions:
 
-- Helium: local Darwin derivation `helium` in `overlays/20-helium.nix`, sourced from the official `imputnet/helium-macos` DMG release.
-- OmniWM: local Darwin derivation `omniwm` in `overlays/20-helium.nix`, sourced from the upstream GitHub release zip and exposing `omniwmctl` through the Nix profile.
-- Stremio: local Darwin derivation `stremio` in `overlays/20-helium.nix`, sourced from the official Stremio macOS DMG.
-- Sublime Text: local Darwin derivation `sublimeText` in `overlays/20-helium.nix`, sourced from the official Sublime Text macOS zip.
+The previous local Nix derivations for Helium, OmniWM, Stremio, and Sublime
+Text were removed when repo-local overlays were deleted. If you still want any
+of those apps managed declaratively, reintroduce them via upstream nixpkgs,
+another flake input, or a separate dedicated repo.
 
-After `nix run .#build-switch`, these app bundles should appear under
-`/Applications/Nix Apps` and can be removed from Homebrew with `brew uninstall
---cask` while preserving user data.
+The current Darwin machine authority is operationally disabled, so repository
+verification is build-only and no `build-switch` app is exposed. App bundle
+appearance under `/Applications/Nix Apps`, migration away from Homebrew, and
+native activation remain **NOT VERIFIED** until the machine is enrolled and an
+authorized native Darwin switch is performed.

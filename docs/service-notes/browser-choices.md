@@ -3,7 +3,6 @@
 This repo now declares:
 
 - `brave`
-- `helium`
 
 ## Not yet declared from locked nixpkgs
 
@@ -11,10 +10,10 @@ The following requested browser packages were **not present** in the repo's
 currently locked nixpkgs input during migration:
 
 - `zen-browser`
+- `helium`
 
-That means `zen-browser` needed a separate flake source, while `helium` needed a
-local package overlay built from the official `imputnet/helium-linux` AppImage
-releases.
+That means `zen-browser` needed a separate flake source. `helium` is no longer
+declared by this repo now that the custom overlay package was removed.
 
 Only the following now remain host-managed unless you later add another source:
 

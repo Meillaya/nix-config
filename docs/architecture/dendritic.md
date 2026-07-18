@@ -11,11 +11,12 @@ cross-platform evaluations before changing that pin.
 `import-tree` loads the flake modules under `modules/flake/`:
 
 - `dendritic.nix` loads Den plus the entity/aspect trees.
-- `systems.nix` declares the four supported evaluation systems.
+- `systems.nix` declares the three supported evaluation systems.
 - `packages.nix`, `apps.nix`, and `dev-shells.nix` own normal flake-parts
   `perSystem` outputs.
-- `outputs.nix` exposes the composed overlay without mixing package output
-  construction into machine configuration.
+- `outputs.nix` exposes the six configuration evaluation paths without mixing
+  package output construction into machine configuration. This inventory is an
+  evaluation contract, not a production-release or activation declaration.
 
 Den exclusively creates `nixosConfigurations`, `darwinConfigurations`, and
 `homeConfigurations`. Do not reintroduce `nixosSystem`, `darwinSystem`, or
@@ -26,27 +27,56 @@ Den exclusively creates `nixosConfigurations`, `darwinConfigurations`, and
 `modules/entities/hosts.nix` is the inventory. It declares:
 
 - `x86_64-linux` and `aarch64-linux` NixOS machines;
-- `x86_64-darwin` and `aarch64-darwin` macOS machines;
+- the distinct `nixos-x86-qualifier` evaluation host;
+- the `aarch64-darwin` macOS machine;
 - `standalone-linux` and `standalone-linux-aarch64` Home Manager outputs; and
 - the `mei` user on each managed host.
 
-Entity declarations stay thin: identity, architecture, attached aggregate
-aspect, and user/home membership. Put behavior in an aspect, never in the
-registry. The Linux output names remain architecture-oriented for compatibility,
-while `hostName` records the network identity (`nixos` or `nixos-aarch64`). Den's
-`hostname` battery carries that entity value into the OS configuration.
+Intel Darwin is retired; `x86_64-darwin` is neither an evaluation system nor a
+configuration output. Both the qualifier and `aarch64-linux` are evaluation-only.
+`configurationEvaluationPaths` names outputs that CI evaluates; it does not
+classify them as production releases.
+
+Entity declarations contain only explicit system, machine, identity, hostname,
+and membership data. Strict Den schemas declare every repository extension to
+host, user, home, aspect, and flake entities. Host and home machine attachments
+structurally type identity, target, system, role, boot, storage, capabilities,
+and remote-install authority before aspect projection. `machine-authority.nix`
+exposes the closed, validated authority used by the inventory. Put behavior in
+an aspect, never in the registry. The public x86 output name remains
+architecture-oriented for compatibility, while its literal machine identity is
+`nixos-laptop`. Both standalone homes carry explicit machine, username, and home
+directory data and never consult evaluator environment variables.
 
 ## Aspects and ownership
 
-The host aggregates under `modules/aspects/hosts/` compose capabilities:
+Machine composition follows one acyclic, inward-only chain:
 
-- `nixos-workstation` includes Nix policy, the NixOS baseline, disk layout,
-  secure bootstrap-password lifecycle, secrets, Niri, and Linux desktop home
-  configuration.
-- `darwin-workstation` includes Nix policy, macOS defaults/packages, Dock,
-  secrets, and Darwin Home Manager configuration.
-- `standalone-linux` combines the shared `mei` home with standalone-only Niri,
-  package, secret, and writable Codex behavior.
+```text
+shared policy -> OS platform -> role -> hardware profile
+              -> storage profile -> named host
+```
+
+- `shared-policy` owns common Nixpkgs config and overlays.
+- `linux-platform` and `darwin-platform` select only their OS-specific baseline,
+  secrets, and Home Manager integration.
+- Role aspects add workstation, qualifier, or evaluation session policy.
+- Hardware aspects select one role and project `host.machine`, the authority
+  attached to the active Den entity. They never re-import a literal global
+  machine ID, so projection cannot drift from the selected entity.
+- A disabled device or capability enrollment means that no enrollment-specific
+  option projection is added. It does **not** globally force baseline services
+  off; upstream feature modules retain ownership of their baseline defaults.
+- Storage aspects select one hardware profile and assert the current `none`
+  profile; they add no Disko or destructive storage behavior.
+- Literal named-host aspects own hostname, location, and OS account projection.
+  The compatibility `x86_64-linux` aspect selects `nixos-laptop`; all other
+  entities select their same-named host aspect directly.
+
+The generic `nixos-workstation` and `darwin-workstation` aspects remain aliases
+for callers, not entity-selected aggregates. `standalone-linux` remains a
+separate Home Manager aggregate combining the shared `mei` home with current
+upstream Noctalia behavior.
 
 Leaf aspects under `modules/aspects/features/` own one coherent capability.
 The `mei` aspect under `modules/aspects/users/` owns cross-platform user and
@@ -77,23 +107,47 @@ OS-level `programs.nushell` option.
 
 ## Linux desktop policy
 
-Niri is the default display-manager session on NixOS. Noctalia is enabled through
-its upstream NixOS module on NixOS hosts and its upstream Home Manager module on
-standalone Linux hosts. Both modules start Noctalia as a systemd user service
-wanted by `graphical-session.target`; do not add a second
-`spawn-at-startup "noctalia"` entry to the shared Niri configuration.
+Niri is the default display-manager session on NixOS. One cross-class
+`den.aspects.noctalia` concern imports Noctalia's upstream NixOS module for
+NixOS hosts and its upstream Home Manager module for standalone Linux homes.
+Both modules start exactly one Noctalia systemd user service wanted by
+`graphical-session.target`; do not add a second `spawn-at-startup "noctalia"`
+entry to the shared Niri configuration.
+
+The upstream Home Manager module generates and validates the standalone TOML at
+build time. Its service uses Home Manager's `X-SwitchMethod=keep-old` extension,
+so `sd-switch` does not stop or restart the live shell during activation. The
+upstream NixOS module does not expose settings/config-file ownership, so the
+NixOS Home Manager file entry remains the single owner of that host's TOML.
+Noctalia launches applications as separate systemd services so launcher children
+do not remain trapped in the shell service's cgroup. Operational details are in
+`docs/service-notes/niri-noctalia-session.md`.
 
 The cross-host evaluation test keeps the primary graphical application set in
 sync between NixOS and standalone Linux. Add generally useful Linux desktop apps
 to both package surfaces, or intentionally document why a package is host-only.
 
-After pulling this configuration on an existing NixOS machine, apply it with:
+Linux machine declarations currently have disabled boot/storage authority. CI
+and operators may build their toplevels without activating them:
 
 ```bash
 cd ~/nix-config
 git pull --ff-only
-sudo nixos-rebuild switch --flake .#x86_64-linux
+nix run .#build
 ```
+
+The Linux app inventory derives activation authority from the machine records.
+While every Linux declaration is evaluation-only or pending, `build-switch` and
+`clean` are absent, and the compatibility scripts behind those names are also
+build-only: they cannot switch/boot a system or delete generations. Standalone
+`home-switch` and `home-news` remain available on both Linux systems.
+
+The Apple Silicon machine is also operationally disabled. Its app inventory is
+derived from the validated machine record and exposes only build and package
+search. Darwin switching, generation cleanup, repository update, and key
+management apps remain absent until the corresponding machine/trust authority
+is enrolled; credential scripts accept only the typed identity supplied by an
+authorized wrapper, never ambient `$USER`.
 
 Log out and back in after changing the graphical session configuration. Niri is
 the only generated login session. Verify Noctalia with:
@@ -106,10 +160,11 @@ journalctl --user -u noctalia.service -b --no-pager
 ## Adding configuration
 
 1. Add a leaf aspect when the behavior is a reusable capability.
-2. Include it from the appropriate host aggregate.
-3. Put cross-platform personal programs/files on `den.aspects.mei.homeManager`.
-4. Keep packages/apps/dev shells in flake-parts, not Den entities.
-5. Avoid recursive legacy imports, string-based profile selectors, lateral
+2. Select it through platform, role, hardware, storage, and named-host layers.
+3. Attach only identity/data to an entity; aspect selection is name-driven.
+4. Put cross-platform personal programs/files on `den.aspects.mei.homeManager`.
+5. Keep packages/apps/dev shells in flake-parts, not Den entities.
+6. Avoid recursive legacy imports, string-based profile selectors, lateral
    reads of unrelated configuration, and hidden `specialArgs` plumbing.
 
 Before applying a change, run:
@@ -118,9 +173,9 @@ Before applying a change, run:
 bash tests/dendritic-architecture.sh
 bash tests/dendritic-boundaries.sh
 bash tests/dendritic-apps.sh
-nix-instantiate --eval --strict tests/dendritic-config-eval.nix
+nix-instantiate --eval --strict --expr 'import ./tests/dendritic-config-eval.nix {}'
 bash tests/dendritic-shells.sh
-nix flake check --all-systems
+nix flake check --all-systems --no-build
 ```
 
 Disk and first-install password behavior has separate destructive-risk tests;

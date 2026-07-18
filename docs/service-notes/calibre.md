@@ -1,4 +1,4 @@
-# Calibre declarative boundary
+# Calibre declarative and runtime boundaries
 
 This repo now manages the following Calibre preference files:
 
@@ -19,9 +19,9 @@ These files express durable user preferences such as:
 
 They are comparatively stable and portable across machines.
 
-## Intentionally not managed yet
+## Synced plaintext is not declaratively managed
 
-The following Calibre files remain outside declarative management for now:
+The following Calibre files remain outside Home Manager management:
 
 - `global.py.json`
 - `gui.py.json`
@@ -39,27 +39,35 @@ Those files currently contain one or more of:
 - search history / recently opened files
 - plugin payload references that are not yet packaged declaratively
 
-## Future migration direction
+## Manual out-of-store installation
 
-If you want deeper Calibre migration later, the next reasonable step is to
-create **sanitized templates** for:
-
-- `global.py.json`
-- `gui.py.json`
-- `customize.py.json`
-
-with machine-specific paths, installation identifiers, and history removed.
-
-That step is now wired through the ignored local/private secrets tree:
+The private, ignored staging locations are:
 
 - `secrets/calibre/global.py.json`
 - `secrets/calibre/gui.py.json`
 - `secrets/calibre/customize.py.json`
 
-If those files exist locally, standalone Home Manager will manage the live
-Calibre files from them.
+Home Manager does not ingest or manage these synced plaintext files. Install
+them only as a manual runtime workflow outside Nix evaluation, for example:
 
-Public sanitized examples live at:
+```bash
+install -d -m 0700 "$HOME/.config/calibre"
+install -m 0600 secrets/calibre/{global.py.json,gui.py.json,customize.py.json} \
+  "$HOME/.config/calibre/"
+```
+
+Before that manual installation, `sync-secrets` requires either `--repo-root`
+or `NIX_CONFIG_REPO_ROOT`; `--repo-root` takes precedence. Omitting both fails
+closed even inside a Git checkout, and there is no detected-checkout fallback.
+The cloned repository URL is never logged. The sync rejects source and
+destination symlinks recursively and replaces live files with an atomic
+same-filesystem exchange.
+
+This documentation records a repository contract, not a live validation.
+Provider, physical-machine, native-platform, runtime-installation, and media
+gates remain **NOT VERIFIED**.
+
+Public sanitized examples remain reference material only:
 
 - `modules/standalone-linux/templates/calibre/global.py.example.json`
 - `modules/standalone-linux/templates/calibre/gui.py.example.json`

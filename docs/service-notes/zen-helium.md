@@ -1,4 +1,4 @@
-# Zen and Helium on standalone Linux
+# Zen on standalone Linux
 
 ## Zen
 
@@ -19,16 +19,7 @@ Source used:
 
 ## Helium
 
-Helium is now declared through a local overlay package that wraps the official
-Linux AppImage release from:
-
-- `https://github.com/imputnet/helium-linux/releases`
-
-The package is pinned to the official upstream release artifacts for:
-
-- `x86_64-linux`
-- `aarch64-linux`
-
-Source used:
-- https://github.com/imputnet/helium
-- https://github.com/imputnet/helium-linux
+Helium is no longer declared by this repo. The old local overlay package was
+removed along with the rest of the custom overlay surface. If you still want
+Helium on standalone Linux, install it outside this repo or add a new upstream
+package source.

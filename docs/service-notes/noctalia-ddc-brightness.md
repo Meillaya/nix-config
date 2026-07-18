@@ -9,8 +9,8 @@ I2C device nodes that `ddcutil` needs.
 
 - Noctalia Display settings showed monitor brightness sliders, but changing
   them did not change external monitor brightness.
-- `~/.config/noctalia/settings.json` had DDC disabled originally:
-  `brightness.enableDdcSupport = false`.
+- `~/.config/noctalia/config.toml` did not originally enable Noctalia's
+  `ddcutil` integration.
 - `/sys/class/backlight` was empty, which is expected for external monitors.
 - `ddcutil detect` failed with:
 
@@ -21,12 +21,11 @@ ddcutil requires module i2c-dev.
 
 ## Fix in this repo
 
-The Home Manager-managed Noctalia settings now enable DDC brightness and show
-the brightness card:
+The Home Manager-managed Noctalia v5 configuration now enables DDC brightness:
 
-- `modules/standalone-linux/config/noctalia/settings.json`
-  - `brightness.enableDdcSupport = true`
-  - `controlCenter.cards[].id == "brightness-card"` has `enabled = true`
+- `modules/standalone-linux/config/noctalia/config.toml`
+  - `[brightness]`
+  - `enable_ddcutil = true`
 
 The standalone Linux package set includes `ddcutil`:
 
@@ -41,14 +40,8 @@ The NixOS host config also enables I2C access declaratively:
 ## One-time OS setup for existing non-NixOS Linux
 
 Standalone Home Manager cannot safely own `/etc` kernel-module and udev files.
-For an existing Arch/CachyOS-style install, run the helper installed by this
-repo:
-
-```bash
-setup-ddc-brightness
-```
-
-That helper performs the root-level setup that made brightness work here:
+For an existing Arch/CachyOS-style install, perform the root-level setup
+explicitly using the host distribution's normal administration workflow:
 
 ```bash
 sudo modprobe i2c-dev
@@ -61,7 +54,9 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
 
-Log out and back in if the helper adds your user to the `i2c` group.
+Log out and back in after adding your user to the `i2c` group. These commands
+are operational guidance only; this repository did not execute or verify them
+on a live standalone machine.
 
 ## Verification
 
