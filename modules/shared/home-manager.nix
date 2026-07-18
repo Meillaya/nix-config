@@ -73,6 +73,7 @@ in
       export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
       export PATH=$HOME/.local/bin:$PATH
       export PATH=$HOME/.local/share/bin:$PATH
+      export PATH=$HOME/.kimi-code/bin:$PATH
 
       export ALTERNATE_EDITOR=""
       export EDITOR="emacsclient -t"
@@ -169,6 +170,7 @@ in
       fish_add_path --prepend $HOME/.npm-packages/bin $HOME/bin
       fish_add_path --prepend $HOME/.local/bin
       fish_add_path --prepend $HOME/.local/share/bin
+      fish_add_path --prepend $HOME/.kimi-code/bin
       fish_add_path --prepend $HOME/.cabal/bin $HOME/.ghcup/bin
       fish_add_path --prepend $HOME/.spicetify
 
@@ -287,6 +289,7 @@ in
         export PATH=$HOME/.npm-packages/bin:$HOME/bin:$PATH
         export PATH=$HOME/.local/bin:$PATH
         export PATH=$HOME/.local/share/bin:$PATH
+        export PATH=$HOME/.kimi-code/bin:$PATH
 
         [[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"
         [[ -f "$HOME/.ghcup/env" ]] && . "$HOME/.ghcup/env"
