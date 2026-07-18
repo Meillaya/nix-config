@@ -4,5 +4,7 @@ result-*
 *.bak
 *.tmp
 temp_insert.txt
+__pycache__/
+*.py[cod]
 secrets/*
 !secrets/README.md
