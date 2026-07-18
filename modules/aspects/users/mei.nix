@@ -68,6 +68,8 @@ in
           extraEnv = ''
             $env.PATH = ([
               ($env.HOME | path join ".nix-profile/bin")
+              ($env.HOME | path join ".kimi-code/bin")
+              "/home/mei/.opencode/bin"
               "/run/current-system/sw/bin"
               "/nix/var/nix/profiles/default/bin"
             ] | append $env.PATH | uniq)
