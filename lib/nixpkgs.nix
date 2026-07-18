@@ -1,49 +1,42 @@
 { inputs }:
 let
-  nixosRenderDocsCompatOverlay = self: super: {
-    # nix-darwin still passes the removed --toc-depth option when building its
-    # HTML manual. Translate it until nix-darwin uses --sidebar-depth itself.
-    nixos-render-docs = super.symlinkJoin {
-      name = "${super.nixos-render-docs.name}-toc-depth-compat";
-      paths = [ super.nixos-render-docs ];
-      postBuild = ''
-        rm "$out/bin/nixos-render-docs"
-        cat > "$out/bin/nixos-render-docs" <<'EOF'
-        #!${super.runtimeShell}
-        args=()
-        for arg in "$@"; do
-          case "$arg" in
-            --toc-depth|--chunk-toc-depth|--section-toc-depth)
-              args+=(--sidebar-depth)
-              ;;
-            --toc-depth=*|--chunk-toc-depth=*|--section-toc-depth=*)
-              args+=(--sidebar-depth="''${arg#*=}")
-              ;;
-            *) args+=("$arg") ;;
-          esac
-        done
-        exec ${super.nixos-render-docs}/bin/nixos-render-docs "''${args[@]}"
-        EOF
-        chmod +x "$out/bin/nixos-render-docs"
-      '';
-    };
-  };
-  localOverlayDirectory = ../overlays;
-  localOverlayFiles = builtins.filter
-    (name:
-      builtins.match ".*\\.nix" name != null
-      || builtins.pathExists (localOverlayDirectory + "/${name}/default.nix"))
-    (builtins.attrNames (builtins.readDir localOverlayDirectory));
-  overlays =
-    [ nixosRenderDocsCompatOverlay ]
-    ++ map (name: import (localOverlayDirectory + "/${name}")) localOverlayFiles
-    ++ [ (import inputs.emacs-overlay) ];
+  lib = inputs.nixpkgs.lib;
+  packageExceptions = builtins.fromJSON (builtins.readFile ../config/package-exceptions.json);
+  allowedUnfreePackagesBySystem = builtins.listToAttrs (map
+    (row: {
+      name = "${row.system}:${row.pname}:${row.version}";
+      value = true;
+    })
+    (packageExceptions.unfree or []));
+  allowedUnfreePackagesByNameVersion = builtins.listToAttrs (map
+    (row: {
+      name = "${row.pname}:${row.version}";
+      value = true;
+    })
+    (packageExceptions.unfree or []));
+  packageSystem = pkg:
+    if pkg ? stdenv && pkg.stdenv ? hostPlatform && pkg.stdenv.hostPlatform ? system then
+      pkg.stdenv.hostPlatform.system
+    else if pkg ? system then
+      pkg.system
+    else
+      null;
+  packageName = pkg: if pkg ? pname then pkg.pname else lib.getName pkg;
+  packageVersion = pkg: if pkg ? version then pkg.version else lib.getVersion pkg;
+  unfreeKeyFor = pkg: "${packageSystem pkg}:${packageName pkg}:${packageVersion pkg}";
+  unfreeNameVersionKeyFor = pkg: "${packageName pkg}:${packageVersion pkg}";
+  overlays = [ (import inputs.emacs-overlay) ];
   config = {
-    allowUnfree = true;
-    allowBroken = true;
+    allowUnfreePredicate = pkg:
+      let
+        system = packageSystem pkg;
+        key = unfreeKeyFor pkg;
+      in
+        if system != null then
+          builtins.hasAttr key allowedUnfreePackagesBySystem
+        else
+          builtins.hasAttr (unfreeNameVersionKeyFor pkg) allowedUnfreePackagesByNameVersion;
     allowInsecure = false;
-    permittedInsecurePackages = [ "pnpm-10.29.2" ];
-    allowUnsupportedSystem = true;
   };
 in
 {

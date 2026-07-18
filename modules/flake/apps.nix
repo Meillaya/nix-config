@@ -1,21 +1,31 @@
 { inputs, lib, ... }:
 let
   inherit (inputs) self home-manager nixpkgs;
-  darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
   mkConfiguredPkgs = (import ../../lib/nixpkgs.nix { inherit inputs; }).mkPkgs;
-  localUpdaterNamesFor = system:
-    [
-      "feather-font"
-      "helium"
-      "oh-my-codex-sidecar"
-      "oh-my-claude-sisyphus-sidecar"
-    ]
-    ++ nixpkgs.lib.optionals (nixpkgs.lib.elem system darwinSystems) [
-      "omniwm"
-      "raycast"
-      "stremio"
-      "sublimeText"
-    ];
+  machineAuthority = import ../entities/_machine-authority/model.nix;
+  localUpdaterNamesFor = _system: [ ];
+  validatedMachines = map machineAuthority.getMachine machineAuthority.machineIds;
+  linuxMachinesFor = system:
+    builtins.filter
+      (machine: machine.system == system && lib.hasPrefix "nixosConfigurations." machine.target)
+      validatedMachines;
+  darwinMachinesFor = system:
+    builtins.filter
+      (machine: machine.system == system && lib.hasPrefix "darwinConfigurations." machine.target)
+      validatedMachines;
+  bootMutationAuthorizedFor = system:
+    builtins.any machineAuthority.allowsSystemMutation (linuxMachinesFor system);
+  darwinMutationAuthorizedFor = system:
+    builtins.any machineAuthority.allowsSystemMutation (darwinMachinesFor system);
+  darwinCredentialAuthorizedFor = system:
+    builtins.any machineAuthority.allowsCredentialMutation (darwinMachinesFor system);
+  darwinMachineFor = system:
+    let machines = darwinMachinesFor system;
+    in
+    if builtins.length machines == 1 then
+      builtins.head machines
+    else
+      throw "expected exactly one validated Darwin machine for ${system}";
   mkApp = scriptName: system: {
     type = "app";
     program = "${(nixpkgs.legacyPackages.${system}.writeScriptBin scriptName ''
@@ -25,10 +35,40 @@ let
       exec ${self}/apps/${system}/${scriptName} "$@"
     '')}/bin/${scriptName}";
   };
+  mkScriptBackedApp =
+    scriptName: system:
+    {
+      runtimeInputs ? [ ],
+      extraEnv ? { },
+      scriptPath ? "${self}/apps/${system}/${scriptName}",
+    }:
+    let
+      pkgs = nixpkgs.legacyPackages.${system};
+      pathExport = lib.optionalString (runtimeInputs != [ ]) ''
+        export PATH=${lib.makeBinPath runtimeInputs}:$PATH
+      '';
+      envExport = lib.concatStringsSep "\n"
+        (lib.mapAttrsToList
+          (name: value: "export ${name}=${lib.escapeShellArg value}")
+          extraEnv);
+    in {
+      type = "app";
+      program = "${(pkgs.writeShellScriptBin scriptName ''
+        set -euo pipefail
+        ${pathExport}
+        ${envExport}
+        exec ${scriptPath} "$@"
+      '')}/bin/${scriptName}";
+    };
   mkSearchPkgsApp = system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-    in {
+    in if system == "aarch64-linux" then mkScriptBackedApp "search-pkgs" system {
+      runtimeInputs = [
+        pkgs.jq
+        pkgs.nix
+      ];
+    } else {
       type = "app";
       program = "${(pkgs.writeShellScriptBin "search-pkgs" ''
         set -euo pipefail
@@ -121,7 +161,17 @@ EOF
         if system == "x86_64-linux"
         then "standalone-linux"
         else "standalone-linux-aarch64";
-    in {
+    in if system == "aarch64-linux" then mkScriptBackedApp "home-switch" system {
+      runtimeInputs = [
+        pkgs.coreutils
+        home-manager.packages.${system}.home-manager
+        pkgs.nix
+      ];
+      extraEnv = {
+        NIX_CONFIG_DEFAULT_HOME_TARGET = defaultTarget;
+        NIX_CONFIG_FLAKE_REF = toString self;
+      };
+    } else {
       type = "app";
       program = "${(pkgs.writeShellScriptBin "home-switch" ''
         set -euo pipefail
@@ -171,7 +221,6 @@ EOF
 
         exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
           --extra-experimental-features "nix-command flakes" \
-          --impure \
           switch \
           -b "$backup_ext" \
           --flake ${self}#$target \
@@ -185,7 +234,15 @@ EOF
         if system == "x86_64-linux"
         then "standalone-linux"
         else "standalone-linux-aarch64";
-    in {
+    in if system == "aarch64-linux" then mkScriptBackedApp "home-news" system {
+      runtimeInputs = [
+        home-manager.packages.${system}.home-manager
+      ];
+      extraEnv = {
+        NIX_CONFIG_DEFAULT_HOME_TARGET = defaultTarget;
+        NIX_CONFIG_FLAKE_REF = toString self;
+      };
+    } else {
       type = "app";
       program = "${(pkgs.writeShellScriptBin "home-news" ''
         set -euo pipefail
@@ -222,7 +279,6 @@ EOF
 
         exec ${home-manager.packages.${system}.home-manager}/bin/home-manager \
           --extra-experimental-features "nix-command flakes" \
-          --impure \
           --flake ${self}#$target \
           news \
           ''${hm_args[@]}
@@ -231,53 +287,13 @@ EOF
   mkSyncSecretsApp = system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-    in {
-      type = "app";
-      program = "${(pkgs.writeShellScriptBin "sync-secrets" ''
-        set -euo pipefail
-
-        repo="''${NIX_SECRETS_REPO:-}"
-        workdir="$(mktemp -d)"
-        cleanup() { rm -rf "$workdir"; }
-        trap cleanup EXIT
-
-        while [ "$#" -gt 0 ]; do
-          case "$1" in
-            --repo)
-              repo="$2"
-              shift 2
-              ;;
-            --help|-h)
-              cat <<'EOF'
-Usage: nix run .#sync-secrets -- [--repo GIT_URL]
-
-Examples:
-  NIX_SECRETS_REPO=git@github.com:Meillaya/nix-screts.git nix run .#sync-secrets
-  nix run .#sync-secrets -- --repo git@github.com:Meillaya/nix-screts.git
-EOF
-              exit 0
-              ;;
-            *)
-              echo "sync-secrets: unknown argument: $1" >&2
-              exit 2
-              ;;
-          esac
-        done
-
-        if [ -z "$repo" ]; then
-          echo "sync-secrets: set NIX_SECRETS_REPO or pass --repo" >&2
-          exit 2
-        fi
-
-        ${pkgs.git}/bin/git clone --depth=1 "$repo" "$workdir/repo"
-        ${pkgs.rsync}/bin/rsync -a --delete \
-          --exclude='.git' \
-          --exclude='README.md' \
-          "$workdir/repo"/ \
-          ${self}/secrets/
-
-        echo "Secrets synced into ./secrets from $repo"
-      '')}/bin/sync-secrets";
+    in mkScriptBackedApp "sync-secrets" system {
+      scriptPath = "${self}/apps/linux/sync-secrets";
+      runtimeInputs = [
+        pkgs.coreutils
+        pkgs.git
+        pkgs.rsync
+      ];
     };
   mkUpdateApp = system:
     let
@@ -386,6 +402,9 @@ PY
         (name: packageUpdater name != null)
         (localUpdaterNamesFor system);
       validUpdaterNames = validPackageUpdaterNames ++ [ "linux-home-sources" ];
+      validUpdaterMap = nixpkgs.lib.concatMapStringsSep "\n"
+        (name: "${name}\t${toString (packageUpdater name)}")
+        validPackageUpdaterNames;
       validUpdaterNamesShell = nixpkgs.lib.concatMapStringsSep " " nixpkgs.lib.escapeShellArg validUpdaterNames;
       validUpdaterNamesText = nixpkgs.lib.concatStringsSep ", " validUpdaterNames;
       updaterCommands =
@@ -399,7 +418,20 @@ PY
         + ''
           run_local_updater linux-home-sources ${nixpkgs.lib.escapeShellArg (toString (nixpkgs.lib.getExe linuxHomeSourcesUpdater))}
         '';
-    in {
+    in if system == "aarch64-linux" then mkScriptBackedApp "update" system {
+      runtimeInputs = [
+        pkgs.curl
+        pkgs.git
+        pkgs.jq
+        pkgs.nix
+        pkgs.python3
+      ];
+      extraEnv = {
+        NIX_CONFIG_LOCAL_UPDATER_MAP = validUpdaterMap;
+        NIX_CONFIG_VALID_UPDATERS = nixpkgs.lib.concatStringsSep " " validUpdaterNames;
+        NIX_CONFIG_VALID_UPDATERS_TEXT = validUpdaterNamesText;
+      };
+    } else {
       type = "app";
       program = "${(pkgs.writeShellScriptBin "update" ''
         set -euo pipefail
@@ -417,7 +449,7 @@ PY
           cat <<'EOF'
 Usage: nix run .#update -- [options] [flake-input...]
 
-Updates flake inputs and repo-local fixed-output package pins.
+Updates flake inputs and repo-local source pins.
 
 Options:
   --flake-only       Run only nix flake update
@@ -430,7 +462,7 @@ Options:
 Examples:
   nix run .#update
   nix run .#update -- nixpkgs home-manager
-  nix run .#update -- --local-only --package raycast
+  nix run .#update -- --local-only --package linux-home-sources
 EOF
         }
 
@@ -523,28 +555,49 @@ EOF
           ${updaterCommands}
         fi
       '')}/bin/update";
-  };
-  mkLinuxApps = system: {
-    "build-switch" = mkApp "build-switch" system;
-    "clean" = mkApp "clean" system;
-    "sync-secrets" = mkSyncSecretsApp system;
-    "home-news" = mkHomeNewsApp system;
-    "home-switch" = mkHomeSwitchApp system;
-    "search-pkgs" = mkSearchPkgsApp system;
-    "update" = mkUpdateApp system;
-  };
-  mkDarwinApps = system: {
-    "build" = mkApp "build" system;
-    "build-switch" = mkApp "build-switch" system;
-    "clean" = mkApp "clean" system;
-    "copy-keys" = mkApp "copy-keys" system;
-    "create-keys" = mkApp "create-keys" system;
-    "check-keys" = mkApp "check-keys" system;
-    "search-pkgs" = mkSearchPkgsApp system;
-    "update" = mkUpdateApp system;
-  };
+    };
+  mkLinuxApps = system:
+    {
+      "build" = mkApp "build" system;
+      "sync-secrets" = mkSyncSecretsApp system;
+      "home-news" = mkHomeNewsApp system;
+      "home-switch" = mkHomeSwitchApp system;
+      "search-pkgs" = mkSearchPkgsApp system;
+      "update" = mkUpdateApp system;
+    }
+    // lib.optionalAttrs (bootMutationAuthorizedFor system) {
+      # These compatibility names are inventory-gated by attached machine
+      # authority. Their repository scripts are also build-only, so a stale
+      # checkout cannot switch/boot a system or delete generations.
+      "build-switch" = mkApp "build-switch" system;
+      "clean" = mkApp "clean" system;
+    };
+  mkDarwinApps = system:
+    let
+      machine = darwinMachineFor system;
+      mkCredentialApp = scriptName: mkScriptBackedApp scriptName system {
+        extraEnv = {
+          NIX_CONFIG_USER_NAME = machine.identity.name;
+          NIX_CONFIG_USER_HOME = machine.identity.home;
+        };
+      };
+    in
+    {
+      "build" = mkApp "build" system;
+      "search-pkgs" = mkSearchPkgsApp system;
+    }
+    // lib.optionalAttrs (darwinMutationAuthorizedFor system) {
+      "build-switch" = mkApp "build-switch" system;
+      "clean" = mkApp "clean" system;
+      "update" = mkUpdateApp system;
+    }
+    // lib.optionalAttrs (darwinCredentialAuthorizedFor system) {
+      "copy-keys" = mkCredentialApp "copy-keys";
+      "create-keys" = mkCredentialApp "create-keys";
+      "check-keys" = mkCredentialApp "check-keys";
+    };
 in {
   perSystem = { system, ... }: {
-    apps = if lib.elem system darwinSystems then mkDarwinApps system else mkLinuxApps system;
+    apps = if system == "aarch64-darwin" then mkDarwinApps system else mkLinuxApps system;
   };
 }
