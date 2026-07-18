@@ -1,10 +1,6 @@
 { den, ... }:
 {
-  den.aspects.darwin-workstation.includes = [
-    den.aspects.nix-core
-    den.aspects.darwin-base
-    den.aspects.darwin-dock
-    den.aspects.secrets
-    den.aspects.darwin-home
-  ];
+  # Compatibility alias. The sole Darwin entity selects aarch64-darwin by
+  # name, and that named-host aspect owns its complete inward-only chain.
+  den.aspects.darwin-workstation.includes = [ den.aspects.workstation-role-darwin ];
 }

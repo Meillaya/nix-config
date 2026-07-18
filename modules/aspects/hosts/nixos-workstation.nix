@@ -1,14 +1,8 @@
 { den, ... }:
 {
-  den.aspects.nixos-workstation.includes = [
-    den.batteries.hostname
-    den.aspects.nix-core
-    den.aspects.nixos-base
-    den.aspects.storage
-    den.aspects.bootstrap-password
-    den.aspects.secrets
-    den.aspects.niri
-    den.aspects.noctalia
-    den.aspects.linux-desktop
-  ];
+  den.aspects.x86_64-linux.includes = [ den.aspects.nixos-laptop ];
+
+  # Compatibility alias for external references; concrete hosts select a
+  # literal named-host aspect instead of this generic aggregate.
+  den.aspects.nixos-workstation.includes = [ den.aspects.workstation-role-linux ];
 }
