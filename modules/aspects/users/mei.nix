@@ -1,38 +1,51 @@
 { den, ... }:
+let
+  osIdentity =
+    { host, user, ... }:
+    let
+      inherit (user) identity;
+    in
+    {
+      name = "machine-identity/${identity.name}@${host.name}";
+
+      nixos =
+        { pkgs, ... }:
+        {
+          environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
+          users.users.${identity.name}.shell = pkgs.nushell;
+        };
+
+      darwin =
+        { pkgs, lib, ... }:
+        {
+          environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
+          users.users.${identity.name}.shell = pkgs.nushell;
+
+          # The primary admin is intentionally not a nix-darwin managed user,
+          # so reconcile only its shell without taking account ownership.
+          system.activationScripts.postActivation.text = lib.mkAfter ''
+            desired_shell=/run/current-system/sw/bin/nu
+            if [[ ! -x "$systemConfig/sw/bin/nu" ]]; then
+              printf >&2 'error: configured Nushell is not executable: %s\n' "$systemConfig/sw/bin/nu"
+              exit 1
+            fi
+
+            current_shell=$(/usr/bin/dscl . -read /Users/${identity.name} UserShell)
+            current_shell="''${current_shell#UserShell: }"
+            if [[ "$current_shell" != "$desired_shell" ]]; then
+              /usr/bin/dscl . -create /Users/${identity.name} UserShell "$desired_shell"
+            fi
+          '';
+        };
+    };
+in
 {
   den.aspects.mei = {
     includes = [
       den.batteries.define-user
       den.batteries.primary-user
+      osIdentity
     ];
-
-    nixos = { pkgs, ... }: {
-      environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
-      users.users.mei.shell = pkgs.nushell;
-    };
-
-    darwin = { pkgs, lib, ... }: {
-      environment.shells = with pkgs; [ nushell bashInteractive zsh fish ];
-      users.users.mei.shell = pkgs.nushell;
-
-      # The primary admin is intentionally not a nix-darwin managed user, so
-      # users.users.mei.shell alone does not update its Directory Service
-      # record. Reconcile only the login shell without taking ownership of the
-      # existing account's UID, groups, or lifecycle.
-      system.activationScripts.postActivation.text = lib.mkAfter ''
-        desired_shell=/run/current-system/sw/bin/nu
-        if [[ ! -x "$systemConfig/sw/bin/nu" ]]; then
-          printf >&2 'error: configured Nushell is not executable: %s\n' "$systemConfig/sw/bin/nu"
-          exit 1
-        fi
-
-        current_shell=$(/usr/bin/dscl . -read /Users/mei UserShell)
-        current_shell="''${current_shell#UserShell: }"
-        if [[ "$current_shell" != "$desired_shell" ]]; then
-          /usr/bin/dscl . -create /Users/mei UserShell "$desired_shell"
-        fi
-      '';
-    };
 
     homeManager = { config, pkgs, lib, ... }: {
       gtk.gtk4.theme = config.gtk.theme;
