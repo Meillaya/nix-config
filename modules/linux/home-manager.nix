@@ -16,48 +16,6 @@ let
     hash = "sha256-TzovzmfrUuaSrtpKCQxyXcih7cKSBhBtMpZLVwY/ScA=";
   };
 
-  patchedDr460nizedKvantum = pkgs.runCommand "dr460nized-kvantum-white-text" { } ''
-    cp -R ${garudaDr460nized}/usr/share/Kvantum/Dr460nized "$out"
-    chmod -R u+w "$out"
-    ${pkgs.perl}/bin/perl -0pi -e '
-      s/transparent_dolphin_view=true/transparent_dolphin_view=false/g;
-      s/opaque_colors=false/opaque_colors=true/g;
-      s/text\.color=#aaaaac/text.color=#ffffff/g;
-      s/window\.text\.color=#aaaaac/window.text.color=#ffffff/g;
-      s/button\.text\.color=#aaaaac/button.text.color=#ffffff/g;
-      s/disabled\.text\.color=#aaaaac78/disabled.text.color=#c8c8d0/g;
-      s/tooltip\.text\.color=#aaaaac/tooltip.text.color=#ffffff/g;
-      s/progress\.indicator\.text\.color=#aaaaac/progress.indicator.text.color=#ffffff/g;
-      s/text\.normal\.color=#aaaaac/text.normal.color=#ffffff/g;
-      s/text\.focus\.color=#c8c8ca/text.focus.color=#ffffff/g;
-      s/text\.press\.color=#d2d2d4/text.press.color=#ffffff/g;
-      s/text\.toggle\.color=#(?:aaaaac|d2d2d4)/text.toggle.color=#ffffff/g;
-    ' "$out/Dr460nized.kvconfig"
-  '';
-
-  sweetColorScheme = pkgs.runCommand "Sweet.colors" { } ''
-    cp ${garudaDr460nized}/usr/share/plasma/desktoptheme/Dr460nized/colors "$out"
-    chmod u+w "$out"
-    ${pkgs.perl}/bin/perl -0pi -e '
-      s/ForegroundNormal=[^\n]*/ForegroundNormal=255,255,255/g;
-      s/ForegroundInactive=[^\n]*/ForegroundInactive=205,205,210/g;
-    ' "$out"
-  '';
-
-  beautylineTheme = pkgs.runCommand "BeautyLine-icons" { } ''
-    mkdir -p "$out"
-    cp -R \
-      ${beautylineSrc}/actions \
-      ${beautylineSrc}/apps \
-      ${beautylineSrc}/devices \
-      ${beautylineSrc}/index.theme \
-      ${beautylineSrc}/mimetypes \
-      ${beautylineSrc}/places \
-      ${beautylineSrc}/preferences \
-      ${beautylineSrc}/status \
-      "$out/"
-  '';
-
   dolphinEnv = "QT_STYLE_OVERRIDE=kvantum QT_QUICK_CONTROLS_STYLE=org.kde.desktop XDG_MENU_PREFIX=plasma-";
   dolphinBin = "${pkgs.kdePackages.dolphin}/bin/dolphin";
   okularBin = "${pkgs.kdePackages.okular}/bin/okular";
@@ -126,6 +84,10 @@ let
     "application/pdf" = "okularApplication_pdf.desktop";
     "application/x-gzpdf" = "okularApplication_pdf.desktop";
     "application/x-bzpdf" = "okularApplication_pdf.desktop";
+    "text/html" = "zen-beta.desktop";
+    "application/xhtml+xml" = "zen-beta.desktop";
+    "x-scheme-handler/http" = "zen-beta.desktop";
+    "x-scheme-handler/https" = "zen-beta.desktop";
     "text/markdown" = "okularApplication_md.desktop";
     "application/epub+zip" = "okularApplication_epub.desktop";
     "application/vnd.comicbook+zip" = "okularApplication_comicbook.desktop";
@@ -165,6 +127,10 @@ let
     "application/pdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" "zen.desktop" ];
     "application/x-gzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
     "application/x-bzpdf" = [ "okularApplication_pdf.desktop" "org.kde.okular.desktop" ];
+    "text/html" = [ "zen-beta.desktop" ];
+    "application/xhtml+xml" = [ "zen-beta.desktop" ];
+    "x-scheme-handler/http" = [ "zen-beta.desktop" ];
+    "x-scheme-handler/https" = [ "zen-beta.desktop" ];
     "text/markdown" = [ "okularApplication_md.desktop" "sublime_text.desktop" "dev.zed.Zed.desktop" "micro.desktop" ];
     "application/epub+zip" = [ "okularApplication_epub.desktop" "calibre-ebook-viewer.desktop" "calibre-gui.desktop" ];
     "application/vnd.comicbook+zip" = [ "okularApplication_comicbook.desktop" ];
@@ -562,7 +528,7 @@ in
       };
 
       "Kvantum/Dr460nized" = {
-        source = patchedDr460nizedKvantum;
+        source = "${garudaDr460nized}/usr/share/Kvantum/Dr460nized";
         force = true;
       };
       "Kvantum/kvantum.kvconfig" = {
@@ -574,6 +540,13 @@ in
       };
       "systemd/user/xdg-desktop-portal-gnome.service" = {
         source = "${pkgs.xdg-desktop-portal-gnome}/share/systemd/user/xdg-desktop-portal-gnome.service";
+        force = true;
+      };
+      # The KDE portal's D-Bus activation file names this Plasma-prefixed
+      # unit. Generic Linux Home Manager does not install upstream user units
+      # globally, so expose the exact unit that FileChooser activation needs.
+      "systemd/user/plasma-xdg-desktop-portal-kde.service" = {
+        source = "${pkgs.kdePackages.xdg-desktop-portal-kde}/share/systemd/user/plasma-xdg-desktop-portal-kde.service";
         force = true;
       };
     };
@@ -658,11 +631,11 @@ in
       };
 
       "color-schemes/Sweet.colors" = {
-        source = sweetColorScheme;
+        source = "${garudaDr460nized}/usr/share/plasma/desktoptheme/Dr460nized/colors";
         force = true;
       };
       "icons/BeautyLine" = {
-        source = beautylineTheme;
+        source = beautylineSrc;
         force = true;
       };
       "icons/candy-icons" = {
